@@ -37,7 +37,7 @@
     "lodash": "^4.17.13",
     "querystringify": "^2.1.1",
     "superagent": "^5.0.5",
-    "superdebug": "https://github.com/mediapeers/superdebug.git#7c29e60b4c60f6f23d37a5882a6687483597f178",
+    "superdebug": "https://github.com/mediafellows/superdebug.git#7c29e60b4c60f6f23d37a5882a6687483597f178",
     "uri-templates": "^0.2.0"
   }
 }

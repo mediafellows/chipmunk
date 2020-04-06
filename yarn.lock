@@ -1632,9 +1632,9 @@ superagent@^5.0.5:
     readable-stream "^3.3.0"
     semver "^6.0.0"
 
-"superdebug@https://github.com/mediapeers/superdebug.git#7c29e60b4c60f6f23d37a5882a6687483597f178":
+"superdebug@https://github.com/mediafellows/superdebug.git#7c29e60b4c60f6f23d37a5882a6687483597f178":
   version "2.2.0"
-  resolved "https://github.com/mediapeers/superdebug.git#7c29e60b4c60f6f23d37a5882a6687483597f178"
+  resolved "https://github.com/mediafellows/superdebug.git#7c29e60b4c60f6f23d37a5882a6687483597f178"
   dependencies:
     chalk "^1.1.3"
     debug "^2.6.0"
