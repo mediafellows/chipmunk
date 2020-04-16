@@ -5,6 +5,7 @@ export interface IHeaderSettings {
   'Session-Id'?: string
   'Affiliation-Id'?: string
   'Role-Id'?: any
+  'Visitor-Id'?: string
   'Mpx-Flavours'?: { [s: string]: any }
 }
 
