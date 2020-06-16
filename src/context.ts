@@ -27,6 +27,7 @@ export interface IAction {
 }
 
 export interface IContext {
+  url: string
   properties: { [s:string]: IProperty }
   associations: { [s:string]: IProperty }
   constants: { [s:string]: string[] }
@@ -98,6 +99,8 @@ export default async (urlOrAppModel: string, config: IConfig):Promise<IContext> 
   context.associations = reduce(context.properties, (assocs, prop, name) => {
     return uriCheck.test(prop.type) ? merge(assocs, { [name]: prop }) : assocs
   }, {})
+
+  context.url = url
 
   return context
 }

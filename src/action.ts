@@ -158,6 +158,8 @@ const performAction = async (appModel: string, actionName: string, opts: IAction
 
   switch (action.method) {
     case 'POST':
+      if (body) body['@context'] = context.url
+
       req = request(config, opts.headers)
         .post(uri)
         .send(body)
