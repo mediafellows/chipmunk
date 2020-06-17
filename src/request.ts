@@ -1,5 +1,6 @@
 import superagent, {Request, Response, SuperAgentStatic, SuperAgentRequest} from 'superagent'
 import superdebug from 'superdebug'
+import nanoid from 'nanoid'
 import {get, each, merge, isEmpty, isPlainObject} from 'lodash'
 import {stringify} from 'querystringify'
 import {IConfig} from './config'
@@ -35,7 +36,9 @@ export const request = (config: IConfig, headers?: { [s: string]: any }): SuperA
   return req
 }
 
-export const run = async (key: string, req: SuperAgentRequest, config: IConfig):Promise<Response>  => {
+export const run = async (req: SuperAgentRequest, config: IConfig):Promise<Response>  => {
+  const key = nanoid()
+
   try {
     const promise = req
     enqueueRequest(key, promise, config)

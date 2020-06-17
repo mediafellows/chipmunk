@@ -5,6 +5,8 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
+    "build": "tsc",
+    "build:dev": "tsc -w",
     "test": "mocha -r ts-node/register tests/**/*.test.ts --timeout 5000",
     "test:watch": "mocha -r ts-node/register tests/**/*.test.ts --watch-extensions ts --watch -R min --timeout 5000",
     "testWithCoverage": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/**/*.test.ts && nyc report"
@@ -38,6 +40,7 @@
     "querystringify": "^2.1.1",
     "superagent": "^5.0.5",
     "superdebug": "https://github.com/mediafellows/superdebug.git#7c29e60b4c60f6f23d37a5882a6687483597f178",
-    "uri-templates": "^0.2.0"
+    "uri-templates": "^0.2.0",
+    "nanoid": "^2.0.0"
   }
 }
