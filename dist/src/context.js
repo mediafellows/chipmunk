@@ -38,7 +38,7 @@ exports.default = (urlOrAppModel, config) => __awaiter(this, void 0, void 0, fun
                 .get(url);
             if (config.timestamp)
                 req.query({ t: config.timestamp });
-            res = yield request_1.run(url, req, config);
+            res = yield request_1.run(req, config);
         }
         context = lodash_1.get(res, `body['@context']`);
     }

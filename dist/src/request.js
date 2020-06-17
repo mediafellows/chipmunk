@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const superagent_1 = __importDefault(require("superagent"));
 const superdebug_1 = __importDefault(require("superdebug"));
+const nanoid_1 = __importDefault(require("nanoid"));
 const lodash_1 = require("lodash");
 const querystringify_1 = require("querystringify");
 const watcher_1 = require("./watcher");
@@ -33,7 +34,8 @@ exports.request = (config, headers) => {
     });
     return req;
 };
-exports.run = (key, req, config) => __awaiter(this, void 0, void 0, function* () {
+exports.run = (req, config) => __awaiter(this, void 0, void 0, function* () {
+    const key = nanoid_1.default();
     try {
         const promise = req;
         watcher_1.enqueueRequest(key, promise, config);

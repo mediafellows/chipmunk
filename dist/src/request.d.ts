@@ -11,4 +11,4 @@ export declare const isNode: () => boolean;
 export declare const request: (config: IConfig, headers?: {
     [s: string]: any;
 }) => superagent.SuperAgentStatic;
-export declare const run: (key: string, req: superagent.SuperAgentRequest, config: IConfig) => Promise<superagent.Response>;
+export declare const run: (req: superagent.SuperAgentRequest, config: IConfig) => Promise<superagent.Response>;

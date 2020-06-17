@@ -130,7 +130,7 @@ const performAction = (appModel, actionName, opts, config) => __awaiter(this, vo
     }
     if (config.timestamp)
         req.query({ t: config.timestamp });
-    const response = yield request_1.run(uri, req, config);
+    const response = yield request_1.run(req, config);
     let objects = [];
     if (lodash_1.get(response, 'body.members'))
         objects = response.body.members;
@@ -190,7 +190,7 @@ const performProxiedAction = (appModel, actionName, opts, config) => __awaiter(t
     const req = request_1.request(config)
         .post(action.template)
         .send(body);
-    const response = yield request_1.run(action.template, req, config);
+    const response = yield request_1.run(req, config);
     const objects = lodash_1.get(response, 'body.objects', []);
     const result = {
         objects: objects,
