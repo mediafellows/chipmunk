@@ -187,7 +187,7 @@ const performAction = async (appModel: string, actionName: string, opts: IAction
 
   if (config.timestamp) req.query({ t: config.timestamp })
 
-  const response = await run(uri, req, config)
+  const response = await run(req, config)
   let objects = []
 
   if (get(response, 'body.members')) objects = response.body.members
@@ -264,7 +264,7 @@ const performProxiedAction = async (appModel: string, actionName: string, opts: 
     .post(action.template)
     .send(body)
 
-  const response = await run(action.template, req, config)
+  const response = await run(req, config)
   const objects = get(response, 'body.objects', []) as IObject[]
 
   const result: IResult = {

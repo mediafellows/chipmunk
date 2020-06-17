@@ -65,7 +65,7 @@ export default async (urlOrAppModel: string, config: IConfig):Promise<IContext> 
 
       if (config.timestamp) req.query({ t: config.timestamp })
 
-      res = await run(url, req, config)
+      res = await run(req, config)
     }
 
     context = get(res, `body['@context']`) as IContext
