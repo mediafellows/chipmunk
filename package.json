@@ -1,5 +1,8 @@
 {
-  "name": "chipmunk",
+  "name": "@mediafellows/chipmunk",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "version": "0.0.2",
   "description": "helper library to talk to mediastore backends",
   "main": "dist/src/index.js",
