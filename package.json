@@ -12,7 +12,8 @@
     "build:dev": "tsc -w",
     "test": "mocha -r ts-node/register tests/**/*.test.ts --timeout 5000",
     "test:watch": "mocha -r ts-node/register tests/**/*.test.ts --watch-extensions ts --watch -R min --timeout 5000",
-    "testWithCoverage": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/**/*.test.ts && nyc report"
+    "testWithCoverage": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/**/*.test.ts && nyc report",
+    "prepublish": "yarn build"
   },
   "author": "johannes-kostas goetzinger",
   "license": "ISC",
