@@ -15,6 +15,12 @@
     "testWithCoverage": "nyc -r lcov -e .ts -x \"*.test.ts\" mocha -r ts-node/register tests/**/*.test.ts && nyc report",
     "prepublish": "yarn build"
   },
+  "files": [
+    "src",
+    "dist",
+    "README.md",
+    "tsconfig.json"
+  ],
   "author": "johannes-kostas goetzinger",
   "license": "ISC",
   "devDependencies": {
