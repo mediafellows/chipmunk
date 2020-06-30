@@ -33,7 +33,6 @@
     "@types/node": "^11.13.7",
     "@types/querystringify": "^2.0.0",
     "@types/sinon": "^7.0.11",
-    "@types/superagent": "^4.1.1",
     "@types/uri-templates": "^0.1.30",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
@@ -46,6 +45,7 @@
     "typescript": "^3.4.5"
   },
   "dependencies": {
+    "@types/superagent": "^4.1.1",
     "lodash": "^4.17.13",
     "nanoid": "^2.0.0",
     "querystringify": "^2.1.1",
