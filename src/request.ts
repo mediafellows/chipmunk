@@ -1,6 +1,5 @@
 import superagent, {Request, Response, SuperAgentStatic, SuperAgentRequest} from 'superagent'
 import superdebug from 'superdebug'
-import nanoid from 'nanoid'
 import {get, each, merge, isEmpty, isPlainObject} from 'lodash'
 import {stringify} from 'querystringify'
 import {IConfig} from './config'
@@ -37,7 +36,7 @@ export const request = (config: IConfig, headers?: { [s: string]: any }): SuperA
 }
 
 export const run = async (req: SuperAgentRequest, config: IConfig):Promise<Response>  => {
-  const key = nanoid()
+  const key = Math.random().toString(36).substr(2, 10)
 
   try {
     const promise = req
