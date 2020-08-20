@@ -2,6 +2,7 @@ import {merge, delay} from 'lodash'
 
 import context, {IContext} from './context'
 import action, {IResult, IActionOpts} from './action'
+import unfurl from './unfurl'
 import {fetch, assign} from './association'
 import createConfig, {IConfig, cleanConfig} from './config'
 import {
@@ -25,6 +26,7 @@ export interface IInterface {
   updateConfig(overrides?: Partial<IConfig>): IConfig
   context(urlOrAppModel: string): Promise<IContext>
   action(appModel: string, actionName: string, opts?: IActionOpts): Promise<IResult>
+  unfurl(appModel: string, actionName: string, opts?: IActionOpts): Promise<IResult>
   fetch(objects: any[], name: string): Promise<IResult>
   assign(targets: any[], objects: any[], name: string): void
   fetchAndAssign(targets: any[], name: string): Promise<void>
@@ -50,6 +52,7 @@ export default (...overrides: Partial<IConfig>[]): IChipmunk => {
     },
     context: (urlOrAppModel) => context(urlOrAppModel, config),
     action: (appModel, actionName, opts = {}) => action(appModel, actionName, opts, config),
+    unfurl: (appModel, actionName, opts = {}) => unfurl(appModel, actionName, opts, config),
     fetch: (objects, name) => fetch(objects, name, config),
     assign: (targets, objects, name) => assign(targets, objects, name, config),
     fetchAndAssign: async (targets, name) => {
