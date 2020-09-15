@@ -36,7 +36,7 @@ export const request = (config: IConfig, headers?: { [s: string]: any }): SuperA
 }
 
 export const run = async (req: SuperAgentRequest, config: IConfig):Promise<Response>  => {
-  const key = Math.random().toString(36).substr(2, 10)
+  const key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
 
   try {
     const promise = req
