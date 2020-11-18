@@ -8,7 +8,7 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && yarn webpack",
     "build:dev": "tsc -w",
     "test": "mocha -r ts-node/register tests/**/*.test.ts --timeout 5000",
     "test:watch": "mocha -r ts-node/register tests/**/*.test.ts --watch-extensions ts --watch -R min --timeout 5000",
@@ -41,8 +41,11 @@
     "nock": "^10.0.6",
     "nyc": "^14.0.0",
     "sinon": "^7.3.2",
+    "ts-loader": "^8.0.11",
     "ts-node": "^8.1.0",
-    "typescript": "^3.4.5"
+    "typescript": "^3.8.3",
+    "webpack": "^5.4.0",
+    "webpack-cli": "^4.2.0"
   },
   "dependencies": {
     "@types/superagent": "^4.1.1",

@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "declaration": false,
+    "target": "ES5",
+    "noImplicitAny": false,
+    "outDir": "tmp",
+    "types": [],
+    "esModuleInterop": true,
+    "lib": [ "es2015", "es2017", "dom" ]
+  },
+  "files": [
+    "src/index.ts"
+  ]
+}
