@@ -32,6 +32,10 @@ export const request = (config: IConfig, headers?: { [s: string]: any }): SuperA
       req.set(key, value)
   })
 
+  if (!isNode()) {
+    req.set("X-Window-Location", get(window, 'location.href', ''));
+  }
+
   return req
 }
 
