@@ -4,6 +4,7 @@ import {IRequestError} from './request'
 export interface IHeaderSettings {
   'Session-Id'?: string
   'Affiliation-Id'?: string
+  'Origin'?: string
   'Role-Id'?: any
   'Visitor-Id'?: string
   'Mpx-Flavours'?: { [s: string]: any }
