@@ -3,7 +3,7 @@ const path = require("path");
 module.exports = {
   entry: ["./src/bundle.ts"],
   output: {
-    filename: "bundle.js",
+    filename: "chipmunk.bundle.js",
     path: path.resolve(__dirname, "dist"),
   },
   resolve: {

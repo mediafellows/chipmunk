@@ -8,7 +8,7 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
-    "build": "tsc && yarn webpack",
+    "build": "tsc && yarn webpack --mode production",
     "build:dev": "tsc -w",
     "test": "mocha -r ts-node/register tests/**/*.test.ts --timeout 5000",
     "test:watch": "mocha -r ts-node/register tests/**/*.test.ts --watch-extensions ts --watch -R min --timeout 5000",
