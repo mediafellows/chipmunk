@@ -5,11 +5,9 @@ import request from 'superagent'
 
 import createChipmunk, {cleanConfig} from './index'
 
-const chipmunkUtils = {
-  createChipmunk,
-  cleanConfig,
-}
-
 window['UriTemplate']   = UriTemplate
 window['request']       = request
-window['chipmunkUtils'] = chipmunkUtils
+
+if (!window['MFX']) window['MFX'] = {};
+window['MFX']['createChipmunk'] = createChipmunk;
+window['MFX']['cleanChipmunkConfig'] = cleanConfig;
