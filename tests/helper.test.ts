@@ -37,7 +37,7 @@ inactive('helper runs', () => {
 
   it('prints geo_scope context', async () => {
     const context = await chipmunk.context('um.geo_scope')
-    console.log(context)
+    //console.log(context)
   })
 
   it('fetches users', async () => {

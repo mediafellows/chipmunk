@@ -1,4 +1,4 @@
-import {delay, isEmpty} from 'lodash'
+import {delay, isEmpty, get, find} from 'lodash'
 
 import {IConfig} from './config'
 
@@ -27,6 +27,9 @@ export const clearRequest = (key: string, config: IConfig): void => {
   next(config)
 }
 
-export const pending = (key: string, config: IConfig): any => {
-  return config.watcher.pendingRequests[key]
+export const pending = (url: string, config: IConfig): any => {
+  const match = find(config.watcher.pendingRequests, (request) => {
+    return request.method === 'GET' && request.url === url
+  })
+  return match
 }
