@@ -163,7 +163,7 @@ to manually resolve associations:
 let users = [user1, user2, user3] // ..requested earlier
 
 user1['@associations']['organization'] // => https://url.to/organization/2'
-user1.organization // => NotLoadedError!
+user1.organization // => null
 
 const orgResult = await ch.fetch(users, 'organization') // => returns all associated organizations as ChipmunkResult
 users = ch.assign(users, orgResult.objects, 'organization')

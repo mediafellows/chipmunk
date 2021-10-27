@@ -4,13 +4,11 @@ import {stringify} from 'querystringify'
 
 import {IConfig, cleanConfig} from './config'
 import {request, run} from './request'
-import getContext, {IAction} from './context'
+import getSpec, {IAction} from './spec'
 import format from './format'
 import parseSchema from './schema'
 import {fetch, assign} from './association'
 import log from './log'
-
-export class NotLoadedError extends Error {}
 
 export interface IActionOpts {
   // converts to ruby on rails accepts nested attributes compatible body
@@ -135,8 +133,8 @@ const resolve = async (objects, schema, config) => {
 }
 
 const performAction = async (appModel: string, actionName: string, opts: IActionOpts, config: IConfig): Promise<IResult> => {
-  const context = await getContext(appModel, config)
-  const action = context.action(actionName)
+  const spec = await getSpec(appModel, config)
+  const action = spec.action(actionName)
   const body = format(opts.body, opts.multi, opts.ROR)
   const uriTemplate = UriTemplate(action.template)
   const params = merge(
@@ -198,12 +196,12 @@ const performAction = async (appModel: string, actionName: string, opts: IAction
     // for this reason we have to check all possible contexts for association definitions
 
     const promises = map(objects, async (object) => {
-      if (!object['@context']) return // skip non JSONLD objects
+      if (!object['@context'] && !object['$schema']) return // skip non JSONLD objects
 
-      const objectContext = await getContext(object['@context'], config)
+      const objectSpec = await getSpec(object['@context'], config)
       object['@associations'] = {}
 
-      each(objectContext.associations, (_def, name) => {
+      each(objectSpec.associations, (_def, name) => {
         const data = object[name]
 
         if (data) {
@@ -250,8 +248,8 @@ const performAction = async (appModel: string, actionName: string, opts: IAction
 }
 
 const performProxiedAction = async (appModel: string, actionName: string, opts: IActionOpts, config: IConfig): Promise<IResult> => {
-  const context = await getContext('tuco.request', config)
-  const action = context.action('proxy')
+  const spec = await getSpec('tuco.request', config)
+  const action = spec.action('proxy')
 
   const body = {
     appModel,

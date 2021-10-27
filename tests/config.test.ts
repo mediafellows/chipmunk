@@ -1,7 +1,6 @@
 import 'mocha'
 import {expect} from 'chai'
 import {get, merge} from 'lodash'
-import context from '../src/context'
 import createConfig from '../src/config'
 
 import {setup} from './setup'

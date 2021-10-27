@@ -1,6 +1,6 @@
 import {merge, delay} from 'lodash'
 
-import context, {IContext} from './context'
+import getSpec, {ISpec} from './spec'
 import action, {IResult, IActionOpts} from './action'
 import unfurl from './unfurl'
 import {fetch, assign} from './association'
@@ -24,7 +24,8 @@ export interface ICache {
 export interface IInterface {
   currentConfig(): IConfig
   updateConfig(overrides?: Partial<IConfig>): IConfig
-  context(urlOrAppModel: string): Promise<IContext>
+  context(urlOrAppModel: string): Promise<ISpec>
+  spec(urlOrAppModel: string): Promise<ISpec>
   action(appModel: string, actionName: string, opts?: IActionOpts): Promise<IResult>
   unfurl(appModel: string, actionName: string, opts?: IActionOpts): Promise<IResult>
   fetch(objects: any[], name: string): Promise<IResult>
@@ -34,7 +35,7 @@ export interface IInterface {
   cache: ICache
 }
 
-export {IContext, IResult, IConfig, IActionOpts, cleanConfig}
+export {ISpec, IResult, IConfig, IActionOpts, cleanConfig}
 
 export interface IChipmunk extends IInterface {
   run: (block: (ch: IInterface) => Promise<any>, errorHandler?: Function) => Promise<any>
@@ -50,7 +51,8 @@ export default (...overrides: Partial<IConfig>[]): IChipmunk => {
     updateConfig: (overrides) => {
       return config = createConfig(config, overrides)
     },
-    context: (urlOrAppModel) => context(urlOrAppModel, config),
+    context: (urlOrAppModel) => getSpec(urlOrAppModel, config),
+    spec: (urlOrAppModel) => getSpec(urlOrAppModel, config),
     action: (appModel, actionName, opts = {}) => action(appModel, actionName, opts, config),
     unfurl: (appModel, actionName, opts = {}) => unfurl(appModel, actionName, opts, config),
     fetch: (objects, name) => fetch(objects, name, config),

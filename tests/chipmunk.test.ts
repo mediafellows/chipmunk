@@ -2,7 +2,6 @@ import 'mocha'
 import {expect} from 'chai'
 import sinon from 'sinon'
 import {get, merge} from 'lodash'
-import context from '../src/context'
 import createConfig from '../src/config'
 
 import {setup, nap} from './setup'
@@ -21,7 +20,7 @@ describe('chipmunk.run', () => {
       chipmunk.updateConfig({ errorInterceptor: (err) => true })
 
       const block = chipmunk.run(async (ch) => {
-        const context = await ch.context('um.foo')
+        const spec = await ch.spec('um.foo')
       })
 
       await expect(block).to.eventually.be.fulfilled
@@ -31,7 +30,7 @@ describe('chipmunk.run', () => {
       chipmunk.updateConfig({ errorInterceptor: (err) => null })
 
       const block = chipmunk.run(async (ch) => {
-        const context = await ch.context('um.foo')
+        const spec = await ch.spec('um.foo')
       })
 
       await expect(block).to.be.rejectedWith('Not Found')
@@ -43,7 +42,7 @@ describe('chipmunk.run', () => {
 
       const block = chipmunk.run(async (ch) => {
         throw new Error('random error')
-        const context = await ch.context('um.foo')
+        const spec = await ch.spec('um.foo')
       })
 
       await expect(block).to.be.rejectedWith('random')
@@ -54,7 +53,7 @@ describe('chipmunk.run', () => {
 
       await chipmunk.run(async (ch) => {
         throw new Error('random error')
-        const context = await ch.context('um.foo')
+        const spec = await ch.spec('um.foo')
       }, handler)
 
       expect(handler.called).to.be.true
@@ -77,8 +76,8 @@ describe('chipmunk.run', () => {
       chipmunk.performLater(handler1)
       chipmunk.performLater(handler2)
 
-      await chipmunk.context('um.user')
-      await chipmunk.context('um.organization')
+      await chipmunk.spec('um.user')
+      await chipmunk.spec('um.organization')
 
       await nap(200)
 
