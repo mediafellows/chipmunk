@@ -10,6 +10,9 @@ import organizationContext from './fixtures/organization.context'
 import sessionContext from './fixtures/session.context'
 import geoScopeContext from './fixtures/geo_scope.context'
 import tucoContext from './fixtures/tuco.context'
+import bicycleSchema from './fixtures/bicycle.schema'
+import manufacturerSchema from './fixtures/manufacturer.schema'
+import wheelSchema from './fixtures/wheel.schema'
 
 export const mockContexts = (config: IConfig) => {
   nock(config.endpoints.um)
@@ -49,4 +52,19 @@ export const mockContexts = (config: IConfig) => {
     .get(matches('context/request'))
     .optionally()
     .reply(200, tucoContext)
+
+  nock(config.endpoints.my)
+    .persist()
+
+    .get(matches('schemas/my.bicycle'))
+    .optionally()
+    .reply(200, bicycleSchema)
+
+    .get(matches('schemas/my.manufacturer'))
+    .optionally()
+    .reply(200, manufacturerSchema)
+
+    .get(matches('schemas/my.wheel'))
+    .optionally()
+    .reply(200, wheelSchema)
 }

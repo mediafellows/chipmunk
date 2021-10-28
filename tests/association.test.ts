@@ -81,6 +81,41 @@ describe('association', () => {
         const result = await chipmunk.fetch(users, 'organization')
         expect(result.objects.length).to.be.gt(1)
       })
+
+      it('fetches the owners of bicycles (mm3)', async () => {
+        nock(config.endpoints.um)
+          .get(matches('/users/104,105'))
+          .reply(200, { members: [
+            { '@context': 'https://um.api.mediapeers.mobi/v20140601/context/user', id: 'first' },
+            { '@context': 'https://um.api.mediapeers.mobi/v20140601/context/user', id: 'second' },
+          ]})
+
+        const bicycles = [
+          {
+            '$id': 'https://my.api.mediapeers.mobi/v2021/bicycles/1659',
+            '$schema': 'https://my.api.mediapeers.mobi/v2021/schemas/my.bicycle.json',
+            '$associations': {
+              // mind this has to point to member get actions for JSON LD objects
+              // since this is what the v2014 api most widely supports
+              owner: 'https://um.api.mediapeers.mobi/v20140601/user/104',
+            },
+            id: 1659,
+            owner_id: 104,
+          },
+          {
+            '$id': 'https://my.api.mediapeers.mobi/v2021/bicycles/1660',
+            '$schema': 'https://my.api.mediapeers.mobi/v2021/schemas/my.bicycle.json',
+            '$associations': {
+              owner: 'https://um.api.mediapeers.mobi/v20140601/user/105',
+            },
+            id: 1660,
+            owner_id: 105,
+          },
+        ]
+
+        const result = await chipmunk.fetch(bicycles, 'owner')
+        expect(result.objects.length).to.be.gt(1)
+      })
     })
 
     describe('has many', () => {

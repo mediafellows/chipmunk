@@ -10,13 +10,14 @@ interface IRefs extends Array<{ [s: string]: any }> {
 }
 
 export const extractReferences = (objects, name):IRefs => {
-  const result = flatten(compact(map(objects, (o) => get(o, `@associations.${name}`)))) as IRefs
-  result.isHabtm = some(objects, (object) => isArray(get(object, `@associations.${name}`)))
+  const result = flatten(compact(map(objects, (o) => get(o, `@associations.${name}`) || get(o, `$associations.${name}`)))) as IRefs
+  result.isHabtm = some(objects, (object) => isArray(get(object, `@associations.${name}`) || get(object, `$associations.${name}`)))
 
   return result
 }
 
 export const extractProps = (spec: ISpec, references) => {
+  const collectionQuery = spec.action('query')
   const collectionGet = spec.action('query')
 
   let memberGet
@@ -26,7 +27,7 @@ export const extractProps = (spec: ISpec, references) => {
 
   const result = {}
 
-  each(compact([memberGet, collectionGet]), (action) => {
+  each(compact([memberGet, collectionGet, collectionQuery]), (action) => {
     const template = UriTemplate(action.template)
 
     try {
@@ -72,7 +73,8 @@ export const fetch = async (objects: any[], name: string, config: IConfig):Promi
   }
 
   const associationProperty = objectSpec.associations[name]
-  const associationSpec = await getSpec(associationProperty.type, config)
+  const ref = associationProperty.type || associationProperty['$ref'] || associationProperty['$jsonld_context']
+  const associationSpec = await getSpec(ref, config)
 
   const references = extractReferences(objects, name)
   const extractedProps = extractProps(associationSpec, references)
@@ -80,7 +82,7 @@ export const fetch = async (objects: any[], name: string, config: IConfig):Promi
 
   const many = associationProperty.collection || associationProperty.type === 'array'
   const actionName = many && !references.isHabtm ? 'query' : 'get'
-  return action(associationProperty.type, actionName, { params }, config)
+  return action(ref, actionName, { params }, config)
 }
 
 export const assign = (targets: any[], objects: any[], name: string, config: IConfig):void => {
@@ -92,7 +94,7 @@ export const assign = (targets: any[], objects: any[], name: string, config: ICo
    * this satisfies 'belongs_to', 'has_one' & 'HABTM' associations
    */
   each(targets, (target) => {
-    const ref = get(target, `@associations[${name}]`)
+    const ref = get(target, `@associations[${name}]`) || get(target, `$associations[${name}]`)
 
     if (isArray(ref)) {
       const matches = pick(objectsById, ref)
@@ -109,7 +111,8 @@ export const assign = (targets: any[], objects: any[], name: string, config: ICo
    * this satifies 'has many' associations
   */
   each(objects, (object) => {
-    each(get(object, '@associations', []), (ref) => {
+    const refs = get(object, '@associations') || get(object, '$associations') || []
+    each(refs, (ref) => {
       const target = targetsById[ref]
       if (!isEmpty(target)) {
         const value = target[name];
