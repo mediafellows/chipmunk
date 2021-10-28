@@ -15,7 +15,7 @@ export default {
   actions: {
     get: {
       method: "get",
-      template: "/v2021/manufacturers/{manufacturer_ids}",
+      template: "https://my.api.mediapeers.mobi/v2021/manufacturers/{manufacturer_ids}",
       mappings: [
         {
           variable: "manufacturer_ids",

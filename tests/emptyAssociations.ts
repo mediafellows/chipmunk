@@ -17,4 +17,4 @@ export const emptyOrganizationAssociations = {
   social_media_profiles: null,
   urls: null,
   users: null,
-}
+};

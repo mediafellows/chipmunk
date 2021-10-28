@@ -1,22 +1,22 @@
-import config, {IConfig} from '../src/config'
-import {merge, isEmpty} from 'lodash'
-import chaiAsPromised from 'chai-as-promised'
-import chai, {expect} from 'chai'
-import nock from 'nock'
-import fs from 'fs'
-import yaml from 'js-yaml'
-import {execSync} from 'child_process'
-import sinon from 'sinon'
+import config, { IConfig } from "../src/config";
+import { merge, isEmpty } from "lodash";
+import chaiAsPromised from "chai-as-promised";
+import chai, { expect } from "chai";
+import nock from "nock";
+import fs from "fs";
+import yaml from "js-yaml";
+import { execSync } from "child_process";
+import sinon from "sinon";
 
-import chipmunk, {IChipmunk} from '../src'
+import chipmunk, { IChipmunk } from "../src";
 
-import {mockContexts} from './mocks'
+import { mockContexts } from "./mocks";
 
 const DEFAULT_CONFIG = {
   //verbose: true,
   timestamp: null,
   headers: {
-    'Affiliation-Id': 'mpx',
+    "Affiliation-Id": "mpx",
   },
   endpoints: {
     um: "https://um.api.mediapeers.mobi",
@@ -28,35 +28,35 @@ const DEFAULT_CONFIG = {
     my: "https://my.api.mediapeers.mobi",
     tuco: "https://tuco.api.mediapeers.mobi",
   },
-}
+};
 
 export const setup = (overrides?: Partial<IConfig>): IConfig => {
-  const conf = config(DEFAULT_CONFIG, overrides)
+  const conf = config(DEFAULT_CONFIG, overrides);
 
   before(() => {
-    nock.cleanAll()
-    mockContexts(conf)
-    chai.use(chaiAsPromised)
-  })
+    nock.cleanAll();
+    mockContexts(conf);
+    chai.use(chaiAsPromised);
+  });
 
   afterEach(() => {
-    sinon.restore()
-  })
+    sinon.restore();
+  });
 
-  return conf
-}
+  return conf;
+};
 
 export const nap = async (milliseconds: number = 100): Promise<void> => {
   return new Promise((resolve) => {
-    setTimeout(resolve, milliseconds)
-  })
-}
+    setTimeout(resolve, milliseconds);
+  });
+};
 
 export const matches = (needle: string) => {
-  return (uri) => uri.includes(needle)
-}
+  return (uri) => uri.includes(needle);
+};
 
 export const readCredentials = () => {
-  const content = execSync('scrambler read tests/credentials.yml').toString()
-  return yaml.safeLoad(content)
-}
+  const content = execSync("scrambler read tests/credentials.yml").toString();
+  return yaml.safeLoad(content);
+};

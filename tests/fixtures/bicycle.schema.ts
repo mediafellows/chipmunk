@@ -58,6 +58,12 @@ export default {
         $ref: "https://my.api.mediapeers.mobi/v2021/schemas/my.wheeel.json",
       },
     },
+    activities: {
+      type: "array",
+      items: {
+        $ref: "https://my.api.mediapeers.mobi/v2021/schemas/my.activity.json",
+      },
+    },
   },
   actions: {},
 };

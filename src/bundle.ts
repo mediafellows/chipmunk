@@ -1,13 +1,13 @@
-'use strict'
+"use strict";
 
-import UriTemplate from 'uri-templates'
-import request from 'superagent'
+import UriTemplate from "uri-templates";
+import request from "superagent";
 
-import createChipmunk, {cleanConfig} from './index'
+import createChipmunk, { cleanConfig } from "./index";
 
-window['UriTemplate']   = UriTemplate
-window['request']       = request
+window["UriTemplate"] = UriTemplate;
+window["request"] = request;
 
-if (!window['MFX']) window['MFX'] = {};
-window['MFX']['createChipmunk'] = createChipmunk;
-window['MFX']['cleanChipmunkConfig'] = cleanConfig;
+if (!window["MFX"]) window["MFX"] = {};
+window["MFX"]["createChipmunk"] = createChipmunk;
+window["MFX"]["cleanChipmunkConfig"] = cleanConfig;
