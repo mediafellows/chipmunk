@@ -1,6 +1,5 @@
 import {
   get,
-  some,
   first,
   reduce,
   includes,
@@ -12,7 +11,7 @@ import { IConfig } from "./config";
 import { request, run } from "./request";
 import { set as cacheSet, get as cacheGet } from "./cache";
 import { pending } from "./watcher";
-import { extractRef } from "./association";
+import { getSpecUrl } from "./association";
 
 const uriCheck = /https?:\/\//i;
 
@@ -87,9 +86,9 @@ export const getSpec = async (
     url = first(urlOrAppModel.split("?"));
   } else {
     if (startsWith(urlOrAppModel, "mm3:")) {
-      const [_mm3, appModel] = urlOrAppModel.split(":");
-      const [app, model] = appModel.split(".");
-      url = `${config.endpoints[app]}/v2021/schemas/${model}`;
+      const [, appModel] = urlOrAppModel.split(":");
+      const [app] = appModel.split(".");
+      url = `${config.endpoints[app]}/v2021/schemas/${appModel}`;
     } else {
       const [app, model] = urlOrAppModel.split(".");
       url = `${config.endpoints[app]}/v20140601/context/${model}`;
@@ -160,7 +159,7 @@ export const getSpec = async (
       spec.associations = reduce(
         spec.properties,
         (assocs, prop, name) => {
-          return extractRef(prop) ? merge(assocs, { [name]: prop }) : assocs;
+          return getSpecUrl(prop) ? merge(assocs, { [name]: prop }) : assocs;
         },
         {}
       );

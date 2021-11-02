@@ -1,9 +1,8 @@
-import { merge, delay } from "lodash";
+import { merge } from "lodash";
 
 import getSpec, { ISpec } from "./spec";
 import action, { IResult, IActionOpts } from "./action";
 import unfurl from "./unfurl";
-import { fetch, assign } from "./association";
 import createConfig, { IConfig, cleanConfig } from "./config";
 import {
   ICallOpts,
@@ -42,9 +41,6 @@ export interface IInterface {
     actionName: string,
     opts?: IActionOpts
   ): Promise<IResult>;
-  fetch(objects: any[], name: string): Promise<IResult>;
-  assign(targets: any[], objects: any[], name: string): void;
-  fetchAndAssign(targets: any[], name: string): Promise<void>;
   performLater(cb: Function): void;
   cache: ICache;
 }
@@ -70,16 +66,8 @@ export default (...overrides: Partial<IConfig>[]): IChipmunk => {
     },
     context: (urlOrAppModel) => getSpec(urlOrAppModel, config),
     spec: (urlOrAppModel) => getSpec(urlOrAppModel, config),
-    action: (appModel, actionName, opts = {}) =>
-      action(appModel, actionName, opts, config),
-    unfurl: (appModel, actionName, opts = {}) =>
-      unfurl(appModel, actionName, opts, config),
-    fetch: (objects, name) => fetch(objects, name, config),
-    assign: (targets, objects, name) => assign(targets, objects, name, config),
-    fetchAndAssign: async (targets, name) => {
-      const result = await fetch(targets, name, config);
-      assign(targets, result.objects, name, config);
-    },
+    action: (appModel, actionName, opts = {}) => action(appModel, actionName, opts, config),
+    unfurl: (appModel, actionName, opts = {}) => unfurl(appModel, actionName, opts, config),
     cache: {
       set: (key, value, opts) => set(key, value, callOpts(opts), config),
       get: (key, opts) => get(key, callOpts(opts), config),

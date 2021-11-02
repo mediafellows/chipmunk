@@ -1,12 +1,8 @@
 import {
-  each,
   isEmpty,
   isObject,
-  split,
   trim,
   first,
-  reduce,
-  merge,
 } from "lodash";
 
 const detectProps = (structure: string) => {

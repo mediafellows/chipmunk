@@ -8,10 +8,6 @@ const minutesFromNow = (min: number): number => {
   return Date.now() + min * 60000;
 };
 
-const cacheKey = (suffix: string, config: IConfig): string => {
-  return `${config.cache.prefix}-${suffix}`;
-};
-
 export let _runtimeCache = {};
 
 export const runtimeFetch = (key: string): any => {

@@ -46,7 +46,8 @@ export default {
     previous_owners: {
       type: "array",
       items: {
-        $jsonld_context: "https://um.api.mediapeers.mobi/v20140601/context/user",
+        $jsonld_context:
+          "https://um.api.mediapeers.mobi/v20140601/context/user",
       },
     },
     manufacturer: {
@@ -65,5 +66,11 @@ export default {
       },
     },
   },
-  actions: {},
+  actions: {
+    query: {
+      method: "get",
+      template: "https://my.api.mediapeers.mobi/v2021/bicycles",
+      mappings: [],
+    },
+  },
 };

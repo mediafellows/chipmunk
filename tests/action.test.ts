@@ -38,7 +38,7 @@ describe("action", () => {
   });
 
   it(`moves association reference into '@associations'`, async () => {
-    const scope = nock(config.endpoints.um)
+    nock(config.endpoints.um)
       .get(matches("/users"))
       .reply(200, {
         members: [
@@ -65,7 +65,7 @@ describe("action", () => {
   // this is required because subclasses can have associations defined the super class has not
   // in this example the manager context has a 'geo_scopes' association, which the base user context is lacking
   it(`moves subclass specific association references`, async () => {
-    const scope = nock(config.endpoints.um)
+    nock(config.endpoints.um)
       .get(matches("/users"))
       .reply(200, {
         members: [
@@ -108,7 +108,7 @@ describe("action", () => {
   });
 
   it(`returns pagination results`, async () => {
-    const scope = nock(config.endpoints.um)
+    nock(config.endpoints.um)
       .get(matches("/users"))
       .reply(200, {
         members: [
@@ -135,7 +135,7 @@ describe("action", () => {
   });
 
   it(`returns reformatted aggregations`, async () => {
-    const scope = nock(config.endpoints.um)
+    nock(config.endpoints.um)
       .get(matches("/users"))
       .reply(200, {
         members: [
@@ -168,12 +168,10 @@ describe("action", () => {
   });
 
   it("sends uri params", async () => {
-    nock(config.endpoints.um)
-      .get(matches("users/1659"))
-      .reply(200, {
-        "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-        id: "one",
-      });
+    nock(config.endpoints.um).get(matches("users/1659")).reply(200, {
+      "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+      id: "one",
+    });
 
     await chipmunk.run(async (ch) => {
       const result = await ch.action("um.user", "get", {
@@ -184,12 +182,10 @@ describe("action", () => {
   });
 
   it("uses forced member action endpoint", async () => {
-    nock(config.endpoints.um)
-      .get(matches("user/1659"))
-      .reply(200, {
-        "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-        id: "one",
-      });
+    nock(config.endpoints.um).get(matches("user/1659")).reply(200, {
+      "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+      id: "one",
+    });
 
     await chipmunk.action("um.user", "member.get", {
       params: { user_id: 1659 },
@@ -303,6 +299,7 @@ describe("action", () => {
             "https://um.api.mediapeers.mobi/v20140601/context/organization",
           "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
           "@associations": {},
+          id: 3,
           name: "graefschaft",
         },
       },
@@ -321,6 +318,7 @@ describe("action", () => {
             "https://um.api.mediapeers.mobi/v20140601/context/organization",
           "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
           "@associations": {},
+          id: 3,
           name: "graefschaft",
         },
       },
@@ -444,6 +442,174 @@ describe("action", () => {
       });
 
       expect(result.objects).to.eql(expected);
+    });
+  });
+
+  it("resolves schema for mm3 models", async () => {
+    nock(config.endpoints.my)
+      .get(matches("/bicycles"))
+      .reply(200, {
+        members: [
+          {
+            $id: "https://my.api.mediapeers.mobi/v2021/bicycles/1659",
+            $schema:
+              "https://my.api.mediapeers.mobi/v2021/schemas/my.bicycle.json",
+            $links: {
+              manufacturer:
+                "https://my.api.mediapeers.mobi/v2021/manufacturers/3",
+              previous_owners:
+                "https://um.api.mediapeers.mobi/v20140601/users/104,105",
+              activities:
+                "https://my.api.mediapeers.mobi/v2021/bicycles/1659/activities",
+            },
+            id: 1659,
+            manufacturer_id: 3,
+            previous_owner_ids: [104, 105],
+          },
+          {
+            $id: "https://my.api.mediapeers.mobi/v2021/bicycles/1660",
+            $schema:
+              "https://my.api.mediapeers.mobi/v2021/schemas/my.bicycle.json",
+            $links: {
+              manufacturer:
+                "https://my.api.mediapeers.mobi/v2021/manufacturers/4",
+              previous_owners:
+                "https://um.api.mediapeers.mobi/v20140601/users/105,106,107,108", // overlap!
+              activities:
+                "https://my.api.mediapeers.mobi/v2021/bicycles/1660/activities",
+            },
+            id: 1660,
+            manufacturer_id: 4,
+            previous_owner_ids: [105, 106, 107, 108],
+          },
+        ],
+      });
+
+    nock(config.endpoints.my)
+      .get(matches("/manufacturers/3,4"))
+      .reply(200, {
+        members: [
+          {
+            $id: "https://my.api.mediapeers.mobi/v2021/manufacturers/3",
+            $schema:
+              "https://my.api.mediapeers.mobi/v2021/schemas/my.manufacturer.json",
+            id: 3,
+            name: "kona",
+          },
+          {
+            $id: "https://my.api.mediapeers.mobi/v2021/manufacturers/4",
+            $schema:
+              "https://my.api.mediapeers.mobi/v2021/schemas/my.manufacturer.json",
+            id: 4,
+            name: "all city",
+          },
+        ],
+      });
+
+    nock(config.endpoints.my)
+      .get(matches("/bicycles/1659,1660/activities"))
+      .reply(200, {
+        members: [
+          {
+            $id: "https://my.api.mediapeers.mobi/v2021/activities/1659",
+            $schema:
+              "https://my.api.mediapeers.mobi/v2021/schemas/my.activity.json",
+            bicycle_id: 1659,
+          },
+          {
+            $id: "https://my.api.mediapeers.mobi/v2021/activities/1660",
+            $schema:
+              "https://my.api.mediapeers.mobi/v2021/schemas/my.activity.json",
+            bicycle_id: 1660,
+          },
+        ],
+      });
+
+    nock(config.endpoints.um)
+      .get(matches("/users/104,105,106,107,108"))
+      .reply(200, {
+        members: [
+          {
+            "@id": "https://um.api.mediapeers.mobi/v20140601/user/104",
+            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            id: 104,
+          },
+          {
+            "@id": "https://um.api.mediapeers.mobi/v20140601/user/105",
+            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            id: 105,
+          },
+          {
+            "@id": "https://um.api.mediapeers.mobi/v20140601/user/106",
+            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            id: 106,
+          },
+          {
+            "@id": "https://um.api.mediapeers.mobi/v20140601/user/107",
+            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            id: 107,
+          },
+          {
+            "@id": "https://um.api.mediapeers.mobi/v20140601/user/108",
+            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            id: 108,
+          },
+        ],
+      });
+
+    await chipmunk.run(async (ch) => {
+      const result = await ch.action("mm3:my.bicycle", "query", {
+        proxy: false,
+        schema: "id, manufacturer, previous_owners, activities",
+      });
+
+      expect(result.objects[0].manufacturer).not.to.be.null;
+      expect(result.objects[0].previous_owners.length).to.be.gt(0);
+    });
+  });
+
+  it.only("auto-extends schema if needed", async () => {
+    // this is required if you ask for less attributes that are needed to resolve associated data
+    nock(config.endpoints.my)
+      .get(matches("/bicycles"))
+      .reply(200, {
+        members: [
+          {
+            $id: "https://my.api.mediapeers.mobi/v2021/bicycles/1659",
+            $schema:
+              "https://my.api.mediapeers.mobi/v2021/schemas/my.bicycle.json",
+            $links: {
+              manufacturer:
+                "https://my.api.mediapeers.mobi/v2021/manufacturers/3",
+            },
+            id: 1659,
+            manufacturer_id: 3,
+          },
+        ],
+      });
+
+    nock(config.endpoints.my)
+      .get(matches("/manufacturers/3"))
+      .reply(200, {
+        members: [
+          {
+            $id: "https://my.api.mediapeers.mobi/v2021/manufacturers/3",
+            $schema:
+              "https://my.api.mediapeers.mobi/v2021/schemas/my.manufacturer.json",
+            id: 3,
+            name: "kona",
+          },
+        ],
+      });
+
+    await chipmunk.run(async (ch) => {
+      const result = await ch.action("mm3:my.bicycle", "query", {
+        proxy: false,
+        schema: "id, manufacturer { name }", // misses the manufacturer's `id`
+      });
+
+      expect(result.objects[0].manufacturer).not.to.be.null;
+      expect(result.objects[0].manufacturer.id).to.eq(3)
     });
   });
 

@@ -2,10 +2,6 @@ import "mocha";
 import { expect } from "chai";
 import schema from "../src/schema";
 
-import { setup } from "./setup";
-
-let chipmunk;
-
 describe("config", () => {
   it("parses simple non-nested schema", () => {
     const input = `foo, bar,`;

@@ -1,12 +1,12 @@
 import UriTemplate from "uri-templates";
 import {
+  assign as write,
   each,
   includes,
   uniq,
   flatten,
   omit,
   pick,
-  pickBy,
   keys,
   reduce,
   filter,
@@ -18,14 +18,13 @@ import {
   isEmpty,
   isPlainObject,
 } from "lodash";
-import { stringify } from "querystringify";
 
 import { IConfig, cleanConfig } from "./config";
 import { request, run } from "./request";
 import getSpec, { IAction } from "./spec";
 import format from "./format";
 import parseSchema from "./schema";
-import { fetch, assign } from "./association";
+import { fetch, assign, assignEmpty } from "./association";
 import log from "./log";
 
 export interface IActionOpts {
@@ -120,7 +119,14 @@ const resolve = async (objects, schema, config) => {
     $links: true,
   });
 
-  const refs = uniq(flatten(map(objects, (x) => keys(x["@associations"]))));
+  const refs = uniq(
+    flatten(
+      map(objects, (x) => {
+        return x["$schema"] ? keys(x["$links"]) : keys(x["@associations"]);
+      })
+    )
+  );
+
   const associations = reduce(
     schema,
     (acc, val, key) => {
@@ -141,21 +147,27 @@ const resolve = async (objects, schema, config) => {
   const promises = map(associations, async (assocSchema, assocName) => {
     try {
       const result = await fetch(objects, assocName, config);
+
+      // first add props needed for the assignments later to the schema
+      const neededProps = keys(result.extractedProps.allProps);
+      reduce(neededProps, (acc, prop) => write(acc, { [prop]: true }), assocSchema)
+
       const resolved = await resolve(result.objects, assocSchema, config);
-      assign(objects, resolved, assocName, config);
+
+      // assign results to the target objects that were associating them
+      await assign(objects, resolved, assocName, result.many, result.extractedProps);
     } catch (err) {
       // if we fail to resolve an association, continue anyways
-      assign(objects, [], assocName, config);
+      assignEmpty(objects, assocName);
       log(`failed to resolve association ${assocName}`);
-      log(err, objects, schema);
       if (config.verbose) log(err, objects, schema);
       return objects;
     }
   });
 
   await Promise.all(promises);
-
-  return map(objects, (o) => pick(o, keys(schema)));
+  const result = map(objects, (o) => pick(o, keys(schema)));
+  return result;
 };
 
 const performAction = async (

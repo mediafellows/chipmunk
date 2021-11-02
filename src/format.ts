@@ -1,11 +1,8 @@
 import {
-  keys,
   reduce,
   assign,
   filter,
-  get,
   each,
-  merge,
   first,
   map,
   reject,

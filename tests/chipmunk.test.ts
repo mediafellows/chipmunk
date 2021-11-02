@@ -1,8 +1,6 @@
 import "mocha";
 import { expect } from "chai";
 import sinon from "sinon";
-import { get, merge } from "lodash";
-import createConfig from "../src/config";
 
 import { setup, nap } from "./setup";
 import createChipmunk from "../src";
@@ -17,20 +15,20 @@ describe("chipmunk.run", () => {
 
   describe("with error interceptor", () => {
     it("ignores the error if the interceptor returns true", async () => {
-      chipmunk.updateConfig({ errorInterceptor: (err) => true });
+      chipmunk.updateConfig({ errorInterceptor: () => true });
 
       const block = chipmunk.run(async (ch) => {
-        const spec = await ch.spec("um.foo");
+        await ch.spec("um.foo");
       });
 
       await expect(block).to.eventually.be.fulfilled;
     });
 
     it("throws an error if the interceptor does not return true", async () => {
-      chipmunk.updateConfig({ errorInterceptor: (err) => null });
+      chipmunk.updateConfig({ errorInterceptor: () => null });
 
       const block = chipmunk.run(async (ch) => {
-        const spec = await ch.spec("um.foo");
+        await ch.spec("um.foo");
       });
 
       await expect(block).to.be.rejectedWith("Not Found");
@@ -44,7 +42,7 @@ describe("chipmunk.run", () => {
 
       const block = chipmunk.run(async (ch) => {
         throw new Error("random error");
-        const spec = await ch.spec("um.foo");
+        await ch.spec("um.foo");
       });
 
       await expect(block).to.be.rejectedWith("random");
@@ -55,14 +53,14 @@ describe("chipmunk.run", () => {
 
       await chipmunk.run(async (ch) => {
         throw new Error("random error");
-        const spec = await ch.spec("um.foo");
+        await ch.spec("um.foo");
       }, handler);
 
       expect(handler.called).to.be.true;
     });
 
     it("returns the result of the run block", async () => {
-      const returnValue = await chipmunk.run(async (ch) => {
+      const returnValue = await chipmunk.run(async () => {
         return "yay";
       });
 

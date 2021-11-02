@@ -1,20 +1,19 @@
 import UriTemplate from "uri-templates";
 import {
+  first,
   every,
   keys,
-  first,
   includes,
-  some,
+  filter,
   find,
   compact,
-  attempt,
   values,
-  merge,
   pick,
   assign as write,
   reduce,
   uniq,
   concat,
+  toString,
   map,
   get,
   flatten,
@@ -31,31 +30,22 @@ import getSpec, {
   IProperty,
   isJsonSchemaSpec,
 } from "./spec";
-import action, { IResult } from "./action";
+import action, { IObject } from "./action";
 
-interface IRefs extends Array<{ [s: string]: any }> {
-  isHabtm: boolean;
+export interface IExtractedProps {
+  isHABTM: boolean;
+  propsByObject: { [s: string]: any[] };
+  allProps: { [s: string]: any[] };
 }
 
-export const extractReferences = (objects, name): IRefs => {
-  const result = flatten(
-    compact(
-      map(
-        objects,
-        (o) => get(o, `@associations.${name}`) || get(o, `$links.${name}`)
-      )
-    )
-  ) as IRefs;
-  result.isHabtm = some(objects, (object) =>
-    isArray(
-      get(object, `@associations.${name}`) || get(object, `$links.${name}`)
-    )
-  );
+export interface IFetchedResults {
+  assocName: string;
+  many: boolean;
+  extractedProps: IExtractedProps;
+  objects: IObject[];
+}
 
-  return result;
-};
-
-export const extractProps = (spec: ISpec, references) => {
+export const getProps = (spec: ISpec, references) => {
   const collectionQuery = spec.action("query");
   const collectionGet = spec.action("get");
 
@@ -87,12 +77,54 @@ export const extractProps = (spec: ISpec, references) => {
   return result;
 };
 
-export const extractRef = (prop: IProperty): string | null => {
+export const getSpecUrl = (prop: IProperty): string | null => {
   const path = find(
     ["$jsonld_context", "$ref", "items.$jsonld_context", "items.$ref"],
     (x) => !!get(prop, x)
   );
-  return path && (get(prop, path) as string);
+  return (path && (get(prop, path) as string)) || prop.type;
+};
+
+export const getId = (object) => {
+  return object["@id"] || object["$id"];
+};
+
+export const extractProps = (
+  assocName,
+  associationSpec,
+  objects
+): IExtractedProps => {
+  let isHABTM = false;
+  const refsByObject = reduce(
+    objects,
+    (acc, object) => {
+      const id = getId(object);
+      const ref =
+        get(object, `@associations.${assocName}`) ||
+        get(object, `$links.${assocName}`);
+      if (!isHABTM && isArray(ref)) isHABTM = true; // JSON LD case only
+      return ref ? write(acc, { [id]: ref }) : acc;
+    },
+    {}
+  );
+
+  const propsByObject = reduce(
+    refsByObject,
+    (acc, ref, id) => {
+      const props = getProps(associationSpec, flatten([ref]));
+      return write(acc, { [id]: props });
+    },
+    {}
+  );
+
+  const allRefs = values(refsByObject);
+  const allProps = getProps(associationSpec, flatten(allRefs));
+
+  return {
+    isHABTM,
+    propsByObject,
+    allProps,
+  };
 };
 
 const buildParams = (action: IAction, props) => {
@@ -107,26 +139,28 @@ const buildParams = (action: IAction, props) => {
 
 export const fetch = async (
   objects: any[],
-  name: string,
+  assocName: string,
   config: IConfig
-): Promise<IResult> => {
+): Promise<IFetchedResults> => {
   // since it might be possible the association we're looking for is only available for a subset of our objects
   // we first need to find the spec that contains a definition for the desired association..
   const specs = await Promise.all(
     map(objects, (obj) => getSpec(obj["@context"] || obj["$schema"], config))
   );
-  const objectSpec = find(specs, (spec) => spec.associations[name]) as ISpec;
+  const objectSpec = find(
+    specs,
+    (spec) => spec.associations[assocName]
+  ) as ISpec;
 
   if (!objectSpec) {
-    throw new Error(`could not find the requested association '${name}'`);
+    throw new Error(`could not find the requested association '${assocName}'`);
   }
 
-  const associationProperty = objectSpec.associations[name];
-  const ref = extractRef(associationProperty) || associationProperty.type;
-  const associationSpec = await getSpec(ref, config);
+  const associationProperty = objectSpec.associations[assocName];
+  const specUrl = getSpecUrl(associationProperty);
+  const associationSpec = await getSpec(specUrl, config);
 
-  const references = extractReferences(objects, name);
-  const extractedProps = extractProps(associationSpec, references);
+  const extractedProps = extractProps(assocName, associationSpec, objects);
 
   const many =
     associationProperty["collection"] || associationProperty.type === "array";
@@ -136,8 +170,11 @@ export const fetch = async (
 
   if (isJsonLDSpec(objectSpec)) {
     // for JSON LD objects -> stick to the original implementation
-    actionName = many && !references.isHabtm ? "query" : "get";
-    params = buildParams(associationSpec.action(actionName), extractedProps);
+    actionName = many && !extractedProps.isHABTM ? "query" : "get";
+    params = buildParams(
+      associationSpec.action(actionName),
+      extractedProps.allProps
+    );
   } else if (isJsonSchemaSpec(objectSpec)) {
     // for JSON Schema objects -> try to find template that matches best
     // TODO: consider to use this for JSON LD + JSON Schema
@@ -146,7 +183,7 @@ export const fetch = async (
       if (!associationAction) return;
 
       // find action where all vars can be replaced using our 'extractedProps'
-      params = buildParams(associationAction, extractedProps);
+      params = buildParams(associationAction, extractedProps.allProps);
       const paramNames = map(keys(params), (x) => `{${x}}`);
       const varNames = associationAction.template.match(/{\w+}/gi);
       return every(varNames, (x) => includes(paramNames, x));
@@ -155,27 +192,47 @@ export const fetch = async (
 
   if (!actionName) {
     throw new Error(
-      `could not find the association action to resolve data for '${name}'`
+      `could not find the association action to resolve data for '${assocName}'`
     );
   }
 
-  return action(ref, actionName, { params }, config);
+  const result = await action(specUrl, actionName, { params }, config);
+
+  return {
+    assocName,
+    many,
+    extractedProps,
+    objects: result.objects,
+  };
 };
 
-export const assign = (
-  targets: any[],
-  objects: any[],
-  name: string,
-  config: IConfig
+export const assignEmpty = (targets: IObject[], assocName: string): void => {
+  // set to null for all targets we didn't find association data for..
+  each(targets, (target) => {
+    const value = target[assocName];
+    if (!value) Object.defineProperty(target, assocName, { value: null });
+  });
+};
+
+export const assignToJsonLd = (
+  targets: IObject[],
+  objects: IObject[],
+  assocName: string
 ): void => {
   const objectsById = reduce(
     objects,
-    (acc, object) => write(acc, { [object["@id"]]: object }),
+    (acc, object) => {
+      const id = getId(object);
+      return write(acc, { [id]: object });
+    },
     {}
   );
   const targetsById = reduce(
     targets,
-    (acc, target) => write(acc, { [target["@id"]]: target }),
+    (acc, target) => {
+      const id = getId(target);
+      return write(acc, { [id]: target });
+    },
     {}
   );
 
@@ -185,16 +242,17 @@ export const assign = (
    */
   each(targets, (target) => {
     const ref =
-      get(target, `@associations[${name}]`) || get(target, `$links[${name}]`);
+      get(target, `@associations[${assocName}]`) ||
+      get(target, `$links[${assocName}]`);
 
     if (isArray(ref)) {
       const matches = pick(objectsById, ref);
       if (!isEmpty(matches))
-        Object.defineProperty(target, name, { value: values(matches) });
+        Object.defineProperty(target, assocName, { value: values(matches) });
     } else {
       const match = objectsById[ref];
       if (!isEmpty(match))
-        Object.defineProperty(target, name, { value: match });
+        Object.defineProperty(target, assocName, { value: match });
     }
   });
 
@@ -204,21 +262,59 @@ export const assign = (
    */
   each(objects, (object) => {
     const refs = get(object, "@associations") || get(object, "$links") || [];
+
     each(refs, (ref) => {
       const target = targetsById[ref];
       if (!isEmpty(target)) {
-        const value = target[name];
+        const value = target[assocName];
         if (value && !isArray(value)) return; // already has a value which is not an array, abort.
 
-        if (value) target[name].push(object);
-        else Object.defineProperty(target, name, { value: [object] });
+        if (value) target[assocName].push(object);
+        else Object.defineProperty(target, assocName, { value: [object] });
       }
     });
   });
+};
 
-  // set to null for all targets we didn't find association data for..
+export const assignToJsonSchema = (
+  targets: IObject[],
+  objects: IObject[],
+  assocName: string,
+  many: boolean,
+  extractedProps: IExtractedProps
+): void => {
   each(targets, (target) => {
-    const value = target[name];
-    if (!value) Object.defineProperty(target, name, { value: null });
-  });
+    const props = extractedProps.propsByObject[target.$id];
+    if (!props) return;
+
+    const matches = filter(objects, (object) => {
+      return every(props, (v, k) => {
+        if (many && isArray(v)) {
+          const values = map(v, toString);
+          return includes(values, toString(object[k]));
+        }
+        else {
+          return toString(object[k]) === toString(v)
+        }
+      })
+    })
+
+    target[assocName] = many ? matches : first(matches);
+  })
+};
+
+export const assign = (
+  targets: IObject[],
+  objects: IObject[],
+  assocName: string,
+  many: boolean,
+  extractedProps: IExtractedProps
+): void => {
+  if (get(targets, "[0].$schema")) {
+    assignToJsonSchema(targets, objects, assocName, many, extractedProps);
+  } else {
+    assignToJsonLd(targets, objects, assocName);
+  }
+
+  assignEmpty(targets, assocName);
 };

@@ -1,11 +1,10 @@
 import superagent, {
-  Request,
   Response,
   SuperAgentStatic,
   SuperAgentRequest,
 } from "superagent";
 import superdebug from "superdebug";
-import { get, each, merge, isEmpty, isPlainObject } from "lodash";
+import { get, each, merge, isPlainObject } from "lodash";
 import { stringify } from "querystringify";
 import { IConfig } from "./config";
 import { enqueueRequest, clearRequest } from "./watcher";

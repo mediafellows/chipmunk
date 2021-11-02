@@ -4,7 +4,7 @@ import { get } from "lodash";
 import nock from "nock";
 
 import createChipmunk from "../src";
-import { extractProps } from "../src/association";
+import { getProps, assignToJsonLd, fetch } from "../src/association";
 import { setup, matches } from "./setup";
 
 const config = setup();
@@ -27,7 +27,7 @@ describe("association", () => {
         id: ["104", "105"],
       };
 
-      expect(extractProps(context, references)).to.eql(expected);
+      expect(getProps(context, references)).to.eql(expected);
     });
 
     it("extracts from has many references", async () => {
@@ -41,7 +41,7 @@ describe("association", () => {
         user_id: ["1659", "1660"],
       };
 
-      expect(extractProps(context, references)).to.eql(expected);
+      expect(getProps(context, references)).to.eql(expected);
     });
   });
 
@@ -90,7 +90,7 @@ describe("association", () => {
           },
         ];
 
-        const result = await chipmunk.fetch(users, "organization");
+        const result = await fetch(users, "organization", config);
         expect(result.objects.length).to.be.gt(1);
       });
 
@@ -137,7 +137,7 @@ describe("association", () => {
           },
         ];
 
-        const result = await chipmunk.fetch(bicycles, "owner");
+        const result = await fetch(bicycles, "owner", config);
         expect(result.objects.length).to.be.gt(1);
       });
 
@@ -245,16 +245,13 @@ describe("association", () => {
           },
         ];
 
-        const activityResults = await chipmunk.fetch(bicycles, "activities");
+        const activityResults = await fetch(bicycles, "activities", config);
         expect(activityResults.objects.length).to.eq(2);
 
-        const ownerResults = await chipmunk.fetch(bicycles, "previous_owners");
+        const ownerResults = await fetch(bicycles, "previous_owners", config);
         expect(ownerResults.objects.length).to.be.eq(5);
 
-        const manufacturerResults = await chipmunk.fetch(
-          bicycles,
-          "manufacturer"
-        );
+        const manufacturerResults = await fetch(bicycles, "manufacturer", config);
         expect(manufacturerResults.objects.length).to.eq(2);
       });
     });
@@ -301,7 +298,7 @@ describe("association", () => {
           },
         ];
 
-        const result = await chipmunk.fetch(users, "phones");
+        const result = await fetch(users, "phones", config);
         expect(result.objects.length).to.be.gt(1);
       });
     });
@@ -371,7 +368,7 @@ describe("association", () => {
           },
         ];
 
-        const result = await chipmunk.fetch(users, "geo_scopes");
+        const result = await fetch(users, "geo_scopes", config);
         expect(result.objects.length).to.be.gt(1);
       });
     });
@@ -406,7 +403,7 @@ describe("association", () => {
         },
       ];
 
-      chipmunk.assign(targets, objects, "organization");
+      assignToJsonLd(targets, objects, "organization");
       expect(targets[0]["organization"]).to.be.null; // could not be found
       expect(targets[1]["organization"]).to.exist;
     });
@@ -452,7 +449,7 @@ describe("association", () => {
         },
       ];
 
-      chipmunk.assign(targets, objects, "geo_scopes");
+      assignToJsonLd(targets, objects, "geo_scopes");
       expect(get(targets, `[0].geo_scopes[0]['@id']`)).to.equal(
         "https://um.api.mediapeers.mobi/v20140601/geo_scope/UGA"
       );
@@ -503,7 +500,7 @@ describe("association", () => {
         },
       ];
 
-      chipmunk.assign(targets, objects, "phones");
+      assignToJsonLd(targets, objects, "phones");
       expect(get(targets, "[0].phones.length")).to.equal(2);
       expect(get(targets, "[1].phones")).to.be.null;
     });

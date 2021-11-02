@@ -1,14 +1,10 @@
 import config, { IConfig } from "../src/config";
-import { merge, isEmpty } from "lodash";
 import chaiAsPromised from "chai-as-promised";
-import chai, { expect } from "chai";
+import chai from "chai";
 import nock from "nock";
-import fs from "fs";
 import yaml from "js-yaml";
 import { execSync } from "child_process";
 import sinon from "sinon";
-
-import chipmunk, { IChipmunk } from "../src";
 
 import { mockContexts } from "./mocks";
 

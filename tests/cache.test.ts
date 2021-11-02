@@ -1,9 +1,8 @@
 import "mocha";
 import { expect } from "chai";
-import { get, merge, keys } from "lodash";
+import { keys } from "lodash";
 import sinon from "sinon";
 
-import createConfig from "../src/config";
 import { _runtimeCache as internalCache } from "../src/cache";
 
 import { setup } from "./setup";

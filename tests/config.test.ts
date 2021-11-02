@@ -1,19 +1,9 @@
 import "mocha";
 import { expect } from "chai";
-import { get, merge } from "lodash";
+import { get } from "lodash";
 import createConfig from "../src/config";
 
-import { setup } from "./setup";
-import createChipmunk from "../src";
-
-const config = setup();
-let chipmunk;
-
 describe("config", () => {
-  beforeEach(() => {
-    chipmunk = createChipmunk(config);
-  });
-
   it("returns an object", () => {
     expect(createConfig()).to.be.a("Object");
   });
