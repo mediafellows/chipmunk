@@ -1,37 +1,33 @@
-import 'mocha'
-import {expect} from 'chai'
-import schema from '../src/schema'
+import "mocha";
+import { expect } from "chai";
+import schema from "../src/schema";
 
-import {setup} from './setup'
+describe("config", () => {
+  it("parses simple non-nested schema", () => {
+    const input = `foo, bar,`;
+    const expected = { foo: true, bar: true };
 
-let chipmunk
+    expect(schema(input)).to.eql(expected);
+  });
 
-describe('config', () => {
-  it('parses simple non-nested schema', () => {
-    const input = `foo, bar,`
-    const expected = { foo: true, bar: true }
-
-    expect(schema(input)).to.eql(expected)
-  })
-
-  it('parses nested schema', () => {
-    const input = `foo, bar { baz { name }, }`
+  it("parses nested schema", () => {
+    const input = `foo, bar { baz { name }, }`;
     const expected = {
       foo: true,
       bar: {
         baz: {
           name: true,
-        }
-      }
-    }
+        },
+      },
+    };
 
-    expect(schema(input)).to.eql(expected)
-  })
+    expect(schema(input)).to.eql(expected);
+  });
 
-  it('deals with empty input', () => {
-    const expected = {}
+  it("deals with empty input", () => {
+    const expected = {};
 
-    expect(schema('')).to.eql(expected)
-    expect(schema(null)).to.eql(expected)
-  })
-})
+    expect(schema("")).to.eql(expected);
+    expect(schema(null)).to.eql(expected);
+  });
+});

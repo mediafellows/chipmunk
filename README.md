@@ -48,6 +48,13 @@ ch.updateConfig({ verbose: true })
 await ch.context('um.user')
 ```
 
+### JSON schemas (mm3 models)
+
+```javascript
+// get context
+await ch.spec('mm3:pm.product')
+```
+
 ### actions
 
 #### examples
@@ -55,6 +62,9 @@ await ch.context('um.user')
 ```javascript
 // get user, default method
 await ch.action('um.user', 'get', { params: { user_id: 3 } })
+
+// get mm3 product
+await ch.action('mm3:pm.product', 'get', { params: { product_ids: 5 } })
 ```
 
 ```javascript
@@ -152,26 +162,6 @@ await ch.action('um.user', 'update', {
 await ch.action('um.user', 'query', {
   raw: true,
 })
-```
-
-### associations
-
-to manually resolve associations:
-
-```javascript
-// fetch organizations for given users
-let users = [user1, user2, user3] // ..requested earlier
-
-user1['@associations']['organization'] // => https://url.to/organization/2'
-user1.organization // => NotLoadedError!
-
-const orgResult = await ch.fetch(users, 'organization') // => returns all associated organizations as ChipmunkResult
-users = ch.assign(users, orgResult.objects, 'organization')
-users[0].organization // => returns org of first user
-
-// alternatively..
-users = await ch.fetchAndAssign(users, 'organization')
-users[0].organization // => returns org of first user
 ```
 
 ### cache

@@ -10,6 +10,8 @@
     "declaration": true,
     "noImplicitAny": false,
     "noImplicitReturns": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "removeComments": true,
     "strictNullChecks": false,
     "outDir": "dist",
