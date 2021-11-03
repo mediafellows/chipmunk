@@ -99,16 +99,18 @@ export const getSpec = async (
 
   if (config.cache.enabled && config.cache.default) {
     const cached = cacheGet(url, { engine: config.cache.default }, config);
-    if (cached) spec = cloneDeep(cached) as ISpec;
+    if (cached) {
+      spec = cloneDeep(cached) as ISpec;
+    }
   }
 
   if (!spec) {
-    let res;
+    let res, req;
 
-    if (pending(url, config)) {
-      res = await pending(url, config);
+    if (req = pending(url, config)) {
+      res = await req;
     } else {
-      const req = request(config).get(url);
+      req = request(config).get(url);
 
       if (config.timestamp) req.query({ t: config.timestamp });
 
@@ -121,52 +123,52 @@ export const getSpec = async (
     if (config.cache.enabled && config.cache.default) {
       cacheSet(url, cloneDeep(spec), { engine: config.cache.default }, config);
     }
-
-    if (!spec) throw new Error(`Failed to fetch spec ${url}`);
-
-    if (isJsonLDSpec(spec)) {
-      spec.action = (actionName: string): IAction => {
-        let action, type, name;
-
-        name = actionName;
-        if (includes(actionName, ".")) [type, name] = actionName.split(".");
-
-        if (type !== "member" && spec.collection_actions[name]) {
-          action = spec.collection_actions[name];
-          action.collection = true;
-        } else if (spec.member_actions[name]) {
-          action = spec.member_actions[name];
-          action.collection = false;
-        }
-
-        return action;
-      };
-
-      spec.associations = reduce(
-        spec.properties,
-        (assocs, prop, name) => {
-          return uriCheck.test(prop.type)
-            ? merge(assocs, { [name]: prop })
-            : assocs;
-        },
-        {}
-      );
-    } else if (isJsonSchemaSpec(spec)) {
-      spec.action = (actionName: string): IAction => {
-        return spec.actions[actionName];
-      };
-
-      spec.associations = reduce(
-        spec.properties,
-        (assocs, prop, name) => {
-          return getSpecUrl(prop) ? merge(assocs, { [name]: prop }) : assocs;
-        },
-        {}
-      );
-    }
-
-    return spec;
   }
+
+  if (!spec) throw new Error(`Failed to fetch spec ${url}`);
+
+  if (isJsonLDSpec(spec)) {
+    spec.action = (actionName: string): IAction => {
+      let action, type, name;
+
+      name = actionName;
+      if (includes(actionName, ".")) [type, name] = actionName.split(".");
+
+      if (type !== "member" && spec.collection_actions[name]) {
+        action = spec.collection_actions[name];
+        action.collection = true;
+      } else if (spec.member_actions[name]) {
+        action = spec.member_actions[name];
+        action.collection = false;
+      }
+
+      return action;
+    };
+
+    spec.associations = reduce(
+      spec.properties,
+      (assocs, prop, name) => {
+        return uriCheck.test(prop.type)
+          ? merge(assocs, { [name]: prop })
+          : assocs;
+      },
+      {}
+    );
+  } else if (isJsonSchemaSpec(spec)) {
+    spec.action = (actionName: string): IAction => {
+      return spec.actions[actionName];
+    };
+
+    spec.associations = reduce(
+      spec.properties,
+      (assocs, prop, name) => {
+        return getSpecUrl(prop) ? merge(assocs, { [name]: prop }) : assocs;
+      },
+      {}
+    );
+  }
+
+  return spec;
 };
 
 export default getSpec;

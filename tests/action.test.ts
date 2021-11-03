@@ -568,7 +568,7 @@ describe("action", () => {
     });
   });
 
-  it.only("auto-extends schema if needed", async () => {
+  it("auto-extends schema if needed", async () => {
     // this is required if you ask for less attributes that are needed to resolve associated data
     nock(config.endpoints.my)
       .get(matches("/bicycles"))
