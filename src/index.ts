@@ -1,6 +1,6 @@
 import { merge } from "lodash";
 
-import getSpec, { ISpec } from "./spec";
+import getSpec, { ISpec, IJsonLDSpec, IJsonSchemaSpec, isJsonLDSpec, isJsonSchemaSpec } from "./spec";
 import action, { IResult, IActionOpts } from "./action";
 import unfurl from "./unfurl";
 import createConfig, { IConfig, cleanConfig } from "./config";
@@ -45,7 +45,8 @@ export interface IInterface {
   cache: ICache;
 }
 
-export { ISpec, IResult, IConfig, IActionOpts, cleanConfig };
+export { ISpec, IJsonLDSpec, IJsonSchemaSpec, isJsonSchemaSpec, isJsonLDSpec };
+export { IResult, IConfig, IActionOpts, cleanConfig };
 
 export interface IChipmunk extends IInterface {
   run: (
