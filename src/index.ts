@@ -1,6 +1,15 @@
 import { merge } from "lodash";
 
-import getSpec, { ISpec, IJsonLDSpec, IJsonSchemaSpec, isJsonLDSpec, isJsonSchemaSpec } from "./spec";
+import getSpec, {
+  ISpec,
+  IJsonLDSpec,
+  IJsonSchemaSpec,
+  IProperty,
+  IJsonLDProperty,
+  IJsonSchemaProperty,
+  isJsonLDSpec,
+  isJsonSchemaSpec,
+} from "./spec";
 import action, { IResult, IActionOpts } from "./action";
 import unfurl from "./unfurl";
 import createConfig, { IConfig, cleanConfig } from "./config";
@@ -45,7 +54,17 @@ export interface IInterface {
   cache: ICache;
 }
 
-export { ISpec, IJsonLDSpec, IJsonSchemaSpec, isJsonSchemaSpec, isJsonLDSpec };
+export {
+  ISpec,
+  IJsonLDSpec,
+  IJsonSchemaSpec,
+  isJsonSchemaSpec,
+  isJsonLDSpec,
+  IProperty,
+  IJsonLDProperty,
+  IJsonSchemaProperty,
+};
+
 export { IResult, IConfig, IActionOpts, cleanConfig };
 
 export interface IChipmunk extends IInterface {
@@ -67,8 +86,10 @@ export default (...overrides: Partial<IConfig>[]): IChipmunk => {
     },
     context: (urlOrAppModel) => getSpec(urlOrAppModel, config),
     spec: (urlOrAppModel) => getSpec(urlOrAppModel, config),
-    action: (appModel, actionName, opts = {}) => action(appModel, actionName, opts, config),
-    unfurl: (appModel, actionName, opts = {}) => unfurl(appModel, actionName, opts, config),
+    action: (appModel, actionName, opts = {}) =>
+      action(appModel, actionName, opts, config),
+    unfurl: (appModel, actionName, opts = {}) =>
+      unfurl(appModel, actionName, opts, config),
     cache: {
       set: (key, value, opts) => set(key, value, callOpts(opts), config),
       get: (key, opts) => get(key, callOpts(opts), config),
