@@ -130,15 +130,13 @@ const resolve = async (objects, schema, config) => {
   const associations = reduce(
     schema,
     (acc, val, key) => {
-      // detecting associations
+      // if there is no reference, we can't resolve it
+      if (!includes(refs, key)) return acc;
+
       if (isPlainObject(val)) {
-        // prop is an association if nested schema is provided
         return merge(acc, { [key]: val });
-      } else if (includes(refs, key)) {
-        // prop is an association if any object's context has a reference to it
-        return merge(acc, { [key]: "*" });
       } else {
-        return acc;
+        return merge(acc, { [key]: "*" });
       }
     },
     {}
