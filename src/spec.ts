@@ -87,8 +87,8 @@ export const getSpec = async (
   } else {
     if (startsWith(urlOrAppModel, "mm3:")) {
       const [, appModel] = urlOrAppModel.split(":");
-      const [app] = appModel.split(".");
-      url = `${config.endpoints[app]}/v2021/schemas/${appModel}`;
+      const [app, model] = appModel.split(".");
+      url = `${config.endpoints[app]}/v2021/schemas/${model}`;
     } else {
       const [app, model] = urlOrAppModel.split(".");
       url = `${config.endpoints[app]}/v20140601/context/${model}`;
