@@ -91,7 +91,9 @@ export const getSpec = async (
       url = `${config.endpoints[app]}/v2021/schemas/${model}`;
     } else {
       const [app, model] = urlOrAppModel.split(".");
-      url = `${config.endpoints[app]}/v20140601/context/${model}`;
+      url = includes(config.endpoints[app], "v20140601")
+        ? `${config.endpoints[app]}/context/${model}`
+        : `${config.endpoints[app]}/v20140601/context/${model}`;
     }
   }
 
@@ -107,7 +109,7 @@ export const getSpec = async (
   if (!spec) {
     let res, req;
 
-    if (req = pending(url, config)) {
+    if ((req = pending(url, config))) {
       res = await req;
     } else {
       req = request(config).get(url);
