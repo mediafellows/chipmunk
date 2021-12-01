@@ -307,7 +307,9 @@ const performProxiedAction = async (
     config: cleanConfig(config),
   };
 
-  const req = request(config).post(action.template).send(body);
+  const debugParams = `?m=${appModel}&a=${actionName}`
+  const url = action.template + debugParams;
+  const req = request(config).post(url).send(body);
 
   const response = await run(req, config);
   const objects = get(response, "body.objects", []) as IObject[];
