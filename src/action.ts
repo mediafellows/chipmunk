@@ -72,7 +72,7 @@ const DEFAULT_OPTS: IActionOpts = {
   params: {},
 };
 
-const PAGINATION_PROPS = ["@total_pages", "@total_count", "@current_page"];
+const PAGINATION_PROPS = ["total_pages", "total_count", "current_page"];
 
 const extractParamsFromBody = (
   action: IAction,
@@ -278,12 +278,15 @@ const performAction = async (
     );
   }
 
-  if (get(response, `body['@total_count']`)) {
+  if (get(response, `body['total_count']`) || get(response, `body['@total_count']`)) {
     result.pagination = {} as IPagination;
 
     each(PAGINATION_PROPS, (prop) => {
       if (response.body[prop]) {
-        result.pagination[prop.substr(1)] = response.body[prop];
+        result.pagination[prop] = response.body[prop];
+      }
+      else if (response.body[`@${prop}`]) {
+        result.pagination[prop] = response.body[`@${prop}`];
       }
     });
   }
