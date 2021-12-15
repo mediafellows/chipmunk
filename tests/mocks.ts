@@ -71,5 +71,21 @@ export const mockContexts = (config: IConfig) => {
 
     .get(matches("schemas/my.activity"))
     .optionally()
+    .reply(200, activitySchema)
+
+    .get(matches("schemas/bicycle"))
+    .optionally()
+    .reply(200, bicycleSchema)
+
+    .get(matches("schemas/manufacturer"))
+    .optionally()
+    .reply(200, manufacturerSchema)
+
+    .get(matches("schemas/wheel"))
+    .optionally()
+    .reply(200, wheelSchema)
+
+    .get(matches("schemas/activity"))
+    .optionally()
     .reply(200, activitySchema);
 };

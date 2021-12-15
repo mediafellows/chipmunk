@@ -738,7 +738,7 @@ describe("action", () => {
     it("forwards the request to tuco", async () => {
       let body;
       nock(config.endpoints.tuco)
-        .post("/proxy", (_body) => {
+        .post(matches("/proxy"), (_body) => {
           body = _body;
           return true; // checking body later..
         })
