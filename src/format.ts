@@ -13,21 +13,29 @@ import {
   isString,
 } from "lodash";
 
-export default (objects: any, multi: boolean, ROR: boolean): any => {
-  if (!isArray(objects)) objects = [objects];
+export default (subject: any, multi: boolean, ROR: boolean): any => {
+  if (isArray(subject)) {
+    let objects = subject;
 
-  objects = map(objects, (member) => {
-    return ROR ? toROR(cleanup(member)) : cleanup(member);
-  });
+    objects = map(objects, (member) => {
+      return ROR ? toROR(cleanup(member)) : cleanup(member);
+    });
 
-  if (!multi) {
-    return first(objects);
+    if (!multi) {
+      return objects;
+    } else {
+      // multi is for old metamodel controllers only
+      return reduce(
+        objects,
+        (acc, member) => assign(acc, { [member.id]: member }),
+        {}
+      );
+    }
   } else {
-    return reduce(
-      objects,
-      (acc, member) => assign(acc, { [member.id]: member }),
-      {}
-    );
+    let object = subject;
+    object = ROR ? toROR(cleanup(object)) : cleanup(object);
+
+    return object;
   }
 };
 
