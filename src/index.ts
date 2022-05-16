@@ -86,9 +86,9 @@ export default (...overrides: Partial<IConfig>[]): IChipmunk => {
     },
     context: (urlOrAppModel) => getSpec(urlOrAppModel, config),
     spec: (urlOrAppModel) => getSpec(urlOrAppModel, config),
-    action: <T=IObject>(appModel, actionName, opts = {}): Promise<IResult<T>> =>
+    action: <T extends IObject=IObject>(appModel, actionName, opts = {}): Promise<IResult<T>> =>
       action<T>(appModel, actionName, opts, config),
-    unfurl: <T=IObject>(appModel, actionName, opts = {}): Promise<IResult<T>> =>
+    unfurl: <T extends IObject=IObject>(appModel, actionName, opts = {}): Promise<IResult<T>> =>
       unfurl<T>(appModel, actionName, opts, config),
     cache: {
       set: (key, value, opts) => set(key, value, callOpts(opts), config),
