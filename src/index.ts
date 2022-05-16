@@ -10,7 +10,7 @@ import getSpec, {
   isJsonLDSpec,
   isJsonSchemaSpec,
 } from "./spec";
-import action, { IResult, IActionOpts } from "./action";
+import action, { IResult, IActionOpts, IObject } from "./action";
 import unfurl from "./unfurl";
 import createConfig, { IConfig, cleanConfig } from "./config";
 import {
@@ -86,10 +86,10 @@ export default (...overrides: Partial<IConfig>[]): IChipmunk => {
     },
     context: (urlOrAppModel) => getSpec(urlOrAppModel, config),
     spec: (urlOrAppModel) => getSpec(urlOrAppModel, config),
-    action: (appModel, actionName, opts = {}) =>
-      action(appModel, actionName, opts, config),
-    unfurl: (appModel, actionName, opts = {}) =>
-      unfurl(appModel, actionName, opts, config),
+    action: <T extends IObject=IObject>(appModel, actionName, opts = {}): Promise<IResult<T>> =>
+      action<T>(appModel, actionName, opts, config),
+    unfurl: <T extends IObject=IObject>(appModel, actionName, opts = {}): Promise<IResult<T>> =>
+      unfurl<T>(appModel, actionName, opts, config),
     cache: {
       set: (key, value, opts) => set(key, value, callOpts(opts), config),
       get: (key, opts) => get(key, callOpts(opts), config),

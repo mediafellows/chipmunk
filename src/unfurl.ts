@@ -3,15 +3,15 @@ import { get, merge, range, map } from "lodash";
 import action, { IActionOpts, IResult } from "./action";
 import { IConfig } from "./config";
 
-export default async (
+export default async <T> (
   appModel: string,
   actionName: string,
   opts: IActionOpts,
   config: IConfig
-): Promise<IResult> => {
+): Promise<IResult<T>> => {
   const per = get(opts, "params.per") || get(opts, "body.per") || 100;
 
-  const result = await action(appModel, actionName, opts, config);
+  const result= await action<T>(appModel, actionName, opts, config);
   let objects = result.objects.slice();
 
   if (result.pagination) {
@@ -25,7 +25,7 @@ export default async (
           body: { page, per },
         });
 
-        return action(appModel, actionName, pageOpts, config);
+        return action<T>(appModel, actionName, pageOpts, config);
       });
 
       const results = await Promise.all(promises);
