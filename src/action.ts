@@ -55,9 +55,9 @@ export interface IPagination {
   current_page: number;
 }
 
-export interface IResult {
-  object: IObject;
-  objects: IObject[];
+export interface IResult<T=IObject> {
+  object: T;
+  objects: T[];
   pagination?: IPagination;
   type?: string;
   headers?: { [s: string]: string };
@@ -168,12 +168,12 @@ const resolve = async (objects, schema, config) => {
   return result;
 };
 
-const performAction = async (
+const performAction = async <T>(
   appModel: string,
   actionName: string,
   opts: IActionOpts,
   config: IConfig
-): Promise<IResult> => {
+): Promise<IResult<T>> => {
   const spec = await getSpec(appModel, config);
   const action = spec.action(actionName);
   const body = format(opts.body, opts.multi, opts.ROR);
@@ -255,7 +255,7 @@ const performAction = async (
     objects = await resolve(objects, schema, config);
   }
 
-  const result: IResult = {
+  const result: IResult<T> = {
     objects,
     get object() {
       return first(objects);
@@ -294,12 +294,12 @@ const performAction = async (
   return result;
 };
 
-const performProxiedAction = async (
+const performProxiedAction = async <T>(
   appModel: string,
   actionName: string,
   opts: IActionOpts,
   config: IConfig
-): Promise<IResult> => {
+): Promise<IResult<T>> => {
   const spec = await getSpec("tuco.request", config);
   const action = spec.action("proxy");
 
@@ -315,9 +315,9 @@ const performProxiedAction = async (
   const req = request(config).post(url).send(body);
 
   const response = await run(req, config);
-  const objects = get(response, "body.objects", []) as IObject[];
+  const objects = get(response, "body.objects", []) as T[];
 
-  const result: IResult = {
+  const result: IResult<T> = {
     objects: objects,
     get object() {
       return first(objects);
@@ -331,12 +331,12 @@ const performProxiedAction = async (
   return result;
 };
 
-export default async (
+export default async <T>(
   appModel: string,
   actionName: string,
   opts: IActionOpts,
   config: IConfig
-): Promise<IResult> => {
+): Promise<IResult<T>> => {
   opts = merge({}, DEFAULT_OPTS, { proxy: !isEmpty(opts.schema) }, opts);
 
   if (opts.proxy && isEmpty(opts.schema)) {
