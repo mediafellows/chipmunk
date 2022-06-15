@@ -1,7 +1,7 @@
 export default {
   '@context': {
-    '@id': 'https://um.api.mediapeers.mobi/v20140601/context/user/manager',
-    '@context': 'https://um.api.mediapeers.mobi/v20140601/context/context',
+    '@id': 'https://um.api.mediastore.dev/v20140601/context/user/manager',
+    '@context': 'https://um.api.mediastore.dev/v20140601/context/context',
     '@type': 'context',
     properties:
      { id:
@@ -324,48 +324,48 @@ export default {
           exportable: true,
           type: 'string' },
        geo_scopes:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/geo_scope',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/geo_scope',
           collection: true,
           readable: true,
           writable: true,
           exportable: true,
           validations: [ { length: { maximum: 24 } } ] },
        groups:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/group',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/group',
           collection: true,
           readable: true,
           writable: false,
           exportable: false },
        organization:
         { type:
-           'https://um.api.mediapeers.mobi/v20140601/context/organization',
+           'https://um.api.mediastore.dev/v20140601/context/organization',
           collection: false,
           readable: true,
           writable: true,
           exportable: true,
           required: true },
        responsible_user:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/user',
           collection: false,
           readable: true,
           writable: true,
           exportable: true },
        role:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/role',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/role',
           collection: false,
           readable: true,
           writable: true,
           exportable: true },
        password:
         { type:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/password',
+           'https://um.api.mediastore.dev/v20140601/context/user/password',
           collection: false,
           readable: true,
           writable: false,
           exportable: false },
        phones:
         { type:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           collection: true,
           readable: true,
           writable: true,
@@ -373,7 +373,7 @@ export default {
           validations: [ { length: { maximum: 5 } } ] },
        im_contacts:
         { type:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/im_contact',
+           'https://um.api.mediastore.dev/v20140601/context/user/im_contact',
           collection: true,
           readable: true,
           writable: true,
@@ -381,7 +381,7 @@ export default {
           validations: [ { length: { maximum: 5 } } ] },
        social_media_profiles:
         { type:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/social_media_profile',
+           'https://um.api.mediastore.dev/v20140601/context/user/social_media_profile',
           collection: true,
           readable: true,
           writable: true,
@@ -389,26 +389,26 @@ export default {
           validations: [ { length: { maximum: 5 } } ] },
        address:
         { type:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/address',
+           'https://um.api.mediastore.dev/v20140601/context/user/address',
           collection: false,
           readable: true,
           writable: true,
           exportable: true },
        country:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/geography',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/geography',
           collection: false,
           readable: true,
           writable: false,
           exportable: false },
        division:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/division',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/division',
           collection: false,
           readable: true,
           writable: true,
           exportable: false },
        preview_image:
         { type:
-           'https://am.api.mediapeers.mobi/v20140601/context/preview_image',
+           'https://am.api.mediastore.dev/v20140601/context/preview_image',
           collection: false,
           readable: true,
           writable: true,
@@ -458,99 +458,99 @@ export default {
      { get:
         { method: 'GET',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          template: 'https://um.api.mediapeers.mobi/v20140601/user/{user_id}',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
+          template: 'https://um.api.mediastore.dev/v20140601/user/{user_id}',
           mappings: [ { variable: 'user_id', source: 'id', required: true } ] },
        update:
         { method: 'PATCH',
-          expects: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          template: 'https://um.api.mediapeers.mobi/v20140601/user/{user_id}',
+          expects: 'https://um.api.mediastore.dev/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
+          template: 'https://um.api.mediastore.dev/v20140601/user/{user_id}',
           mappings: [ { variable: 'user_id', source: 'id', required: true } ] },
        invite:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/user/{user_id}/invite',
+           'https://um.api.mediastore.dev/v20140601/user/{user_id}/invite',
           mappings: [ { variable: 'user_id', source: 'id' } ] },
        approve:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/user/{user_id}/approve',
+           'https://um.api.mediastore.dev/v20140601/user/{user_id}/approve',
           mappings: [ { variable: 'user_id', source: 'id' } ] },
        block:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/user/{user_id}/block',
+           'https://um.api.mediastore.dev/v20140601/user/{user_id}/block',
           mappings: [ { variable: 'user_id', source: 'id' } ] },
        unblock:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/user/{user_id}/unblock',
+           'https://um.api.mediastore.dev/v20140601/user/{user_id}/unblock',
           mappings: [ { variable: 'user_id', source: 'id' } ] },
        reject:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/user/{user_id}/reject',
+           'https://um.api.mediastore.dev/v20140601/user/{user_id}/reject',
           mappings: [ { variable: 'user_id', source: 'id' } ] },
        delete:
         { method: 'DELETE',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          template: 'https://um.api.mediapeers.mobi/v20140601/user/{user_id}',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
+          template: 'https://um.api.mediastore.dev/v20140601/user/{user_id}',
           mappings: [ { variable: 'user_id', source: 'id', required: true } ] },
        restore:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/user/{user_id}/restore',
+           'https://um.api.mediastore.dev/v20140601/user/{user_id}/restore',
           mappings: [ { variable: 'user_id', source: 'id' } ] },
        add_geo_scopes:
         { method: 'POST',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_id}/geo_scopes/{geo_scope_ids}/add',
+           'https://um.api.mediastore.dev/v20140601/users/{user_id}/geo_scopes/{geo_scope_ids}/add',
           mappings:
            [ { variable: 'user_id', source: 'id', required: true },
              { variable: 'geo_scope_ids', required: true } ] },
        remove_geo_scopes:
         { method: 'DELETE',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_id}/geo_scopes/{geo_scope_ids}/remove',
+           'https://um.api.mediastore.dev/v20140601/users/{user_id}/geo_scopes/{geo_scope_ids}/remove',
           mappings:
            [ { variable: 'user_id', source: 'id', required: true },
              { variable: 'geo_scope_ids', required: true } ] },
        update_geo_scopes:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_id}/geo_scopes/{geo_scope_ids}',
+           'https://um.api.mediastore.dev/v20140601/users/{user_id}/geo_scopes/{geo_scope_ids}',
           mappings:
            [ { variable: 'user_id', source: 'id', required: true },
              { variable: 'geo_scope_ids', required: true } ] } },
@@ -558,11 +558,11 @@ export default {
      { query:
         { method: 'GET',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users{?ids,q,qfields,per,page,sort,order,include_deleted}',
+           'https://um.api.mediastore.dev/v20140601/users{?ids,q,qfields,per,page,sort,order,include_deleted}',
           mappings:
            [ { variable: 'ids', source: 'id' },
              { variable: 'q' },
@@ -575,11 +575,11 @@ export default {
        search:
         { method: 'POST',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/search{?ids,q,qfields,per,page,sort,order,include_deleted}',
+           'https://um.api.mediastore.dev/v20140601/users/search{?ids,q,qfields,per,page,sort,order,include_deleted}',
           mappings:
            [ { variable: 'ids', source: 'id' },
              { variable: 'q' },
@@ -591,106 +591,106 @@ export default {
              { variable: 'include_deleted' } ] },
        create:
         { method: 'POST',
-          expects: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          template: 'https://um.api.mediapeers.mobi/v20140601/users',
+          expects: 'https://um.api.mediastore.dev/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
+          response: 'https://um.api.mediastore.dev/v20140601/context/user',
+          template: 'https://um.api.mediastore.dev/v20140601/users',
           mappings: [] },
        get:
         { method: 'GET',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
-          template: 'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
+          template: 'https://um.api.mediastore.dev/v20140601/users/{user_ids}',
           mappings: [ { variable: 'user_ids', source: 'id', required: true } ] },
        update:
         { method: 'PATCH',
-          expects: 'https://um.api.mediapeers.mobi/v20140601/context/user',
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          expects: 'https://um.api.mediastore.dev/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
-          template: 'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
+          template: 'https://um.api.mediastore.dev/v20140601/users/{user_ids}',
           mappings: [ { variable: 'user_ids', source: 'id', required: true } ] },
        invite:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/invite',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/invite',
           mappings: [ { variable: 'user_ids', source: 'id' } ] },
        approve:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/approve',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/approve',
           mappings: [ { variable: 'user_ids', source: 'id' } ] },
        review:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/review',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/review',
           mappings: [ { variable: 'user_ids', source: 'id' } ] },
        block:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/block',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/block',
           mappings: [ { variable: 'user_ids', source: 'id' } ] },
        unblock:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/unblock',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/unblock',
           mappings: [ { variable: 'user_ids', source: 'id' } ] },
        reject:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/reject',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/reject',
           mappings: [ { variable: 'user_ids', source: 'id' } ] },
        delete:
         { method: 'DELETE',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
-          template: 'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
+          template: 'https://um.api.mediastore.dev/v20140601/users/{user_ids}',
           mappings: [ { variable: 'user_ids', source: 'id', required: true } ] },
        restore:
         { method: 'PUT',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/restore',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/restore',
           mappings: [ { variable: 'user_ids', source: 'id' } ] },
        query_groups:
         { method: 'GET',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/user',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/groups{?ids,q,qfields,page,per,sort,order}',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/groups{?ids,q,qfields,page,per,sort,order}',
           mappings:
            [ { variable: 'user_ids', source: 'id', required: true },
              { variable: 'ids' },

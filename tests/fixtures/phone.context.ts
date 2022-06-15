@@ -1,8 +1,8 @@
 export default {
   '@context': {
     '@id':
-    'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
-    '@context': 'https://um.api.mediapeers.mobi/v20140601/context/context',
+    'https://um.api.mediastore.dev/v20140601/context/user/phone',
+    '@context': 'https://um.api.mediastore.dev/v20140601/context/context',
     '@type': 'context',
     properties:
      { sequence_number:
@@ -51,7 +51,7 @@ export default {
                   message: 'may contain 0-9, (), +, - and .' } } ],
           type: 'string' },
        user:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/user',
           collection: false,
           readable: true,
           writable: false,
@@ -62,24 +62,24 @@ export default {
         { method: 'GET',
           expects: null,
           resource:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/phone/{phone_id}',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/phone/{phone_id}',
           mappings:
            [ { variable: 'user_ids', source: 'user_id', required: true },
              { variable: 'phone_id', source: 'id', required: true } ] },
        update:
         { method: 'PATCH',
           expects:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           resource:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/phone/{phone_id}',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/phone/{phone_id}',
           mappings:
            [ { variable: 'user_ids', source: 'user_id', required: true },
              { variable: 'phone_id', source: 'id', required: true } ] },
@@ -87,11 +87,11 @@ export default {
         { method: 'DELETE',
           expects: null,
           resource:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/phone/{phone_id}',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/phone/{phone_id}',
           mappings:
            [ { variable: 'user_ids', source: 'user_id', required: true },
              { variable: 'phone_id', source: 'id', required: true } ] } },
@@ -100,11 +100,11 @@ export default {
         { method: 'GET',
           expects: null,
           resource:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/phones{?ids,page,per}',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/phones{?ids,page,per}',
           mappings:
            [ { variable: 'user_ids', source: 'user_id', required: true },
              { variable: 'ids', source: 'id' },
@@ -113,36 +113,36 @@ export default {
        create:
         { method: 'POST',
           expects:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           resource:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_id}/phones',
+           'https://um.api.mediastore.dev/v20140601/users/{user_id}/phones',
           mappings: [ { variable: 'user_id', required: true } ] },
        get:
         { method: 'GET',
           expects: null,
           resource:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/phones/{phone_ids}',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/phones/{phone_ids}',
           mappings:
            [ { variable: 'user_ids', source: 'user_id', required: true },
              { variable: 'phone_ids', source: 'id', required: true } ] },
        update:
         { method: 'PATCH',
           expects:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           resource:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/phones/{phone_ids}',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/phones/{phone_ids}',
           mappings:
            [ { variable: 'user_ids', source: 'user_id', required: true },
              { variable: 'phone_ids', source: 'id', required: true } ] },
@@ -150,18 +150,18 @@ export default {
         { method: 'DELETE',
           expects: null,
           resource:
-           'https://um.api.mediapeers.mobi/v20140601/context/user/phone',
+           'https://um.api.mediastore.dev/v20140601/context/user/phone',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/users/{user_ids}/phones/{phone_ids}',
+           'https://um.api.mediastore.dev/v20140601/users/{user_ids}/phones/{phone_ids}',
           mappings:
            [ { variable: 'user_ids', source: 'user_id', required: true },
              { variable: 'phone_ids', source: 'id', required: true } ] } },
     action: [Function],
     associations:
      { user:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/user',
           collection: false,
           readable: true,
           writable: false,

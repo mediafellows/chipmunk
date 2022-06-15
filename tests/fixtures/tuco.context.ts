@@ -1,7 +1,7 @@
 export default {
   "@context":{
-    "@id":"https://tuco.api.mediapeers.mobi/context/request",
-    "@context":"https://tuco.api.mediapeers.mobi/context/context",
+    "@id":"https://tuco.api.mediastore.dev/context/request",
+    "@context":"https://tuco.api.mediastore.dev/context/context",
     "@type":"context",
     "properties":{
     },
@@ -9,25 +9,25 @@ export default {
       "get":{
         "method":"POST",
         "expects":null,
-        "resource":"https://tuco.api.mediapeers.mobi/context/request",
-        "response":"https://tuco.api.mediapeers.mobi/context/collection",
-        "template":"https://tuco.api.mediapeers.mobi"
+        "resource":"https://tuco.api.mediastore.dev/context/request",
+        "response":"https://tuco.api.mediastore.dev/context/collection",
+        "template":"https://tuco.api.mediastore.dev"
       },
       "proxy":{
         "method":"POST",
         "expects":null,
-        "resource":"https://tuco.api.mediapeers.mobi/context/request",
-        "response":"https://tuco.api.mediapeers.mobi/context/collection",
-        "template":"https://tuco.api.mediapeers.mobi/proxy"
+        "resource":"https://tuco.api.mediastore.dev/context/request",
+        "response":"https://tuco.api.mediastore.dev/context/collection",
+        "template":"https://tuco.api.mediastore.dev/proxy"
       }
     },
     "member_actions": {
       "get":{
         "method":"POST",
         "expects":null,
-        "resource":"https://tuco.api.mediapeers.mobi/context/request",
-        "response":"https://tuco.api.mediapeers.mobi/context/collection",
-        "template":"https://tuco.api.mediapeers.mobi"
+        "resource":"https://tuco.api.mediastore.dev/context/request",
+        "response":"https://tuco.api.mediastore.dev/context/collection",
+        "template":"https://tuco.api.mediastore.dev"
       }
     }
   }

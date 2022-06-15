@@ -21,11 +21,11 @@ describe("action", () => {
       .reply(200, {
         members: [
           {
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: "first",
           },
           {
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: "second",
           },
         ],
@@ -43,12 +43,12 @@ describe("action", () => {
       .reply(200, {
         members: [
           {
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: "first",
             organization: { "@id": "http://um.app/organization/1" },
           },
           {
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: "second",
           },
         ],
@@ -71,20 +71,20 @@ describe("action", () => {
         members: [
           {
             "@context":
-              "https://um.api.mediapeers.mobi/v20140601/context/user/manager",
+              "https://um.api.mediastore.dev/v20140601/context/user/manager",
             id: "first",
             organization: { "@id": "http://um.app/organizations/1" },
             geo_scopes: [
               {
-                "@id": "https://um.api.mediapeers.mobi/v20140601/geo_scope/UGA",
+                "@id": "https://um.api.mediastore.dev/v20140601/geo_scope/UGA",
               },
               {
-                "@id": "https://um.api.mediapeers.mobi/v20140601/geo_scope/SWZ",
+                "@id": "https://um.api.mediastore.dev/v20140601/geo_scope/SWZ",
               },
             ],
           },
           {
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: "second",
             organization: { "@id": "http://um.app/organizations/1" },
           },
@@ -97,8 +97,8 @@ describe("action", () => {
         "http://um.app/organizations/1"
       );
       expect(result.objects[0]["@associations"].geo_scopes).to.eql([
-        "https://um.api.mediapeers.mobi/v20140601/geo_scope/UGA",
-        "https://um.api.mediapeers.mobi/v20140601/geo_scope/SWZ",
+        "https://um.api.mediastore.dev/v20140601/geo_scope/UGA",
+        "https://um.api.mediastore.dev/v20140601/geo_scope/SWZ",
       ]);
 
       expect(result.objects[1]["@associations"].organization).to.equal(
@@ -113,7 +113,7 @@ describe("action", () => {
       .reply(200, {
         members: [
           {
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: "first",
           },
         ],
@@ -140,7 +140,7 @@ describe("action", () => {
       .reply(200, {
         members: [
           {
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: "first",
           },
         ],
@@ -169,7 +169,7 @@ describe("action", () => {
 
   it("sends uri params", async () => {
     nock(config.endpoints.um).get(matches("users/1659")).reply(200, {
-      "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+      "@context": "https://um.api.mediastore.dev/v20140601/context/user",
       id: "one",
     });
 
@@ -183,7 +183,7 @@ describe("action", () => {
 
   it("uses forced member action endpoint", async () => {
     nock(config.endpoints.um).get(matches("user/1659")).reply(200, {
-      "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+      "@context": "https://um.api.mediastore.dev/v20140601/context/user",
       id: "one",
     });
 
@@ -244,10 +244,10 @@ describe("action", () => {
         members: [
           {
             "@type": "user",
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-            "@id": "https://um.api.mediapeers.mobi/v20140601/user/1",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+            "@id": "https://um.api.mediastore.dev/v20140601/user/1",
             organization: {
-              "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+              "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
             },
             id: 1,
             first_name: "philipp",
@@ -256,10 +256,10 @@ describe("action", () => {
           },
           {
             "@type": "user",
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-            "@id": "https://um.api.mediapeers.mobi/v20140601/user/2",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+            "@id": "https://um.api.mediastore.dev/v20140601/user/2",
             organization: {
-              "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+              "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
             },
             id: 2,
             first_name: "antonie",
@@ -274,8 +274,8 @@ describe("action", () => {
           {
             "@type": "organization",
             "@context":
-              "https://um.api.mediapeers.mobi/v20140601/context/organization",
-            "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+              "https://um.api.mediastore.dev/v20140601/context/organization",
+            "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
             id: 3,
             name: "graefschaft",
           },
@@ -285,19 +285,19 @@ describe("action", () => {
     const expected = [
       {
         "@type": "user",
-        "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-        "@id": "https://um.api.mediapeers.mobi/v20140601/user/1",
+        "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+        "@id": "https://um.api.mediastore.dev/v20140601/user/1",
         "@associations": {
           organization:
-            "https://um.api.mediapeers.mobi/v20140601/organization/3",
+            "https://um.api.mediastore.dev/v20140601/organization/3",
         },
         first_name: "philipp",
         last_name: "goetzinger",
         organization: {
           "@type": "organization",
           "@context":
-            "https://um.api.mediapeers.mobi/v20140601/context/organization",
-          "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+            "https://um.api.mediastore.dev/v20140601/context/organization",
+          "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
           "@associations": {},
           id: 3,
           name: "graefschaft",
@@ -305,18 +305,18 @@ describe("action", () => {
       },
       {
         "@type": "user",
-        "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-        "@id": "https://um.api.mediapeers.mobi/v20140601/user/2",
+        "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+        "@id": "https://um.api.mediastore.dev/v20140601/user/2",
         "@associations": {
           organization:
-            "https://um.api.mediapeers.mobi/v20140601/organization/3",
+            "https://um.api.mediastore.dev/v20140601/organization/3",
         },
         first_name: "antonie",
         organization: {
           "@type": "organization",
           "@context":
-            "https://um.api.mediapeers.mobi/v20140601/context/organization",
-          "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+            "https://um.api.mediastore.dev/v20140601/context/organization",
+          "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
           "@associations": {},
           id: 3,
           name: "graefschaft",
@@ -341,17 +341,17 @@ describe("action", () => {
         members: [
           {
             "@type": "user",
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-            "@id": "https://um.api.mediapeers.mobi/v20140601/user/1",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+            "@id": "https://um.api.mediastore.dev/v20140601/user/1",
             organization: {
-              "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+              "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
             },
             geo_scopes: [
               {
-                "@id": "https://um.api.mediapeers.mobi/v20140601/geo_scope/UGA",
+                "@id": "https://um.api.mediastore.dev/v20140601/geo_scope/UGA",
               },
               {
-                "@id": "https://um.api.mediapeers.mobi/v20140601/geo_scope/SWZ",
+                "@id": "https://um.api.mediastore.dev/v20140601/geo_scope/SWZ",
               },
             ],
             id: 1,
@@ -361,10 +361,10 @@ describe("action", () => {
           },
           {
             "@type": "user",
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-            "@id": "https://um.api.mediapeers.mobi/v20140601/user/2",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+            "@id": "https://um.api.mediastore.dev/v20140601/user/2",
             organization: {
-              "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+              "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
             },
             id: 2,
             first_name: "antonie",
@@ -379,8 +379,8 @@ describe("action", () => {
           {
             "@type": "organization",
             "@context":
-              "https://um.api.mediapeers.mobi/v20140601/context/organization",
-            "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+              "https://um.api.mediastore.dev/v20140601/context/organization",
+            "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
             id: 3,
             name: "graefschaft",
           },
@@ -390,14 +390,14 @@ describe("action", () => {
     const expected = [
       {
         "@type": "user",
-        "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-        "@id": "https://um.api.mediapeers.mobi/v20140601/user/1",
+        "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+        "@id": "https://um.api.mediastore.dev/v20140601/user/1",
         "@associations": {
           organization:
-            "https://um.api.mediapeers.mobi/v20140601/organization/3",
+            "https://um.api.mediastore.dev/v20140601/organization/3",
           geo_scopes: [
-            "https://um.api.mediapeers.mobi/v20140601/geo_scope/UGA",
-            "https://um.api.mediapeers.mobi/v20140601/geo_scope/SWZ",
+            "https://um.api.mediastore.dev/v20140601/geo_scope/UGA",
+            "https://um.api.mediastore.dev/v20140601/geo_scope/SWZ",
           ],
         },
         first_name: "philipp",
@@ -406,8 +406,8 @@ describe("action", () => {
           ...emptyOrganizationAssociations,
           "@type": "organization",
           "@context":
-            "https://um.api.mediapeers.mobi/v20140601/context/organization",
-          "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+            "https://um.api.mediastore.dev/v20140601/context/organization",
+          "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
           "@associations": {},
           id: 3,
           name: "graefschaft",
@@ -415,19 +415,19 @@ describe("action", () => {
       },
       {
         "@type": "user",
-        "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-        "@id": "https://um.api.mediapeers.mobi/v20140601/user/2",
+        "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+        "@id": "https://um.api.mediastore.dev/v20140601/user/2",
         "@associations": {
           organization:
-            "https://um.api.mediapeers.mobi/v20140601/organization/3",
+            "https://um.api.mediastore.dev/v20140601/organization/3",
         },
         first_name: "antonie",
         organization: {
           ...emptyOrganizationAssociations,
           "@type": "organization",
           "@context":
-            "https://um.api.mediapeers.mobi/v20140601/context/organization",
-          "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+            "https://um.api.mediastore.dev/v20140601/context/organization",
+          "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
           "@associations": {},
           id: 3,
           name: "graefschaft",
@@ -451,32 +451,32 @@ describe("action", () => {
       .reply(200, {
         members: [
           {
-            $id: "https://my.api.mediapeers.mobi/v2021/bicycles/1659",
+            $id: "https://my.api.mediastore.dev/v2021/bicycles/1659",
             $schema:
-              "https://my.api.mediapeers.mobi/v2021/schemas/my.bicycle.json",
+              "https://my.api.mediastore.dev/v2021/schemas/my.bicycle.json",
             $links: {
               manufacturer:
-                "https://my.api.mediapeers.mobi/v2021/manufacturers/3",
+                "https://my.api.mediastore.dev/v2021/manufacturers/3",
               previous_owners:
-                "https://um.api.mediapeers.mobi/v20140601/users/104,105",
+                "https://um.api.mediastore.dev/v20140601/users/104,105",
               activities:
-                "https://my.api.mediapeers.mobi/v2021/bicycles/1659/activities",
+                "https://my.api.mediastore.dev/v2021/bicycles/1659/activities",
             },
             id: 1659,
             manufacturer_id: 3,
             previous_owner_ids: [104, 105],
           },
           {
-            $id: "https://my.api.mediapeers.mobi/v2021/bicycles/1660",
+            $id: "https://my.api.mediastore.dev/v2021/bicycles/1660",
             $schema:
-              "https://my.api.mediapeers.mobi/v2021/schemas/my.bicycle.json",
+              "https://my.api.mediastore.dev/v2021/schemas/my.bicycle.json",
             $links: {
               manufacturer:
-                "https://my.api.mediapeers.mobi/v2021/manufacturers/4",
+                "https://my.api.mediastore.dev/v2021/manufacturers/4",
               previous_owners:
-                "https://um.api.mediapeers.mobi/v20140601/users/105,106,107,108", // overlap!
+                "https://um.api.mediastore.dev/v20140601/users/105,106,107,108", // overlap!
               activities:
-                "https://my.api.mediapeers.mobi/v2021/bicycles/1660/activities",
+                "https://my.api.mediastore.dev/v2021/bicycles/1660/activities",
             },
             id: 1660,
             manufacturer_id: 4,
@@ -490,16 +490,16 @@ describe("action", () => {
       .reply(200, {
         members: [
           {
-            $id: "https://my.api.mediapeers.mobi/v2021/manufacturers/3",
+            $id: "https://my.api.mediastore.dev/v2021/manufacturers/3",
             $schema:
-              "https://my.api.mediapeers.mobi/v2021/schemas/my.manufacturer.json",
+              "https://my.api.mediastore.dev/v2021/schemas/my.manufacturer.json",
             id: 3,
             name: "kona",
           },
           {
-            $id: "https://my.api.mediapeers.mobi/v2021/manufacturers/4",
+            $id: "https://my.api.mediastore.dev/v2021/manufacturers/4",
             $schema:
-              "https://my.api.mediapeers.mobi/v2021/schemas/my.manufacturer.json",
+              "https://my.api.mediastore.dev/v2021/schemas/my.manufacturer.json",
             id: 4,
             name: "all city",
           },
@@ -511,15 +511,15 @@ describe("action", () => {
       .reply(200, {
         members: [
           {
-            $id: "https://my.api.mediapeers.mobi/v2021/activities/1659",
+            $id: "https://my.api.mediastore.dev/v2021/activities/1659",
             $schema:
-              "https://my.api.mediapeers.mobi/v2021/schemas/my.activity.json",
+              "https://my.api.mediastore.dev/v2021/schemas/my.activity.json",
             bicycle_id: 1659,
           },
           {
-            $id: "https://my.api.mediapeers.mobi/v2021/activities/1660",
+            $id: "https://my.api.mediastore.dev/v2021/activities/1660",
             $schema:
-              "https://my.api.mediapeers.mobi/v2021/schemas/my.activity.json",
+              "https://my.api.mediastore.dev/v2021/schemas/my.activity.json",
             bicycle_id: 1660,
           },
         ],
@@ -530,28 +530,28 @@ describe("action", () => {
       .reply(200, {
         members: [
           {
-            "@id": "https://um.api.mediapeers.mobi/v20140601/user/104",
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@id": "https://um.api.mediastore.dev/v20140601/user/104",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: 104,
           },
           {
-            "@id": "https://um.api.mediapeers.mobi/v20140601/user/105",
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@id": "https://um.api.mediastore.dev/v20140601/user/105",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: 105,
           },
           {
-            "@id": "https://um.api.mediapeers.mobi/v20140601/user/106",
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@id": "https://um.api.mediastore.dev/v20140601/user/106",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: 106,
           },
           {
-            "@id": "https://um.api.mediapeers.mobi/v20140601/user/107",
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@id": "https://um.api.mediastore.dev/v20140601/user/107",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: 107,
           },
           {
-            "@id": "https://um.api.mediapeers.mobi/v20140601/user/108",
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
+            "@id": "https://um.api.mediastore.dev/v20140601/user/108",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: 108,
           },
         ],
@@ -575,12 +575,12 @@ describe("action", () => {
       .reply(200, {
         members: [
           {
-            $id: "https://my.api.mediapeers.mobi/v2021/bicycles/1659",
+            $id: "https://my.api.mediastore.dev/v2021/bicycles/1659",
             $schema:
-              "https://my.api.mediapeers.mobi/v2021/schemas/my.bicycle.json",
+              "https://my.api.mediastore.dev/v2021/schemas/my.bicycle.json",
             $links: {
               manufacturer:
-                "https://my.api.mediapeers.mobi/v2021/manufacturers/3",
+                "https://my.api.mediastore.dev/v2021/manufacturers/3",
             },
             id: 1659,
             manufacturer_id: 3,
@@ -593,9 +593,9 @@ describe("action", () => {
       .reply(200, {
         members: [
           {
-            $id: "https://my.api.mediapeers.mobi/v2021/manufacturers/3",
+            $id: "https://my.api.mediastore.dev/v2021/manufacturers/3",
             $schema:
-              "https://my.api.mediapeers.mobi/v2021/schemas/my.manufacturer.json",
+              "https://my.api.mediastore.dev/v2021/schemas/my.manufacturer.json",
             id: 3,
             name: "kona",
           },
@@ -620,10 +620,10 @@ describe("action", () => {
         members: [
           {
             "@type": "user",
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-            "@id": "https://um.api.mediapeers.mobi/v20140601/user/1",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+            "@id": "https://um.api.mediastore.dev/v20140601/user/1",
             organization: {
-              "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+              "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
             },
             id: 1,
             first_name: "philipp",
@@ -632,10 +632,10 @@ describe("action", () => {
           },
           {
             "@type": "user",
-            "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-            "@id": "https://um.api.mediapeers.mobi/v20140601/user/2",
+            "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+            "@id": "https://um.api.mediastore.dev/v20140601/user/2",
             organization: {
-              "@id": "https://um.api.mediapeers.mobi/v20140601/organization/3",
+              "@id": "https://um.api.mediastore.dev/v20140601/organization/3",
             },
             id: 2,
             first_name: "antonie",
@@ -650,11 +650,11 @@ describe("action", () => {
     const expected = [
       {
         "@type": "user",
-        "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-        "@id": "https://um.api.mediapeers.mobi/v20140601/user/1",
+        "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+        "@id": "https://um.api.mediastore.dev/v20140601/user/1",
         "@associations": {
           organization:
-            "https://um.api.mediapeers.mobi/v20140601/organization/3",
+            "https://um.api.mediastore.dev/v20140601/organization/3",
         },
         first_name: "philipp",
         last_name: "goetzinger",
@@ -662,11 +662,11 @@ describe("action", () => {
       },
       {
         "@type": "user",
-        "@context": "https://um.api.mediapeers.mobi/v20140601/context/user",
-        "@id": "https://um.api.mediapeers.mobi/v20140601/user/2",
+        "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+        "@id": "https://um.api.mediastore.dev/v20140601/user/2",
         "@associations": {
           organization:
-            "https://um.api.mediapeers.mobi/v20140601/organization/3",
+            "https://um.api.mediastore.dev/v20140601/organization/3",
         },
         first_name: "antonie",
         organization: null,
@@ -746,12 +746,12 @@ describe("action", () => {
           members: [
             {
               "@context":
-                "https://um.api.mediapeers.mobi/v20140601/context/user",
+                "https://um.api.mediastore.dev/v20140601/context/user",
               id: "first",
             },
             {
               "@context":
-                "https://um.api.mediapeers.mobi/v20140601/context/user",
+                "https://um.api.mediastore.dev/v20140601/context/user",
               id: "second",
             },
           ],

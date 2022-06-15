@@ -1,5 +1,5 @@
 export default {
-  $id: "https://my.api.mediapeers.mobi/v2021/schemas/my.wheel.json",
+  $id: "https://my.api.mediastore.dev/v2021/schemas/my.wheel.json",
   type: "object",
   title: "my wheel",
   default: {},

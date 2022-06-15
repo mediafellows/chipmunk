@@ -15,14 +15,14 @@ const DEFAULT_CONFIG = {
     "Affiliation-Id": "mpx",
   },
   endpoints: {
-    um: "https://um.api.mediapeers.mobi",
-    pm: "https://pm.api.mediapeers.mobi",
-    am: "https://am.api.mediapeers.mobi",
-    ac: "https://ac.api.mediapeers.mobi",
-    sm: "https://sm.api.mediapeers.mobi",
-    mc: "https://mc.api.mediapeers.mobi",
-    my: "https://my.api.mediapeers.mobi",
-    tuco: "https://tuco.api.mediapeers.mobi",
+    um: "https://um.api.mediastore.dev",
+    pm: "https://pm.api.mediastore.dev",
+    am: "https://am.api.mediastore.dev",
+    ac: "https://ac.api.mediastore.dev",
+    sm: "https://sm.api.mediastore.dev",
+    mc: "https://mc.api.mediastore.dev",
+    my: "https://my.api.mediastore.dev",
+    tuco: "https://tuco.api.mediastore.dev",
   },
 };
 

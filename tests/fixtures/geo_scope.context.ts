@@ -1,7 +1,7 @@
 export default {
   '@context': {
-    '@id': 'https://um.api.mediapeers.mobi/v20140601/context/geo_scope',
-    '@context': 'https://um.api.mediapeers.mobi/v20140601/context/context',
+    '@id': 'https://um.api.mediastore.dev/v20140601/context/geo_scope',
+    '@context': 'https://um.api.mediastore.dev/v20140601/context/context',
     '@type': 'context',
     properties:
      { id:
@@ -66,46 +66,46 @@ export default {
      { get:
         { method: 'GET',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/geo_scope',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/geo_scope',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/geo_scope',
+          response: 'https://um.api.mediastore.dev/v20140601/context/geo_scope',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/geo_scope/{geography_id}',
+           'https://um.api.mediastore.dev/v20140601/geo_scope/{geography_id}',
           mappings:
            [ { variable: 'geography_id', source: 'id', required: true } ] } },
     collection_actions:
      { query:
         { method: 'GET',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/geo_scope',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/geo_scope',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
-          template: 'https://um.api.mediapeers.mobi/v20140601/geo_scopes{?ids}',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
+          template: 'https://um.api.mediastore.dev/v20140601/geo_scopes{?ids}',
           mappings: [ { variable: 'ids', source: 'id' } ] },
        graph:
         { method: 'GET',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/geo_scope',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/geo_scope',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
-          template: 'https://um.api.mediapeers.mobi/v20140601/geo_scopes/graph',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
+          template: 'https://um.api.mediastore.dev/v20140601/geo_scopes/graph',
           mappings: [] },
        countries:
         { method: 'GET',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/geo_scope',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/geo_scope',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/geo_scopes/countries{?ids}',
+           'https://um.api.mediastore.dev/v20140601/geo_scopes/countries{?ids}',
           mappings: [ { variable: 'ids', source: 'id' } ] },
        get:
         { method: 'GET',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/geo_scope',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/geo_scope',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/geo_scopes/{geography_ids}',
+           'https://um.api.mediastore.dev/v20140601/geo_scopes/{geography_ids}',
           mappings:
            [ { variable: 'geography_ids', source: 'id', required: true } ] } },
     action: [Function],

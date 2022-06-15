@@ -1,5 +1,5 @@
 export default {
-  $id: "https://my.api.mediapeers.mobi/v2021/schemas/my.manufacturer.json",
+  $id: "https://my.api.mediastore.dev/v2021/schemas/my.manufacturer.json",
   type: "object",
   title: "my manufacturer",
   default: {},
@@ -15,7 +15,7 @@ export default {
   actions: {
     get: {
       method: "get",
-      template: "https://my.api.mediapeers.mobi/v2021/manufacturers/{manufacturer_ids}",
+      template: "https://my.api.mediastore.dev/v2021/manufacturers/{manufacturer_ids}",
       mappings: [
         {
           variable: "manufacturer_ids",

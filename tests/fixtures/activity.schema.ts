@@ -1,5 +1,5 @@
 export default {
-  $id: "https://my.api.mediapeers.mobi/v2021/schemas/my.activity.json",
+  $id: "https://my.api.mediastore.dev/v2021/schemas/my.activity.json",
   type: "object",
   title: "my activity",
   default: {},
@@ -15,7 +15,7 @@ export default {
   actions: {
     get: {
       method: "get",
-      template: "https://my.api.mediapeers.mobi/v2021/activities/{activity_ids}",
+      template: "https://my.api.mediastore.dev/v2021/activities/{activity_ids}",
       mappings: [
         {
           variable: "activity_ids",
@@ -25,7 +25,7 @@ export default {
     },
     query: {
       method: "get",
-      template: "https://my.api.mediapeers.mobi/v2021/bicycles/{bicycle_ids}/activities",
+      template: "https://my.api.mediastore.dev/v2021/bicycles/{bicycle_ids}/activities",
       mappings: [
         {
           variable: "bicycle_ids",
