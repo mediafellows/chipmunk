@@ -1,5 +1,5 @@
 export default {
-  $id: "https://my.api.mediapeers.mobi/v2021/schemas/my.bicycle.json",
+  $id: "https://my.api.mediastore.dev/v2021/schemas/my.bicycle.json",
   type: "object",
   title: "my bicycle",
   default: {},
@@ -41,35 +41,35 @@ export default {
       type: "integer",
     },
     owner: {
-      $jsonld_context: "https://um.api.mediapeers.mobi/v20140601/context/user",
+      $jsonld_context: "https://um.api.mediastore.dev/v20140601/context/user",
     },
     previous_owners: {
       type: "array",
       items: {
         $jsonld_context:
-          "https://um.api.mediapeers.mobi/v20140601/context/user",
+          "https://um.api.mediastore.dev/v20140601/context/user",
       },
     },
     manufacturer: {
-      $ref: "https://my.api.mediapeers.mobi/v2021/schemas/my.manufacturer.json",
+      $ref: "https://my.api.mediastore.dev/v2021/schemas/my.manufacturer.json",
     },
     wheels: {
       type: "array",
       items: {
-        $ref: "https://my.api.mediapeers.mobi/v2021/schemas/my.wheeel.json",
+        $ref: "https://my.api.mediastore.dev/v2021/schemas/my.wheeel.json",
       },
     },
     activities: {
       type: "array",
       items: {
-        $ref: "https://my.api.mediapeers.mobi/v2021/schemas/my.activity.json",
+        $ref: "https://my.api.mediastore.dev/v2021/schemas/my.activity.json",
       },
     },
   },
   actions: {
     query: {
       method: "get",
-      template: "https://my.api.mediapeers.mobi/v2021/bicycles",
+      template: "https://my.api.mediastore.dev/v2021/bicycles",
       mappings: [],
     },
   },

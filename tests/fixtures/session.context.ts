@@ -1,7 +1,7 @@
 export default {
   '@context': {
-    '@id': 'https://um.api.mediapeers.mobi/v20140601/context/session',
-    '@context': 'https://um.api.mediapeers.mobi/v20140601/context/context',
+    '@id': 'https://um.api.mediastore.dev/v20140601/context/session',
+    '@context': 'https://um.api.mediastore.dev/v20140601/context/context',
     '@type': 'context',
     properties:
      { id:
@@ -36,45 +36,45 @@ export default {
           type: 'number' },
        affiliation:
         { type:
-           'https://um.api.mediapeers.mobi/v20140601/context/affiliation',
+           'https://um.api.mediastore.dev/v20140601/context/affiliation',
           collection: false,
           readable: true,
           writable: false,
           exportable: false },
        user:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/user',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/user',
           collection: false,
           readable: true,
           writable: false,
           exportable: false },
        organization:
         { type:
-           'https://um.api.mediapeers.mobi/v20140601/context/organization',
+           'https://um.api.mediastore.dev/v20140601/context/organization',
           collection: false,
           readable: true,
           writable: false,
           exportable: false },
        role:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/role',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/role',
           collection: false,
           readable: true,
           writable: false,
           exportable: false },
        powers:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/power',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/power',
           collection: true,
           readable: true,
           writable: false,
           exportable: false },
        groupings:
-        { type: 'https://um.api.mediapeers.mobi/v20140601/context/group',
+        { type: 'https://um.api.mediastore.dev/v20140601/context/group',
           collection: true,
           readable: true,
           writable: false,
           exportable: false },
        protection_checks:
         { type:
-           'https://um.api.mediapeers.mobi/v20140601/context/protection_check',
+           'https://um.api.mediastore.dev/v20140601/context/protection_check',
           collection: true,
           readable: true,
           writable: false,
@@ -84,38 +84,38 @@ export default {
      { create:
         { method: 'POST',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/session',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/session',
-          template: 'https://um.api.mediapeers.mobi/v20140601/session',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/session',
+          response: 'https://um.api.mediastore.dev/v20140601/context/session',
+          template: 'https://um.api.mediastore.dev/v20140601/session',
           mappings: [] },
        get:
         { method: 'GET',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/session',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/session',
-          template: 'https://um.api.mediapeers.mobi/v20140601/session',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/session',
+          response: 'https://um.api.mediastore.dev/v20140601/context/session',
+          template: 'https://um.api.mediastore.dev/v20140601/session',
           mappings: [] },
        full:
         { method: 'GET',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/session',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/session',
-          template: 'https://um.api.mediapeers.mobi/v20140601/session/full',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/session',
+          response: 'https://um.api.mediastore.dev/v20140601/context/session',
+          template: 'https://um.api.mediastore.dev/v20140601/session/full',
           mappings: [] },
        delete:
         { method: 'DELETE',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/session',
-          response: 'https://um.api.mediapeers.mobi/v20140601/context/session',
-          template: 'https://um.api.mediapeers.mobi/v20140601/session',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/session',
+          response: 'https://um.api.mediastore.dev/v20140601/context/session',
+          template: 'https://um.api.mediastore.dev/v20140601/session',
           mappings: [] } },
     collection_actions:
      { impersonate:
         { method: 'POST',
           expects: null,
-          resource: 'https://um.api.mediapeers.mobi/v20140601/context/session',
+          resource: 'https://um.api.mediastore.dev/v20140601/context/session',
           response:
-           'https://um.api.mediapeers.mobi/v20140601/context/collection',
+           'https://um.api.mediastore.dev/v20140601/context/collection',
           template:
-           'https://um.api.mediapeers.mobi/v20140601/session/impersonate',
+           'https://um.api.mediastore.dev/v20140601/session/impersonate',
           mappings: [] } } } }

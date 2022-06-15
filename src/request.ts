@@ -9,6 +9,15 @@ import { stringify } from "querystringify";
 import { IConfig } from "./config";
 import { enqueueRequest, clearRequest } from "./watcher";
 
+const SSRFRegex = /api.nbcupassport|api.mediastore/i
+const preventSSRF = (request) => {
+  if (!get(request, 'url', '').match(SSRFRegex)) {
+    throw Error(`unsupported URL ${request.url}`);
+  }
+
+  return request;
+};
+
 export interface IRequestError extends Error {
   message: string;
   status?: number;
@@ -28,6 +37,7 @@ export const request = (
   const req = superagent.agent();
 
   if (config.verbose) req.use(superdebug(console.info));
+  req.use(preventSSRF);
 
   headers = merge({}, config.headers, headers);
 

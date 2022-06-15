@@ -30,7 +30,7 @@ describe("format", () => {
   });
 
   it("returns a suitable multi action object", () => {
-    const input = { id: 3, name: "john" };
+    const input = [{ id: 3, name: "john" }];
     const expected = {
       "3": { id: 3, name: "john" },
     };
@@ -75,7 +75,7 @@ describe("format", () => {
   });
 
   it("returns a multi action ruby-on-rails-nested-attributes object", () => {
-    const input = {
+    const input = [{
       id: 3,
       name: "john",
       interest_ids: "3,4,5",
@@ -83,7 +83,8 @@ describe("format", () => {
         id: 4,
         name: "lukas",
       },
-    };
+    }];
+
     const expected = {
       "3": {
         id: 3,
