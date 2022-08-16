@@ -9,7 +9,7 @@ import { stringify } from "querystringify";
 import { IConfig } from "./config";
 import { enqueueRequest, clearRequest } from "./watcher";
 
-const SSRFRegex = /api.nbcupassport|api.mediastore/i
+const SSRFRegex = /api.nbcupassport|api.mediastore|localhost/i
 const preventSSRF = (request) => {
   if (!get(request, 'url', '').match(SSRFRegex)) {
     throw Error(`unsupported URL ${request.url}`);
