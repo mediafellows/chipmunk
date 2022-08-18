@@ -51,7 +51,10 @@ export default {
       },
     },
     manufacturer: {
-      $ref: "https://my.api.mediastore.dev/v2021/schemas/my.manufacturer.json",
+      anyOf: [
+        { $ref: "https://my.api.mediastore.dev/v2021/schemas/my.manufacturer.json" },
+        { type: "null" },
+      ]
     },
     wheels: {
       type: "array",
