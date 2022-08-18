@@ -164,6 +164,9 @@ export const getSpec = async (
     spec.associations = reduce(
       spec.properties,
       (assocs, prop, name) => {
+        if (prop.anyOf && !prop['$jsonld_context']) {
+          prop = first(prop.anyOf);
+        }
         return getSpecUrl(prop) ? merge(assocs, { [name]: prop }) : assocs;
       },
       {}

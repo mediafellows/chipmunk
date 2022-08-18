@@ -82,7 +82,11 @@ export const getSpecUrl = (prop: IProperty): string | null => {
     ["$jsonld_context", "$ref", "items.$jsonld_context", "items.$ref"],
     (x) => !!get(prop, x)
   );
-  return (path && (get(prop, path) as string)) || prop.type;
+  return (path && (get(prop, path) as string));
+};
+
+export const getSpecIdentifier = (prop: IProperty): string | null => {
+  return getSpecUrl(prop) || prop.type;
 };
 
 export const getId = (object) => {
@@ -157,7 +161,7 @@ export const fetch = async (
   }
 
   const associationProperty = objectSpec.associations[assocName];
-  const specUrl = getSpecUrl(associationProperty);
+  const specUrl = getSpecIdentifier(associationProperty);
   const associationSpec = await getSpec(specUrl, config);
 
   const extractedProps = extractProps(assocName, associationSpec, objects);
