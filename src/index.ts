@@ -40,16 +40,16 @@ export interface IInterface {
   updateConfig(overrides?: Partial<IConfig>): IConfig;
   context(urlOrAppModel: string): Promise<ISpec>;
   spec(urlOrAppModel: string): Promise<ISpec>;
-  action(
+  action<T>(
     appModel: string,
     actionName: string,
     opts?: IActionOpts
-  ): Promise<IResult>;
-  unfurl(
+  ): Promise<IResult<T>>;
+  unfurl<T>(
     appModel: string,
     actionName: string,
     opts?: IActionOpts
-  ): Promise<IResult>;
+  ): Promise<IResult<T>>;
   performLater(cb: Function): void;
   cache: ICache;
 }
