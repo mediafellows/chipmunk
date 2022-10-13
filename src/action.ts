@@ -265,17 +265,22 @@ const performAction = async <T>(
   };
 
   if (get(response, "body.aggregations")) {
-    result.aggregations = reduce(
-      response.body.aggregations,
-      (acc, agg, name) => {
-        acc[name] = map(get(agg, "buckets"), (tranche) => ({
-          value: tranche.key,
-          count: tranche.doc_count,
-        }));
-        return acc;
-      },
-      {}
-    );
+    if (opts.raw) {
+      result.aggregations = response.body.aggregations;
+    }
+    else {
+      result.aggregations = reduce(
+        response.body.aggregations,
+        (acc, agg, name) => {
+          acc[name] = map(get(agg, "buckets"), (tranche) => ({
+            value: tranche.key,
+            count: tranche.doc_count,
+          }));
+          return acc;
+        },
+        {}
+      );
+    }
   }
 
   if (get(response, `body['total_count']`) || get(response, `body['@total_count']`)) {

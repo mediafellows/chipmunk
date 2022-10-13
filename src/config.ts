@@ -26,6 +26,7 @@ export interface IConfig {
   headers?: IHeaderSettings;
   errorInterceptor?(err: IRequestError): boolean;
   verbose?: boolean;
+  preventSSRF?: boolean;
   cache?: ICacheSettings;
   watcher?: IWatcher;
   timestamp?: number;
@@ -38,6 +39,7 @@ const DEFAULTS: IConfig = {
     "Mpx-Flavours": {},
   },
   verbose: false,
+  preventSSRF: true,
   cache: {
     default: null,
     prefix: "anonymous",

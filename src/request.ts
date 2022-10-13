@@ -37,7 +37,7 @@ export const request = (
   const req = superagent.agent();
 
   if (config.verbose) req.use(superdebug(console.info));
-  req.use(preventSSRF);
+  if (config.preventSSRF) req.use(preventSSRF);
 
   headers = merge({}, config.headers, headers);
 
