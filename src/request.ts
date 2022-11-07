@@ -66,7 +66,7 @@ export const run = async (
     const promise = req;
     enqueueRequest(key, promise, config);
 
-    return promise;
+    return await promise;
   } catch (err) {
     const error = err as IRequestError;
     error.name = "RequestError";
