@@ -55,7 +55,7 @@ export interface IPagination {
   current_page: number;
 }
 
-export interface IResult<T=IObject> {
+export interface IResult<T = IObject> {
   object: T;
   objects: T[];
   pagination?: IPagination;
@@ -148,12 +148,22 @@ const resolve = async (objects, schema, config) => {
 
       // first add props needed for the assignments later to the schema
       const neededProps = keys(result.extractedProps.allProps);
-      reduce(neededProps, (acc, prop) => write(acc, { [prop]: true }), assocSchema)
+      reduce(
+        neededProps,
+        (acc, prop) => write(acc, { [prop]: true }),
+        assocSchema
+      );
 
       const resolved = await resolve(result.objects, assocSchema, config);
 
       // assign results to the target objects that were associating them
-      await assign(objects, resolved, assocName, result.many, result.extractedProps);
+      await assign(
+        objects,
+        resolved,
+        assocName,
+        result.many,
+        result.extractedProps
+      );
     } catch (err) {
       // if we fail to resolve an association, continue anyways
       assignEmpty(objects, assocName);
@@ -267,8 +277,7 @@ const performAction = async <T>(
   if (get(response, "body.aggregations")) {
     if (opts.raw) {
       result.aggregations = response.body.aggregations;
-    }
-    else {
+    } else {
       result.aggregations = reduce(
         response.body.aggregations,
         (acc, agg, name) => {
@@ -283,14 +292,16 @@ const performAction = async <T>(
     }
   }
 
-  if (get(response, `body['total_count']`) || get(response, `body['@total_count']`)) {
+  if (
+    get(response, `body['total_count']`) ||
+    get(response, `body['@total_count']`)
+  ) {
     result.pagination = {} as IPagination;
 
     each(PAGINATION_PROPS, (prop) => {
       if (response.body[prop]) {
         result.pagination[prop] = response.body[prop];
-      }
-      else if (response.body[`@${prop}`]) {
+      } else if (response.body[`@${prop}`]) {
         result.pagination[prop] = response.body[`@${prop}`];
       }
     });
@@ -305,35 +316,67 @@ const performProxiedAction = async <T>(
   opts: IActionOpts,
   config: IConfig
 ): Promise<IResult<T>> => {
-  const spec = await getSpec("tuco.request", config);
-  const action = spec.action("proxy");
+  let dataRequest;
+  let cancelPromise;
 
-  const body = {
-    appModel,
-    actionName,
-    opts: omit(opts, "proxy"),
-    config: cleanConfig(config),
+  const promise = new Promise<IResult<T>>((resolve, reject) => {
+    cancelPromise = reject;
+    const specReq = getSpec("tuco.request", config);
+
+    specReq
+      .then((spec) => {
+        const action = spec.action("proxy");
+
+        const body = {
+          appModel,
+          actionName,
+          opts: omit(opts, "proxy"),
+          config: cleanConfig(config),
+        };
+
+        const debugParams = `?m=${appModel}&a=${actionName}`;
+        const url = action.template + debugParams;
+        const req = request(config).post(url).send(body);
+
+        dataRequest = run(req, config);
+
+        dataRequest
+          .then((response) => {
+            const objects = get(response, "body.objects", []) as T[];
+
+            const result: IResult<T> = {
+              objects: objects,
+              get object() {
+                return first(objects);
+              },
+              headers: get(response, "body.headers", {}),
+              type: get(response, "body.type"),
+              aggregations: get(response, "body.aggregations"),
+              pagination: get(response, "body.pagination"),
+            };
+
+            resolve(result);
+          })
+          .catch((err) => {
+            reject(err);
+          });
+      })
+      .catch((err) => {
+        reject(err);
+      });
+  });
+
+  promise["cancel"] = () => {
+    console.log("attempting to cancel the request..");
+    cancelPromise && cancelPromise("request cancelled");
+
+    try {
+      // if the main request is already running, cancel it
+      dataRequest.abort();
+    } catch {}
   };
 
-  const debugParams = `?m=${appModel}&a=${actionName}`
-  const url = action.template + debugParams;
-  const req = request(config).post(url).send(body);
-
-  const response = await run(req, config);
-  const objects = get(response, "body.objects", []) as T[];
-
-  const result: IResult<T> = {
-    objects: objects,
-    get object() {
-      return first(objects);
-    },
-    headers: get(response, "body.headers", {}),
-    type: get(response, "body.type"),
-    aggregations: get(response, "body.aggregations"),
-    pagination: get(response, "body.pagination"),
-  };
-
-  return result;
+  return promise;
 };
 
 export default async <T>(
