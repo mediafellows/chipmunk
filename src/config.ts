@@ -5,7 +5,7 @@ export interface IHeaderSettings {
   "Session-Id"?: string | null;
   "Affiliation-Id"?: string | null;
   Origin?: string;
-  "Role-Id"?: string | null;
+  "Role-Id"?: number | string | null;
   "Visitor-Id"?: string | null;
   "Mpx-Flavours"?: { [s: string]: any };
 }
