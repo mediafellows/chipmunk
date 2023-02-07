@@ -2,11 +2,11 @@ import { merge, get, cloneDeep, omit } from "lodash";
 import { IRequestError } from "./request";
 
 export interface IHeaderSettings {
-  "Session-Id"?: string;
-  "Affiliation-Id"?: string;
+  "Session-Id"?: string | null;
+  "Affiliation-Id"?: string | null;
   Origin?: string;
-  "Role-Id"?: any;
-  "Visitor-Id"?: string;
+  "Role-Id"?: string | null;
+  "Visitor-Id"?: string | null;
   "Mpx-Flavours"?: { [s: string]: any };
 }
 
