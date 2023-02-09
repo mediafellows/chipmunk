@@ -33,7 +33,7 @@ export interface IJsonSchemaProperty extends IProperty {
   readonly?: boolean;
   uiType?: string;
   source?: string;
-  items?: { [s: string]: string };
+  items?: { [s: string]: string } & { enum?: any[] };
   [s: string]: any; // JSON Schema validation props..
 }
 
