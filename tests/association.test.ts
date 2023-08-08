@@ -96,7 +96,7 @@ describe("association", () => {
 
       it("fetches the owners of bicycles (mm3)", async () => {
         nock(config.endpoints.um)
-          .get(matches("/users/104,105"))
+          .post(matches("/users/search"))
           .reply(200, {
             members: [
               {
@@ -179,7 +179,7 @@ describe("association", () => {
           });
 
         nock(config.endpoints.um)
-          .get(matches("/users/104,105,106,107,108"))
+          .post(matches("/users/search"))
           .reply(200, {
             members: [
               {

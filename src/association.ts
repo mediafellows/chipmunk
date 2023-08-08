@@ -20,6 +20,7 @@ import {
   each,
   isEmpty,
   isArray,
+  isEqual,
 } from "lodash";
 
 import { IConfig } from "./config";
@@ -31,6 +32,7 @@ import getSpec, {
   isJsonSchemaSpec,
 } from "./spec";
 import action, { IObject } from "./action";
+import unfurl from "./unfurl";
 
 export interface IExtractedProps {
   isHABTM: boolean;
@@ -165,14 +167,19 @@ export const fetch = async (
   const associationSpec = await getSpec(specUrl, config);
 
   const extractedProps = extractProps(assocName, associationSpec, objects);
+  const referencedById = isEqual(keys(extractedProps.allProps), ['id']); // only extracted prop is 'id'
 
   const many =
     associationProperty["collection"] || associationProperty.type === "array";
 
+  let performSearch = false;
   let actionName;
   let params;
 
-  if (isJsonLDSpec(objectSpec)) {
+  if (referencedById && associationSpec.action('search')) {
+    performSearch = true;
+    actionName = 'search';
+  } else if (isJsonLDSpec(objectSpec)) {
     // for JSON LD objects -> stick to the original implementation
     actionName = many && !extractedProps.isHABTM ? "query" : "get";
     params = buildParams(
@@ -190,6 +197,7 @@ export const fetch = async (
       params = buildParams(associationAction, extractedProps.allProps);
       const paramNames = map(keys(params), (x) => `{${x}}`);
       const varNames = associationAction.template.match(/{\w+}/gi);
+
       return every(varNames, (x) => includes(paramNames, x));
     });
   }
@@ -200,7 +208,14 @@ export const fetch = async (
     );
   }
 
-  const result = await action(specUrl, actionName, { params }, config);
+  let result;
+  if (performSearch) {
+    const ids = extractedProps.allProps['id'];
+    result = await unfurl(specUrl, actionName, { body: { search: { filters: [['id', 'in', ids]] } } }, config)
+  }
+  else {
+    result = await action(specUrl, actionName, { params }, config);
+  }
 
   return {
     assocName,
