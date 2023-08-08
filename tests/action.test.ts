@@ -526,7 +526,7 @@ describe("action", () => {
       });
 
     nock(config.endpoints.um)
-      .get(matches("/users/104,105,106,107,108"))
+      .post(matches("/users/search"))
       .reply(200, {
         members: [
           {
