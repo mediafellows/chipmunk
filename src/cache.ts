@@ -4,6 +4,20 @@ import { startsWith, each, merge } from "lodash";
 const PREFIX = "chipmunk";
 const DEFAULT_EXPIRY = 60;
 
+
+// remove all expired entries
+const nowDate = Date.now();
+for (const key of Object.keys(localStorage).filter(k => k.startsWith(`${PREFIX}-`))) {
+	try {
+		const valueStr = localStorage.getItem(key);
+		if (typeof valueStr !== 'string') continue;
+		const expires = JSON.parse(valueStr)?.expires;
+		if (!Number.isInteger(expires)) continue;
+		if (nowDate <= expires) continue;
+		localStorage.removeItem(key);
+	} catch (e) {}
+}
+
 const minutesFromNow = (min: number): number => {
   return Date.now() + min * 60000;
 };
