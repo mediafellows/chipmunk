@@ -209,7 +209,7 @@ const performAction = async <T>(
       break;
 
     case "DELETE":
-      req = request(config, opts.headers).delete(uri);
+      req = request(config, opts.headers).delete(uri).send(body);
       break;
 
     default:
