@@ -307,12 +307,13 @@ const performProxiedAction = async <T>(
 ): Promise<IResult<T>> => {
   const spec = await getSpec("tuco.request", config);
   const action = spec.action("proxy");
+  const cleanedConfig = omit(cleanConfig(config), 'endpoints');
 
   const body = {
     appModel,
     actionName,
     opts: omit(opts, "proxy"),
-    config: cleanConfig(config),
+    config: cleanedConfig,
   };
 
   const debugParams = `?m=${appModel}&a=${actionName}`
