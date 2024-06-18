@@ -4,6 +4,7 @@ import { IRequestError } from "./request";
 export interface IHeaderSettings {
   "Session-Id"?: string | null;
   "Affiliation-Id"?: string | null;
+  "Accept"?: string | null;
   Origin?: string;
   "Role-Id"?: number | string | null;
   "Visitor-Id"?: string | null;
@@ -36,6 +37,7 @@ const DEFAULTS: IConfig = {
   timestamp: (Date.now() / 1000) | 0,
   headers: {
     "Mpx-Flavours": {},
+    "Accept": "application/json"
   },
   verbose: false,
   cache: {
