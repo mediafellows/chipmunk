@@ -286,7 +286,7 @@ export const assignToJsonLd = (
       const target = targetsById[ref];
       if (!isEmpty(target)) {
         const value = target[assocName];
-        if (value?.type !== "array") return; // already has a value which is not an array, abort.
+        if (value && !isArray(value)) return; // already has a value which is not an array, abort.
 
         if (value) target[assocName].push(object);
         else Object.defineProperty(target, assocName, { value: [object] });
