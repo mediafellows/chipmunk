@@ -264,7 +264,7 @@ export const assignToJsonLd = (
       get(target, `@associations[${assocName}]`) ||
       get(target, `$links[${assocName}]`);
 
-    if (isArray(ref)) {
+    if (ref?.type === "array" || isArray(ref)) {
       const matches = pick(objectsById, ref);
       if (!isEmpty(matches))
         Object.defineProperty(target, assocName, { value: values(matches) });
