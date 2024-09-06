@@ -173,12 +173,17 @@ export const fetch = async (
     associationProperty["collection"] || associationProperty.type === "array";
 
   let performSearch = false;
+  let searchAction;
   let actionName;
   let params;
 
-  if (referencedById && associationSpec.action('search')) {
+  // favour search action if available,
+  // since these by design don't throw 404 if an entity cannot be accessed, but
+  // ignores these and returns the remaining entities
+  if (referencedById && (searchAction = associationSpec.action('search'))) {
     performSearch = true;
     actionName = 'search';
+    params = buildParams(searchAction, extractedProps.allProps);
   } else if (isJsonLDSpec(objectSpec)) {
     // for JSON LD objects -> stick to the original implementation
     actionName = many && !extractedProps.isHABTM ? "query" : "get";
@@ -211,7 +216,7 @@ export const fetch = async (
   let result;
   if (performSearch) {
     const ids = extractedProps.allProps['id'];
-    result = await unfurl(specUrl, actionName, { body: { search: { filters: [['id', 'in', ids]] } } }, config)
+    result = await unfurl(specUrl, actionName, { params, body: { search: { filters: [['id', 'in', ids]] } } }, config)
   }
   else {
     result = await action(specUrl, actionName, { params }, config);
