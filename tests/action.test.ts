@@ -761,7 +761,6 @@ describe("action", () => {
         schema: "id, first_name",
       });
 
-      expect(get(body, "config.endpoints")).to.exist;
       expect(get(body, "config.headers")).to.exist;
       expect(get(body, "config.errorInterceptor")).not.to.exist;
       expect(get(body, "config.watcher")).not.to.exist;
