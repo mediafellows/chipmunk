@@ -178,8 +178,6 @@ export const fetch = async (
   let params;
 
   // favour search action if available,
-  // since these by design don't throw 404 if an entity cannot be accessed, but
-  // ignores these and returns the remaining entities
   if (referencedById && (searchAction = associationSpec.action('search'))) {
     performSearch = true;
     actionName = 'search';
@@ -194,7 +192,7 @@ export const fetch = async (
   } else if (isJsonSchemaSpec(objectSpec)) {
     // for JSON Schema objects -> try to find template that matches best
     // TODO: consider to use this for JSON LD + JSON Schema
-    actionName = find(["get", "query"], (name) => {
+    actionName = find(["search", "get", "query"], (name) => {
       const associationAction = associationSpec.action(name);
       if (!associationAction) return;
 
