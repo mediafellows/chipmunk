@@ -28,14 +28,14 @@ import { fetch, assign, assignEmpty } from "./association";
 import log from "./log";
 
 export interface IActionOpts {
-  // converts to ruby on rails accepts nested attributes compatible body
-  ROR?: boolean;
   // returns raw data, without moving association references, does not support schema resolving
   raw?: boolean;
   // if enabled, this request is routed via tuco
   proxy?: boolean;
-  // indicates, if provided array body should be converted into hash, where 'id' is the key of each
+  // legacy: for core models: indicates, if provided, that the array body should be converted into hash, where 'id' is the key of each
   multi?: boolean;
+  // legacy, for core models: converts to ruby on rails accepts nested attributes compatible body
+  ROR?: boolean;
 
   headers?: { [s: string]: any };
   body?: { [s: string]: any };
