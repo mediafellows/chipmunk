@@ -1,6 +1,6 @@
 import "mocha";
 import { expect } from "chai";
-import { keys } from "lodash";
+import keys from "lodash/keys";
 import sinon from "sinon";
 
 import { _runtimeCache as internalCache } from "../src/cache";

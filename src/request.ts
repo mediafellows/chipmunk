@@ -4,7 +4,10 @@ import superagent, {
   SuperAgentRequest,
 } from "superagent";
 import superdebug from "superdebug";
-import { get, each, merge, isPlainObject } from "lodash";
+import get from "lodash/get";
+import each from "lodash/each";
+import merge from "lodash/merge";
+import isPlainObject from "lodash/isPlainObject";
 import { stringify } from "querystringify";
 import { IConfig } from "./config";
 import { enqueueRequest, clearRequest } from "./watcher";

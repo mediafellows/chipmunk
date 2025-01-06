@@ -3,6 +3,7 @@
     "declaration": false,
     "target": "ES5",
     "noImplicitAny": false,
+    "skipLibCheck": true,
     "outDir": "tmp",
     "types": [],
     "esModuleInterop": true,

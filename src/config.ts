@@ -1,4 +1,7 @@
-import { merge, get, cloneDeep, omit } from "lodash";
+import merge from "lodash/merge";
+import get from "lodash/get";
+import cloneDeep from "lodash/cloneDeep";
+import omit from "lodash/omit";
 import { IRequestError } from "./request";
 
 export interface IHeaderSettings {

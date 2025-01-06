@@ -1,4 +1,6 @@
-import { delay, isEmpty, find } from "lodash";
+import delay from "lodash/delay";
+import isEmpty from "lodash/isEmpty";
+import find from "lodash/find";
 
 import { IConfig } from "./config";
 

@@ -1,5 +1,7 @@
 import { IConfig } from "./config";
-import { startsWith, each, merge } from "lodash";
+import startsWith from "lodash/startsWith";
+import each from "lodash/each";
+import merge from "lodash/merge";
 import { isNode } from "./request";
 
 const PREFIX = "chipmunk";
