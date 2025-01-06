@@ -1,4 +1,7 @@
-import { get, merge, range, map } from "lodash";
+import get from "lodash/get";
+import merge from "lodash/merge";
+import range from "lodash/range";
+import map from "lodash/map";
 
 import action, { IActionOpts, IResult } from "./action";
 import { IConfig } from "./config";

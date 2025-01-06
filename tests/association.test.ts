@@ -1,6 +1,6 @@
 import "mocha";
 import { expect } from "chai";
-import { get } from "lodash";
+import get from "lodash/get";
 import nock from "nock";
 
 import createChipmunk from "../src";

@@ -52,7 +52,7 @@ export const matches = (needle: string) => {
   return (uri) => uri.includes(needle);
 };
 
-export const readCredentials = () => {
+export const readCredentials = (): { [s:string]: string } => {
   const content = execSync("scrambler read tests/credentials.yml").toString();
-  return yaml.safeLoad(content);
+  return yaml.safeLoad(content) as { [s:string]: string };
 };

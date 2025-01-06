@@ -286,7 +286,7 @@ export const assignToJsonLd = (
     const refs = get(object, "@associations") || get(object, "$links") || [];
 
     each(refs, (ref) => {
-      const target = targetsById[ref];
+      const target = targetsById[ref as string];
       if (!isEmpty(target)) {
         const value = target[assocName];
         if (value && !isArray(value)) return; // already has a value which is not an array, abort.
