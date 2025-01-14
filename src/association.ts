@@ -1,27 +1,26 @@
 import UriTemplate from "uri-templates";
-import {
-  first,
-  every,
-  keys,
-  includes,
-  filter,
-  find,
-  compact,
-  values,
-  pick,
-  assign as write,
-  reduce,
-  uniq,
-  concat,
-  toString,
-  map,
-  get,
-  flatten,
-  each,
-  isEmpty,
-  isArray,
-  isEqual,
-} from "lodash";
+
+import first from "lodash/first";
+import every from "lodash/every";
+import keys from "lodash/keys";
+import includes from "lodash/includes";
+import filter from "lodash/filter";
+import find from "lodash/find";
+import compact from "lodash/compact";
+import values from "lodash/values";
+import pick from "lodash/pick";
+import write from "lodash/assign";
+import reduce from "lodash/reduce";
+import uniq from "lodash/uniq";
+import concat from "lodash/concat";
+import toString from "lodash/toString";
+import map from "lodash/map";
+import get from "lodash/get";
+import flatten from "lodash/flatten";
+import each from "lodash/each";
+import isEmpty from "lodash/isEmpty";
+import isArray from "lodash/isArray";
+import isEqual from "lodash/isEqual";
 
 import { IConfig } from "./config";
 import getSpec, {

@@ -1,23 +1,22 @@
 import UriTemplate from "uri-templates";
-import {
-  assign as write,
-  each,
-  includes,
-  uniq,
-  flatten,
-  omit,
-  pick,
-  keys,
-  reduce,
-  filter,
-  get,
-  merge,
-  first,
-  map,
-  isArray,
-  isEmpty,
-  isPlainObject,
-} from "lodash";
+
+import write from "lodash/assign";
+import each from "lodash/each";
+import includes from "lodash/includes";
+import uniq from "lodash/uniq";
+import flatten from "lodash/flatten";
+import omit from "lodash/omit";
+import pick from "lodash/pick";
+import keys from "lodash/keys";
+import reduce from "lodash/reduce";
+import filter from "lodash/filter";
+import get from "lodash/get";
+import merge from "lodash/merge";
+import first from "lodash/first";
+import map from "lodash/map";
+import isArray from "lodash/isArray";
+import isEmpty from "lodash/isEmpty";
+import isPlainObject from "lodash/isPlainObject";
 
 import { IConfig, cleanConfig } from "./config";
 import { request, run } from "./request";

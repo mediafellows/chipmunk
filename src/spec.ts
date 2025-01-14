@@ -1,12 +1,11 @@
-import {
-  get,
-  first,
-  reduce,
-  includes,
-  merge,
-  cloneDeep,
-  startsWith,
-} from "lodash";
+import get from "lodash/get";
+import first from "lodash/first";
+import reduce from "lodash/reduce";
+import includes from "lodash/includes";
+import merge from "lodash/merge";
+import cloneDeep from "lodash/cloneDeep";
+import startsWith from "lodash/startsWith";
+
 import { IConfig } from "./config";
 import { request, run } from "./request";
 import { set as cacheSet, get as cacheGet } from "./cache";
@@ -33,7 +32,7 @@ export interface IJsonSchemaProperty extends IProperty {
   readonly?: boolean;
   uiType?: string;
   source?: string;
-  items?: { [s: string]: string } & { enum?: any[] };
+  items?: { [s: string]: string | Array<any> } & { enum?: any[] };
   [s: string]: any; // JSON Schema validation props..
 }
 
@@ -164,7 +163,10 @@ export const getSpec = async (
     spec.associations = reduce(
       spec.properties,
       (assocs, prop, name) => {
-        if (prop.anyOf && !prop['$jsonld_context']) {
+        if (prop.items?.anyOf && !prop['$jsonld_context']) {
+          prop = { ...first(prop.items.anyOf), type: 'array' };
+        }
+        else if (prop.anyOf && !prop['$jsonld_context']) {
           prop = first(prop.anyOf);
         }
         return getSpecUrl(prop) ? merge(assocs, { [name]: prop }) : assocs;
