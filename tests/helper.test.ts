@@ -4,15 +4,15 @@ import nock from "nock";
 import createChipmunk from "../src";
 import { setup, readCredentials } from "./setup";
 
-const config = setup();
-const credentials = readCredentials();
-let chipmunk;
-
 const inactive = (...args) => {
   console.log("inactive", args);
 };
 
 inactive("helper runs", () => {
+  const config = setup();
+  const credentials = readCredentials();
+  let chipmunk;
+
   beforeEach(async () => {
     nock.restore();
 
