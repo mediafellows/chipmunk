@@ -1,0 +1,40 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Javascript CI
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: CI tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v3
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Install yarn package manger (which we use instead of npm)
+        run: npm install -g yarn
+
+      # We use the access token of the mfx-v2-deployment GH user which has read acess to all
+      # mediafellows org library repos and thus the associated GH packages
+      - name: Setup GH credentials for pulling NPM packages from Github NPM registry
+        run: |
+          touch ~/.npmrc
+          echo '//npm.pkg.github.com/:_authToken=${{ secrets.MF_GH_PKG_TOKEN }}' > ~/.npmrc
+          chmod 600 ~/.npmrc
+
+      - name: Install npm dependencies
+        run: yarn install
+
+      - name: Run tests
+        run: yarn test
