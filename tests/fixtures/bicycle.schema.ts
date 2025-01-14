@@ -65,7 +65,10 @@ export default {
     activities: {
       type: "array",
       items: {
-        $ref: "https://my.api.mediastore.dev/v2021/schemas/my.activity.json",
+        anyOf: [
+          { $ref: "https://my.api.mediastore.dev/v2021/schemas/my.activity.json" },
+          { type: "null" },
+        ]
       },
     },
   },
