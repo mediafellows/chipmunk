@@ -1,17 +1,15 @@
-import {
-  reduce,
-  assign,
-  filter,
-  each,
-  first,
-  map,
-  reject,
-  isEmpty,
-  isFunction,
-  isPlainObject,
-  isArray,
-  isString,
-} from "lodash";
+import reduce from "lodash/reduce";
+import assign from "lodash/assign";
+import filter from "lodash/filter";
+import each from "lodash/each";
+import first from "lodash/first";
+import map from "lodash/map";
+import reject from "lodash/reject";
+import isEmpty from "lodash/isEmpty";
+import isFunction from "lodash/isFunction";
+import isPlainObject from "lodash/isPlainObject";
+import isArray from "lodash/isArray";
+import isString from "lodash/isString";
 
 export default (subject: any, multi: boolean, ROR: boolean): any => {
   if (isArray(subject)) {

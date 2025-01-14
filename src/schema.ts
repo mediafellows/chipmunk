@@ -1,9 +1,7 @@
-import {
-  isEmpty,
-  isObject,
-  trim,
-  first,
-} from "lodash";
+import isEmpty from "lodash/isEmpty";
+import isObject from "lodash/isObject";
+import trim from "lodash/trim";
+import first from "lodash/first";
 
 const detectProps = (structure: string) => {
   let result = {};
