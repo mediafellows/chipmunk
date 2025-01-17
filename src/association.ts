@@ -217,7 +217,7 @@ export const fetch = async (
     result = await unfurl(specUrl, actionName, { params, body: { search: { filters: [['id', 'in', ids]] } } }, config)
   }
   else {
-    result = await action(specUrl, actionName, { params }, config);
+    result = await unfurl(specUrl, actionName, { params }, config);
   }
 
   return {
