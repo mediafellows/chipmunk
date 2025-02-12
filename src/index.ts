@@ -26,6 +26,7 @@ import {
 import { enqueuePerformLater } from "./watcher";
 
 export * from "./cache";
+export { IRequestError } from './request';
 
 export interface ICache {
   set(key: string, value: any, opts?: ISetOpts): void;
