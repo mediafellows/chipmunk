@@ -29,7 +29,7 @@ export interface IConfig {
   endpoints?: { [s: string]: string };
   headers?: IHeaderSettings;
   errorInterceptor?(err: IRequestError): boolean;
-  defaultErrorHandler?(err: IRequestError): boolean;
+  defaultErrorHandler?(err: IRequestError): void;
   verbose?: boolean;
   cache?: ICacheSettings;
   watcher?: IWatcher;
