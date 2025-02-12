@@ -100,7 +100,7 @@ export default (...overrides: Partial<IConfig>[]): IChipmunk => {
     performLater: (cb) => enqueuePerformLater(cb, config),
   };
 
-  const run = async (block, errorHandler?) => {
+  const run = async (block, errorHandler = config.defaultErrorHandler) => {
     try {
       return await block(ch);
     } catch (e) {

@@ -29,6 +29,7 @@ export interface IConfig {
   endpoints?: { [s: string]: string };
   headers?: IHeaderSettings;
   errorInterceptor?(err: IRequestError): boolean;
+  defaultErrorHandler?(err: IRequestError): boolean;
   verbose?: boolean;
   cache?: ICacheSettings;
   watcher?: IWatcher;
@@ -53,6 +54,7 @@ const DEFAULTS: IConfig = {
     performLaterHandlers: [],
   },
   errorInterceptor: null,
+  defaultErrorHandler: null
 };
 
 export const cleanConfig = (config: IConfig): Partial<IConfig> => {
