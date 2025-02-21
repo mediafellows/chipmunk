@@ -342,7 +342,7 @@ export default async <T>(
   opts: IActionOpts,
   config: IConfig
 ): Promise<IResult<T>> => {
-  opts = merge({}, DEFAULT_OPTS, { proxy: process.env.NODE_ENV !== 'development' && !isEmpty(opts.schema) }, opts);
+  opts = merge({}, DEFAULT_OPTS, { proxy: process.env.NODE_ENV !== 'development' && !isEmpty(opts.schema) && !opts.proxy }, opts);
 
   if (opts.proxy && isEmpty(opts.schema)) {
     throw new Error("Proxying is supported only if a schema is given, too.");
