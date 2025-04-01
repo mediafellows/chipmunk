@@ -342,8 +342,7 @@ export default async <T>(
   opts: IActionOpts,
   config: IConfig
 ): Promise<IResult<T>> => {
-  const proxy = opts.proxy && !isEmpty(opts.schema)
-  opts = merge({}, DEFAULT_OPTS, { proxy }, opts);
+  opts = merge({}, DEFAULT_OPTS, { proxy: !isEmpty(opts.schema) }, opts);
 
   if (opts.proxy && isEmpty(opts.schema)) {
     throw new Error("Proxying is supported only if a schema is given, too.");
