@@ -21,6 +21,7 @@ import each from "lodash/each";
 import isEmpty from "lodash/isEmpty";
 import isArray from "lodash/isArray";
 import isEqual from "lodash/isEqual";
+import mergeWith from 'lodash/mergeWith';
 
 import { IConfig } from "./config";
 import getSpec, {
@@ -145,7 +146,7 @@ const buildParams = (action: IAction, props) => {
 export const fetch = async (
   objects: any[],
   assocName: string,
-  config: IConfig
+  { defaultAssociationsSearch , ...config }: IConfig = {}
 ): Promise<IFetchedResults> => {
   // since it might be possible the association we're looking for is only available for a subset of our objects
   // we first need to find the spec that contains a definition for the desired association..
@@ -212,8 +213,20 @@ export const fetch = async (
 
   let result;
   if (performSearch) {
-    const ids = extractedProps.allProps['id'];
-    result = await unfurl(specUrl, actionName, { params, body: { search: { filters: [['id', 'in', ids]] } } }, config)
+    const ids = [...extractedProps.allProps['id']];
+    let associationSearch = {};
+    if (assocName && defaultAssociationsSearch?.[assocName]) {
+      associationSearch = defaultAssociationsSearch[assocName];
+    }
+
+    // covers filters array
+    const customizer = (objValue, srcValue) => {
+      if (isArray(objValue)) {
+        return objValue.concat(srcValue);
+      }
+    }
+
+    result = await unfurl(specUrl, actionName, { params, body: mergeWith({ search: { filters: [['id', 'in', ids]] } }, associationSearch, customizer) }, config)
   }
   else {
     result = await unfurl(specUrl, actionName, { params }, config);

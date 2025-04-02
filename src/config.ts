@@ -34,6 +34,7 @@ export interface IConfig {
   cache?: ICacheSettings;
   watcher?: IWatcher;
   timestamp?: number;
+  defaultAssociationsSearch?: { [s: string]: any };
 }
 
 const DEFAULTS: IConfig = {
@@ -53,6 +54,7 @@ const DEFAULTS: IConfig = {
     pendingRequests: {},
     performLaterHandlers: [],
   },
+  defaultAssociationsSearch: {},
   errorInterceptor: null,
   defaultErrorHandler: null
 };
