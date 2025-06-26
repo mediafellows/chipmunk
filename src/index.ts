@@ -82,12 +82,22 @@ export default (...overrides: Partial<IConfig>[]): IChipmunk => {
   let config = createConfig.apply(null, overrides);
   let currentAbortController: AbortController | null = null;
 
+  // If abortController is provided in initial config, set it
+  if (config.abortController) {
+    currentAbortController = config.abortController;
+  }
+
   const callOpts = (opts) => merge({ engine: config.cache.default }, opts);
 
   const ch = {
     currentConfig: () => config,
     updateConfig: (overrides) => {
-      return (config = createConfig(config, overrides));
+      config = createConfig(config, overrides);
+      // If abortController is provided in overrides, set it
+      if (overrides && overrides.abortController) {
+        currentAbortController = overrides.abortController;
+      }
+      return config;
     },
     context: (urlOrAppModel) => getSpec(urlOrAppModel, config),
     spec: (urlOrAppModel) => getSpec(urlOrAppModel, config),
