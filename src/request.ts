@@ -1,8 +1,4 @@
-import superagent, {
-  Response,
-  SuperAgentStatic,
-  SuperAgentRequest,
-} from "superagent";
+import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from "axios";
 import superdebug from "superdebug";
 import get from "lodash/get";
 import each from "lodash/each";
@@ -12,13 +8,12 @@ import { stringify } from "querystringify";
 import { IConfig } from "./config";
 import { enqueueRequest, clearRequest } from "./watcher";
 
-const SSRFRegex = /api.nbcupassport|api.mediastore|localhost/i
-const preventSSRF = (request) => {
-  if (!get(request, 'url', '').match(SSRFRegex)) {
-    throw Error(`unsupported URL ${request.url}`);
+const SSRFRegex = /api.nbcupassport|api.mediastore|localhost/i;
+const preventSSRF = (config: InternalAxiosRequestConfig) => {
+  if (!get(config, 'url', '').match(SSRFRegex)) {
+    throw Error(`unsupported URL ${config.url}`);
   }
-
-  return request;
+  return config;
 };
 
 export interface IRequestError extends Error {
@@ -36,55 +31,71 @@ export const isNode = (): boolean => {
 export const request = (
   config: IConfig,
   headers?: { [s: string]: any }
-): SuperAgentStatic => {
-  const req = superagent.agent();
-
-  if (config.verbose) req.use(superdebug(console.info));
-  req.use(preventSSRF);
-
+): AxiosInstance => {
+  // Merge headers
   headers = merge({}, config.headers, headers);
 
+  // Create axios instance with validateStatus to always resolve
+  const instance = axios.create({
+    validateStatus: () => true,
+    headers: {}, // We'll set headers below
+  });
+
+  // SSRF prevention as a request interceptor
+  instance.interceptors.request.use(preventSSRF);
+
+  // Optionally add debug logging
+  if (config.verbose) {
+    // No direct axios equivalent for superdebug, but you can add a logging interceptor
+    instance.interceptors.request.use((cfg) => {
+      superdebug(console.info)(cfg);
+      return cfg;
+    });
+  }
+
+  // Set headers
   each(headers, (value, key) => {
     if (!value) return;
-
-    isPlainObject(value) ? req.set(key, stringify(value)) : req.set(key, value);
+    instance.defaults.headers.common[key] = isPlainObject(value)
+      ? stringify(value)
+      : value;
   });
 
   if (!isNode()) {
-    req.set("X-Window-Location", get(window, "location.href", ""));
+    instance.defaults.headers.common["X-Window-Location"] = get(window, "location.href", "");
   }
 
-  return req;
+  return instance;
 };
 
+function isAxiosError(error: any): error is AxiosError {
+  return error && error.isAxiosError;
+}
+
 export const run = async (
-  req: SuperAgentRequest,
+  req: Promise<AxiosResponse>,
   config: IConfig
-): Promise<Response> => {
+): Promise<AxiosResponse> => {
   const key =
     Math.random().toString(36).substring(2, 15) +
     Math.random().toString(36).substring(2, 15);
 
   try {
-    const promise = req;
-    enqueueRequest(key, promise, config);
-
-    return await promise;
-  } catch (err) {
-    // TO-DO: Why is error.name always hardcoded?
-    const error = err as IRequestError;
-
-    if (error.name === "AbortError") {
+    enqueueRequest(key, req, config);
+    const response = await req;
+    // Always resolve, even for non-2xx (handled by validateStatus)
+    return response;
+  } catch (err: any) {
+    // Only network errors or aborts should throw
+    const error: IRequestError = err;
+    if (error.name === "AbortError" || (isAxiosError(error) && error.code === "ERR_CANCELED")) {
       error.message = "Request was aborted";
     } else {
-      // TO-DO: Why is error.name always hardcoded?
       error.name = "RequestError";
     }
-
-    error.object = get(err, "response.body");
-    error.text = get(err, "response.body.description") || err.message;
-    error.url = get(req, "url");
-
+    error.object = get(err, "response.data");
+    error.text = get(err, "response.data.description") || err.message;
+    error.url = get(err, "config.url");
     throw error;
   } finally {
     clearRequest(key, config);

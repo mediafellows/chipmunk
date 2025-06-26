@@ -13,7 +13,7 @@ beforeEach(() => {
 });
 
 describe("AbortController", () => {
-  describe.skip("Basic AbortController functionality", () => {
+  describe("Basic AbortController functionality", () => {
     it("creates an AbortController instance", () => {
       const controller = chipmunk.createAbortController();
 
@@ -48,7 +48,7 @@ describe("AbortController", () => {
   });
 
   describe("Request abortion", () => {
-    it.skip("aborts a pending request", async () => {
+    it("aborts a pending request", async () => {
       // Mock a slow request
       nock(config.endpoints.um)
         .get(matches("/users"))
@@ -56,10 +56,6 @@ describe("AbortController", () => {
         .reply(200, { members: [] });
 
       const controller = chipmunk.createAbortController();
-
-      controller.signal.addEventListener('abort', () => {
-        console.log('Abort signal triggered!');
-      });
 
       // Start the request
       const requestPromise = chipmunk.run(async (ch) => {
@@ -73,7 +69,7 @@ describe("AbortController", () => {
       await expect(requestPromise).to.be.rejectedWith("Request was aborted");
     });
 
-    it.skip("aborts request with per-action signal", async () => {
+    it("aborts request with per-action signal", async () => {
       // Mock a slow request
       nock(config.endpoints.um)
         .get(matches("/users"))
@@ -94,7 +90,7 @@ describe("AbortController", () => {
       await expect(requestPromise).to.be.rejectedWith("Request was aborted");
     });
 
-    it.skip("continues normal requests when not aborted", async () => {
+    it("continues normal requests when not aborted", async () => {
       nock(config.endpoints.um)
         .get(matches("/users"))
         .reply(200, { members: [{ id: "1" }] });
