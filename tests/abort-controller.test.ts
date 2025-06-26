@@ -56,7 +56,7 @@ describe("AbortController", () => {
         .delay(1000) // 1 second delay
         .reply(200, { members: [] });
 
-      const controller = chipmunk.createAbortController();
+      chipmunk.createAbortController();
 
       // Start the request
       const requestPromise = chipmunk.run(async (ch) => {
@@ -96,7 +96,7 @@ describe("AbortController", () => {
         .get(matches("/users"))
         .reply(200, { members: [{ id: "1" }] });
 
-      const controller = chipmunk.createAbortController();
+      chipmunk.createAbortController();
 
       const result = await chipmunk.run(async (ch) => {
         return await ch.action("um.user", "query");
@@ -155,7 +155,7 @@ describe("AbortController", () => {
         .delay(1000)
         .reply(200, { members: [] });
 
-      const controller = chipmunk.createAbortController();
+      chipmunk.createAbortController();
 
       const request1 = chipmunk.run(async (ch) => {
         return await ch.action("um.user", "query");
@@ -240,7 +240,7 @@ describe("AbortController", () => {
 
   describe("Clean config", () => {
     it("excludes abort controller from cleaned config", () => {
-      const controller = chipmunk.createAbortController();
+      chipmunk.createAbortController();
       const cleanedConfig = chipmunk.currentConfig();
 
       expect(cleanedConfig.abortController).to.be.undefined;

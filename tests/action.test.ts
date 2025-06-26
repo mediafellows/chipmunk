@@ -777,7 +777,7 @@ describe("action", () => {
         .delay(1000)
         .reply(200, { members: [] });
 
-      const controller = chipmunk.createAbortController();
+      chipmunk.createAbortController();
 
       const actionPromise = chipmunk.action("um.user", "query");
 
@@ -811,7 +811,7 @@ describe("action", () => {
         .delay(1000)
         .reply(200, { id: "1" });
 
-      const controller = chipmunk.createAbortController();
+      chipmunk.createAbortController();
 
       const actionPromise = chipmunk.action("um.user", "create", {
         body: { first_name: "John" }
@@ -828,7 +828,7 @@ describe("action", () => {
         .delay(1000)
         .reply(200, { id: "1" });
 
-      const controller = chipmunk.createAbortController();
+      chipmunk.createAbortController();
 
       const actionPromise = chipmunk.action("um.user", "update", {
         params: { user_ids: 1 },
@@ -846,7 +846,7 @@ describe("action", () => {
         .delay(1000)
         .reply(200, {});
 
-      const controller = chipmunk.createAbortController();
+      chipmunk.createAbortController();
 
       const actionPromise = chipmunk.action("um.user", "delete", {
         params: { user_ids: 1 }
@@ -863,7 +863,7 @@ describe("action", () => {
         .delay(1000)
         .reply(200, { objects: [] });
 
-      const controller = chipmunk.createAbortController();
+      chipmunk.createAbortController();
 
       const actionPromise = chipmunk.action("um.user", "query", {
         proxy: true,
@@ -880,7 +880,7 @@ describe("action", () => {
         .get(matches("/users"))
         .reply(200, { members: [{ id: "1" }] });
 
-      const controller = chipmunk.createAbortController();
+      chipmunk.createAbortController();
 
       const result = await chipmunk.action("um.user", "query");
 
