@@ -105,14 +105,18 @@ const validateParams = (action: IAction, params, config): boolean => {
   return true;
 };
 
+function checkAborted(signal?: AbortSignal, configSignal?: AbortSignal) {
+  if (signal?.aborted || configSignal?.aborted) {
+    throw new Error("Request was aborted");
+  }
+}
+
 const resolve = async (objects, schema, config, signal?: AbortSignal) => {
   if (isEmpty(objects)) return [];
   if (schema === "*") return objects;
 
   // Check if aborted before proceeding
-  if (signal?.aborted || config.signal?.aborted) {
-    throw new Error("Request was aborted");
-  }
+  checkAborted(signal, config.signal);
 
   merge(schema, {
     "@id": true,
@@ -150,9 +154,7 @@ const resolve = async (objects, schema, config, signal?: AbortSignal) => {
   const promises = map(associations, async (assocSchema, assocName) => {
     try {
       // Check if aborted before each association fetch
-      if (signal?.aborted || config.signal?.aborted) {
-        throw new Error("Request was aborted");
-      }
+      checkAborted(signal, config.signal);
 
       const result = await fetch(objects, assocName, config);
 
@@ -184,6 +186,9 @@ const performAction = async <T>(
   opts: IActionOpts,
   config: IConfig
 ): Promise<IResult<T>> => {
+  // Short-circuit if already aborted
+  checkAborted(opts.signal, config.signal);
+
   const spec = await getSpec(appModel, config);
   const action = spec.action(actionName);
   const body = format(opts.body, opts.multi, opts.ROR);
