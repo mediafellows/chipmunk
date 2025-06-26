@@ -234,7 +234,7 @@ const performAction = async <T>(
       req = request(config, opts.headers).get(uri, axiosOptions);
   }
 
-  const response = await run(req, config);
+  const response = await run(req, config, action.method, uri);
   let objects = [];
 
   if (get(response, "data.members")) objects = response.data.members;
@@ -336,7 +336,7 @@ const performProxiedAction = async <T>(
   const url = action.template + debugParams;
   const req = request(config).post(url, body);
 
-  const response = await run(req, config);
+  const response = await run(req, config, "POST", url);
   const objects = get(response, "data.objects", []) as T[];
 
   const result: IResult<T> = {

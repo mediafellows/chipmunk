@@ -72,19 +72,17 @@ function isAxiosError(error: any): error is AxiosError {
 
 export const run = async (
   req: Promise<AxiosResponse>,
-  config: IConfig
+  config: IConfig,
+  method: string,
+  url: string
 ): Promise<AxiosResponse> => {
-  const key =
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15);
-
+  // Use a unique random key for each request
+  const key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  enqueueRequest(key, req, config, method, url);
   try {
-    enqueueRequest(key, req, config);
     const response = await req;
-    // Always resolve, even for non-2xx (handled by validateStatus)
     return response;
   } catch (err: any) {
-    // Only network errors or aborts should throw
     const error: IRequestError = err;
     if (error.name === "AbortError" || (isAxiosError(error) && error.code === "ERR_CANCELED")) {
       error.message = "Request was aborted";

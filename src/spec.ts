@@ -115,8 +115,7 @@ export const getSpec = async (
         params: config.timestamp ? { t: config.timestamp } : undefined,
         signal: config.signal,
       });
-
-      res = await run(req, config);
+      res = await run(req, config, "GET", url);
     }
 
     spec = get(res, `data['@context']`) || get(res, "data");
