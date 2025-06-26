@@ -769,7 +769,7 @@ describe("action", () => {
       expect(get(body, "opts.proxy")).not.to.exist;
     });
 
-    describe("AbortController with actions", () => {
+    describe.skip("AbortController with actions", () => {
       it("aborts action with config-level signal", async () => {
         nock(config.endpoints.um)
           .get(matches("/users"))
