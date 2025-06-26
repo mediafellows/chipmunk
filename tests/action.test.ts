@@ -221,7 +221,6 @@ describe("action", () => {
     await expect(promise).to.be.fulfilled;
   });
 
-  // 'badheaders' option seems not to work with superagent :(
   it("does not send a session id", async () => {
     chipmunk.updateConfig({ headers: { "Session-Id": "56BA" } });
 
