@@ -1,18 +1,26 @@
 import "mocha";
 import { expect } from "chai";
 import sinon from "sinon";
+import nock from "nock";
 
 import { setup, nap } from "./setup";
 import createChipmunk from "../src";
 
-const config = setup();
 let chipmunk;
+let config;
+
+beforeEach(() => {
+  config = setup(); // fresh config for every test
+  chipmunk = createChipmunk(config);
+});
+
+afterEach(() => {
+  if (chipmunk && chipmunk.abort) chipmunk.abort();
+  chipmunk.updateConfig({ signal: undefined, abortController: undefined });
+  nock.cleanAll();
+});
 
 describe("chipmunk.run", () => {
-  beforeEach(() => {
-    chipmunk = createChipmunk(config);
-  });
-
   describe("with error interceptor", () => {
     it("ignores the error if the interceptor returns true", async () => {
       chipmunk.updateConfig({ errorInterceptor: () => true });
