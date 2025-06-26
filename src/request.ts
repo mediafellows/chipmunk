@@ -35,20 +35,12 @@ export const isNode = (): boolean => {
 
 export const request = (
   config: IConfig,
-  headers?: { [s: string]: any },
-  signal?: AbortSignal
+  headers?: { [s: string]: any }
 ): SuperAgentStatic => {
   const req = superagent.agent();
 
   if (config.verbose) req.use(superdebug(console.info));
   req.use(preventSSRF);
-
-  // Apply abort signal if provided
-  if (signal) {
-    req.abort(signal);
-  } else if (config.signal) {
-    req.abort(config.signal);
-  }
 
   headers = merge({}, config.headers, headers);
 

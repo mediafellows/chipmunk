@@ -111,7 +111,8 @@ export const getSpec = async (
     if ((req = pending(url, config))) {
       res = await req;
     } else {
-      req = request(config, undefined, config.signal).get(url);
+      req = request(config).get(url);
+      if (config.signal) req = req.signal(config.signal);
 
       if (config.timestamp) req.query({ t: config.timestamp });
 

@@ -207,23 +207,28 @@ const performAction = async <T>(
 
   switch (action.method) {
     case "POST":
-      req = request(config, opts.headers, opts.signal).post(uri).send(body);
+      req = request(config, opts.headers).post(uri).send(body);
+      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
       break;
 
     case "PUT":
-      req = request(config, opts.headers, opts.signal).put(uri).send(body);
+      req = request(config, opts.headers).put(uri).send(body);
+      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
       break;
 
     case "PATCH":
-      req = request(config, opts.headers, opts.signal).patch(uri).send(body);
+      req = request(config, opts.headers).patch(uri).send(body);
+      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
       break;
 
     case "DELETE":
-      req = request(config, opts.headers, opts.signal).delete(uri).send(body);
+      req = request(config, opts.headers).delete(uri).send(body);
+      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
       break;
 
     default:
-      req = request(config, opts.headers, opts.signal).get(uri);
+      req = request(config, opts.headers).get(uri);
+      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
   }
 
   if (config.timestamp) req.query({ t: config.timestamp });
@@ -328,7 +333,7 @@ const performProxiedAction = async <T>(
 
   const debugParams = `?m=${appModel}&a=${actionName}`
   const url = action.template + debugParams;
-  const req = request(config, undefined, opts.signal).post(url).send(body);
+  const req = request(config).post(url).send(body);
 
   const response = await run(req, config, opts.signal);
   const objects = get(response, "body.objects", []) as T[];
