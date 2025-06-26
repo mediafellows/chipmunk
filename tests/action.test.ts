@@ -866,4 +866,12 @@ describe("action", () => {
       });
     });
   });
+
+  it("throws an error for unsupported URLs (SSRF prevention)", async () => {
+    chipmunk.updateConfig({
+      endpoints: { um: "https://evil.com/api" }
+    });
+    const promise = chipmunk.action("um.user", "query");
+    await expect(promise).to.be.rejectedWith(/unsupported URL/);
+  });
 });
