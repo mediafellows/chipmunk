@@ -55,7 +55,6 @@
     "lodash": "^4.17.21",
     "querystringify": "^2.1.1",
     "superagent": "10.2.1",
-    "superdebug": "^2.2.0",
     "uri-templates": "^0.2.0"
   }
 }

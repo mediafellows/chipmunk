@@ -1,5 +1,4 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from "axios";
-import superdebug from "superdebug";
 import get from "lodash/get";
 import each from "lodash/each";
 import merge from "lodash/merge";
@@ -44,10 +43,15 @@ export const request = (
 
   // Optionally add debug logging
   if (config.verbose) {
-    // No direct axios equivalent for superdebug, but you can add a logging interceptor
+    // Add Axios request and response interceptors for logging
     instance.interceptors.request.use((cfg) => {
-      superdebug(console.info)(cfg);
+      console.info('Axios Request:', cfg);
       return cfg;
+    });
+
+    instance.interceptors.response.use((response) => {
+      console.info('Axios Response:', response);
+      return response;
     });
   }
 
