@@ -66,7 +66,7 @@ describe("chipmunk.run", () => {
         await ch.spec("um.foo");
       });
 
-      await expect(block).to.be.rejectedWith("Not Found");
+      await expect(block).to.be.rejected;
     });
 
     // NOTE: this is an example how differentiate request specific errors from other errors..

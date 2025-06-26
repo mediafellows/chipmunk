@@ -35,9 +35,7 @@ export const request = (
   // Merge headers
   headers = merge({}, config.headers, headers);
 
-  // Create axios instance with validateStatus to always resolve
   const instance = axios.create({
-    validateStatus: () => true,
     headers: {}, // We'll set headers below
   });
 

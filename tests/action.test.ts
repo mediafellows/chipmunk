@@ -226,8 +226,7 @@ describe("action", () => {
     chipmunk.updateConfig({ headers: { "Session-Id": "56BA" } });
 
     nock(config.endpoints.um)
-      // nock performs a string check on the value. meaning we have to check for Session-Id to equal to '' to verify it is not sent
-      .matchHeader("Session-Id", "")
+      .matchHeader("Session-Id", null)
       .get(matches("users"))
       .reply(404, {});
 
