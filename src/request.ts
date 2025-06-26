@@ -59,8 +59,7 @@ export const request = (
 
 export const run = async (
   req: SuperAgentRequest,
-  config: IConfig,
-  signal?: AbortSignal
+  config: IConfig
 ): Promise<Response> => {
   const key =
     Math.random().toString(36).substring(2, 15) +
@@ -73,14 +72,13 @@ export const run = async (
     return await promise;
   } catch (err) {
     const error = err as IRequestError;
-    error.name = "RequestError";
+    error.name = error.name || "RequestError";
     error.object = get(err, "response.body");
     error.text = get(err, "response.body.description") || err.message;
     error.url = get(req, "url");
 
     // Check if the error is due to abort
-    if (signal?.aborted || config.signal?.aborted) {
-      error.name = "AbortError";
+    if (error.name === "AbortError") {
       error.message = "Request was aborted";
     }
 

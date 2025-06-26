@@ -116,7 +116,7 @@ export const getSpec = async (
 
       if (config.timestamp) req.query({ t: config.timestamp });
 
-      res = await run(req, config, config.signal);
+      res = await run(req, config);
     }
 
     spec = get(res, `body['@context']`) || get(res, "body");
