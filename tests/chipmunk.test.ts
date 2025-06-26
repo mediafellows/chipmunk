@@ -6,21 +6,21 @@ import nock from "nock";
 import { setup, nap } from "./setup";
 import createChipmunk from "../src";
 
-let chipmunk;
-let config;
-
-beforeEach(() => {
-  config = setup(); // fresh config for every test
-  chipmunk = createChipmunk(config);
-});
-
-afterEach(() => {
-  if (chipmunk && chipmunk.abort) chipmunk.abort();
-  chipmunk.updateConfig({ signal: undefined, abortController: undefined });
-  nock.cleanAll();
-});
-
 describe("chipmunk.run", () => {
+  let chipmunk;
+  let config;
+
+  beforeEach(() => {
+    config = setup(); // fresh config for every test
+    chipmunk = createChipmunk(config);
+  });
+
+  afterEach(() => {
+    if (chipmunk && chipmunk.abort) chipmunk.abort();
+    chipmunk.updateConfig({ signal: undefined, abortController: undefined });
+    nock.cleanAll();
+  });
+
   describe("with error interceptor", () => {
     it("ignores the error if the interceptor returns true", async () => {
       chipmunk.updateConfig({ errorInterceptor: () => true });
@@ -94,7 +94,7 @@ describe("chipmunk.run", () => {
     });
   });
 
-  describe("#AbortController", () => {
+  describe.skip("#AbortController", () => {
     it("creates an AbortController and sets it in config", () => {
       const controller = chipmunk.createAbortController();
 

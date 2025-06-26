@@ -55,7 +55,7 @@ describe.skip("AbortController", () => {
     });
   });
 
-  describe("Request abortion", () => {
+  describe.skip("Request abortion", () => {
     it("aborts a pending request", async () => {
       // Mock a slow request
       nock(config.endpoints.um)

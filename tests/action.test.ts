@@ -7,21 +7,21 @@ import createChipmunk from "../src";
 import { setup, matches } from "./setup";
 import { emptyOrganizationAssociations } from "./emptyAssociations";
 
-let chipmunk;
-let config;
+describe("chipmunk.run", () => {
+  let chipmunk;
+  let config;
 
-beforeEach(() => {
-  config = setup(); // fresh config for every test
-  chipmunk = createChipmunk(config);
-});
+  beforeEach(() => {
+    config = setup(); // fresh config for every test
+    chipmunk = createChipmunk(config);
+  });
 
-afterEach(() => {
-  if (chipmunk && chipmunk.abort) chipmunk.abort();
-  chipmunk.updateConfig({ signal: undefined, abortController: undefined });
-  nock.cleanAll();
-});
+  afterEach(() => {
+    if (chipmunk && chipmunk.abort) chipmunk.abort();
+    chipmunk.updateConfig({ signal: undefined, abortController: undefined });
+    nock.cleanAll();
+  });
 
-describe("action", () => {
   it("queries for users", async () => {
     nock(config.endpoints.um)
       .get(matches("/users"))
