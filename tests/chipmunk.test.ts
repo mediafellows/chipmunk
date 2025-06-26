@@ -13,6 +13,41 @@ describe("chipmunk.run", () => {
     chipmunk = createChipmunk(config);
   });
 
+  describe("#AbortController", () => {
+    it("creates an AbortController and sets it in config", () => {
+      const controller = chipmunk.createAbortController();
+
+      expect(controller).to.be.instanceOf(AbortController);
+      expect(chipmunk.currentConfig().signal).to.equal(controller.signal);
+    });
+
+    it("aborts the current controller", () => {
+      const controller = chipmunk.createAbortController();
+      const abortSpy = sinon.spy(controller, 'abort');
+
+      chipmunk.abort();
+
+      expect(abortSpy.called).to.be.true;
+      expect(controller.signal.aborted).to.be.true;
+    });
+
+    it("returns the current abort signal", () => {
+      expect(chipmunk.getAbortSignal()).to.be.undefined;
+
+      const controller = chipmunk.createAbortController();
+
+      expect(chipmunk.getAbortSignal()).to.equal(controller.signal);
+    });
+
+    it("handles multiple abort controller creations", () => {
+      const controller1 = chipmunk.createAbortController();
+      const controller2 = chipmunk.createAbortController();
+
+      expect(controller1).to.not.equal(controller2);
+      expect(chipmunk.getAbortSignal()).to.equal(controller2.signal);
+    });
+  });
+
   describe("with error interceptor", () => {
     it("ignores the error if the interceptor returns true", async () => {
       chipmunk.updateConfig({ errorInterceptor: () => true });
