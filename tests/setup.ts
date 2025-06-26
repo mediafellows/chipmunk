@@ -30,13 +30,17 @@ export const setup = (overrides?: Partial<IConfig>): IConfig => {
   const conf = config(DEFAULT_CONFIG, overrides);
 
   before(() => {
-    nock.cleanAll();
-    mockContexts(conf);
+    nock.disableNetConnect();
     chai.use(chaiAsPromised);
+  });
+
+  beforeEach(() => {
+    mockContexts(conf);
   });
 
   afterEach(() => {
     sinon.restore();
+    nock.cleanAll();
   });
 
   return conf;

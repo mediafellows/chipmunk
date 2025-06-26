@@ -764,6 +764,8 @@ describe("action", () => {
       expect(get(body, "config.headers")).to.exist;
       expect(get(body, "config.errorInterceptor")).not.to.exist;
       expect(get(body, "config.watcher")).not.to.exist;
+      expect(get(body, "config.abortController")).not.to.exist;
+      expect(get(body, "config.signal")).not.to.exist;
 
       expect(get(body, "opts.schema")).to.exist;
       expect(get(body, "opts.proxy")).not.to.exist;

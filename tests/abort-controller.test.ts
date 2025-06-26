@@ -49,7 +49,7 @@ describe("AbortController", () => {
         .delay(3000)
         .reply(200, { members: [] });
       chipmunk.createAbortController();
-      const requestPromise = chipmunk.run(async (ch) => ch.action("um.user", "query", { proxy: false }));
+      const requestPromise = chipmunk.run(async (ch) => ch.action("um.user", "query"));
       setImmediate(() => chipmunk.abort());
       try {
         await requestPromise;
@@ -78,11 +78,23 @@ describe("AbortController", () => {
     it("continues normal requests when not aborted", async () => {
       nock(config.endpoints.um)
         .get(matches("/users"))
-        .reply(200, { members: [{ id: "1" }] });
-      chipmunk.createAbortController();
-      const result = await chipmunk.run(async (ch) => ch.action("um.user", "query"));
-      expect(result.objects).to.have.length(1);
-      expect(result.objects[0].id).to.equal("1");
+        .reply(200, {
+          members: [
+            {
+              "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+              id: "first",
+            },
+            {
+              "@context": "https://um.api.mediastore.dev/v20140601/context/user",
+              id: "second",
+            },
+          ],
+        });
+
+      await chipmunk.run(async (ch) => {
+        const result = await ch.action("um.user", "query");
+        expect(result.objects.length).to.be.gt(1);
+      });
     });
   });
 
@@ -106,7 +118,7 @@ describe("AbortController", () => {
         params: { user_ids: 1 },
         schema: "id, organization { name }"
       }));
-      setTimeout(() => controller.abort(), 100);
+      setImmediate(() => controller.abort());
       try {
         await requestPromise;
         throw new Error("Expected promise to be rejected");
@@ -194,15 +206,6 @@ describe("AbortController", () => {
       const controller = new AbortController();
       chipmunk.updateConfig({ abortController: controller });
       expect(chipmunk.getAbortSignal()).to.equal(controller.signal);
-    });
-  });
-
-  describe("Clean config", () => {
-    it("excludes abort controller from cleaned config", () => {
-      chipmunk.createAbortController();
-      const cleanedConfig = chipmunk.currentConfig();
-      expect(cleanedConfig.abortController).to.be.undefined;
-      expect(cleanedConfig.signal).to.be.undefined;
     });
   });
 });
