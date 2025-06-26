@@ -768,5 +768,124 @@ describe("action", () => {
       expect(get(body, "opts.schema")).to.exist;
       expect(get(body, "opts.proxy")).not.to.exist;
     });
+
+    describe("AbortController with actions", () => {
+      it("aborts action with config-level signal", async () => {
+        nock(config.endpoints.um)
+          .get(matches("/users"))
+          .delay(1000)
+          .reply(200, { members: [] });
+
+        chipmunk.createAbortController();
+
+        const actionPromise = chipmunk.action("um.user", "query");
+
+        // Abort immediately
+        chipmunk.abort();
+
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("aborts action with per-action signal", async () => {
+        nock(config.endpoints.um)
+          .get(matches("/users"))
+          .delay(1000)
+          .reply(200, { members: [] });
+
+        const controller = new AbortController();
+
+        const actionPromise = chipmunk.action("um.user", "query", {
+          signal: controller.signal
+        });
+
+        // Abort immediately
+        controller.abort();
+
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("aborts POST action", async () => {
+        nock(config.endpoints.um)
+          .post(matches("/users"))
+          .delay(1000)
+          .reply(200, { id: "1" });
+
+        chipmunk.createAbortController();
+
+        const actionPromise = chipmunk.action("um.user", "create", {
+          body: { first_name: "John" }
+        });
+
+        chipmunk.abort();
+
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("aborts PUT action", async () => {
+        nock(config.endpoints.um)
+          .put(matches("/users/1"))
+          .delay(1000)
+          .reply(200, { id: "1" });
+
+        chipmunk.createAbortController();
+
+        const actionPromise = chipmunk.action("um.user", "update", {
+          params: { user_ids: 1 },
+          body: { first_name: "John" }
+        });
+
+        chipmunk.abort();
+
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("aborts DELETE action", async () => {
+        nock(config.endpoints.um)
+          .delete(matches("/users/1"))
+          .delay(1000)
+          .reply(200, {});
+
+        chipmunk.createAbortController();
+
+        const actionPromise = chipmunk.action("um.user", "delete", {
+          params: { user_ids: 1 }
+        });
+
+        chipmunk.abort();
+
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("aborts proxied action", async () => {
+        nock(config.endpoints.tuco)
+          .post(matches("/proxy"))
+          .delay(1000)
+          .reply(200, { objects: [] });
+
+        chipmunk.createAbortController();
+
+        const actionPromise = chipmunk.action("um.user", "query", {
+          proxy: true,
+          schema: "id"
+        });
+
+        chipmunk.abort();
+
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("continues normal action when not aborted", async () => {
+        nock(config.endpoints.um)
+          .get(matches("/users"))
+          .reply(200, { members: [{ id: "1" }] });
+
+        chipmunk.createAbortController();
+
+        const result = await chipmunk.action("um.user", "query");
+
+        expect(result.objects).to.have.length(1);
+        expect(result.objects[0].id).to.equal("1");
+      });
+    });
   });
 });

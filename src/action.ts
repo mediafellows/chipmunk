@@ -213,27 +213,27 @@ const performAction = async <T>(
   switch (action.method) {
     case "POST":
       req = request(config, opts.headers).post(uri).send(body);
-      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
+      if (opts.signal || config.signal) req.signal = opts.signal || config.signal;
       break;
 
     case "PUT":
       req = request(config, opts.headers).put(uri).send(body);
-      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
+      if (opts.signal || config.signal) req.signal = opts.signal || config.signal;
       break;
 
     case "PATCH":
       req = request(config, opts.headers).patch(uri).send(body);
-      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
+      if (opts.signal || config.signal) req.signal = opts.signal || config.signal;
       break;
 
     case "DELETE":
       req = request(config, opts.headers).delete(uri).send(body);
-      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
+      if (opts.signal || config.signal) req.signal = opts.signal || config.signal;
       break;
 
     default:
       req = request(config, opts.headers).get(uri);
-      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
+      if (opts.signal || config.signal) req.signal = opts.signal || config.signal;
   }
 
   if (config.timestamp) req.query({ t: config.timestamp });
