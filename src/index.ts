@@ -53,6 +53,9 @@ export interface IInterface {
   ): Promise<IResult<T>>;
   performLater(cb: Function): void;
   cache: ICache;
+  createAbortController(): AbortController;
+  abort(): void;
+  getAbortSignal(): AbortSignal | undefined;
 }
 
 export {
@@ -77,6 +80,7 @@ export interface IChipmunk extends IInterface {
 
 export default (...overrides: Partial<IConfig>[]): IChipmunk => {
   let config = createConfig.apply(null, overrides);
+  let currentAbortController: AbortController | null = null;
 
   const callOpts = (opts) => merge({ engine: config.cache.default }, opts);
 
@@ -99,6 +103,19 @@ export default (...overrides: Partial<IConfig>[]): IChipmunk => {
       clear: (opts) => clear(callOpts(opts)),
     },
     performLater: (cb) => enqueuePerformLater(cb, config),
+    createAbortController: () => {
+      currentAbortController = new AbortController();
+      config.signal = currentAbortController.signal;
+      return currentAbortController;
+    },
+    abort: () => {
+      if (currentAbortController) {
+        currentAbortController.abort();
+      }
+    },
+    getAbortSignal: () => {
+      return currentAbortController?.signal;
+    },
   };
 
   const run = async (block, errorHandler = config.defaultErrorHandler) => {

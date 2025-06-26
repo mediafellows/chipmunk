@@ -71,8 +71,16 @@ export const run = async (
 
     return await promise;
   } catch (err) {
+    // TO-DO: Why is error.name always hardcoded?
     const error = err as IRequestError;
-    error.name = "RequestError";
+
+    if (error.name === "AbortError") {
+      error.message = "Request was aborted";
+    } else {
+      // TO-DO: Why is error.name always hardcoded?
+      error.name = "RequestError";
+    }
+
     error.object = get(err, "response.body");
     error.text = get(err, "response.body.description") || err.message;
     error.url = get(req, "url");

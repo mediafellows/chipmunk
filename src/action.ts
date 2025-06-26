@@ -40,6 +40,7 @@ export interface IActionOpts {
   body?: { [s: string]: any };
   params?: { [s: string]: any };
   schema?: string;
+  signal?: AbortSignal;
 }
 
 export interface IObject {
@@ -104,9 +105,18 @@ const validateParams = (action: IAction, params, config): boolean => {
   return true;
 };
 
-const resolve = async (objects, schema, config) => {
+function checkAborted(signal?: AbortSignal, configSignal?: AbortSignal) {
+  if (signal?.aborted || configSignal?.aborted) {
+    throw new Error("Request was aborted");
+  }
+}
+
+const resolve = async (objects, schema, config, signal?: AbortSignal) => {
   if (isEmpty(objects)) return [];
   if (schema === "*") return objects;
+
+  // Check if aborted before proceeding
+  checkAborted(signal, config.signal);
 
   merge(schema, {
     "@id": true,
@@ -143,13 +153,16 @@ const resolve = async (objects, schema, config) => {
 
   const promises = map(associations, async (assocSchema, assocName) => {
     try {
+      // Check if aborted before each association fetch
+      checkAborted(signal, config.signal);
+
       const result = await fetch(objects, assocName, config);
 
       // first add props needed for the assignments later to the schema
       const neededProps = keys(result.extractedProps.allProps);
       reduce(neededProps, (acc, prop) => write(acc, { [prop]: true }), assocSchema)
 
-      const resolved = await resolve(result.objects, assocSchema, config);
+      const resolved = await resolve(result.objects, assocSchema, config, signal);
 
       // assign results to the target objects that were associating them
       await assign(objects, resolved, assocName, result.many, result.extractedProps);
@@ -173,6 +186,9 @@ const performAction = async <T>(
   opts: IActionOpts,
   config: IConfig
 ): Promise<IResult<T>> => {
+  // Short-circuit if already aborted
+  checkAborted(opts.signal, config.signal);
+
   const spec = await getSpec(appModel, config);
   const action = spec.action(actionName);
   const body = format(opts.body, opts.multi, opts.ROR);
@@ -197,22 +213,27 @@ const performAction = async <T>(
   switch (action.method) {
     case "POST":
       req = request(config, opts.headers).post(uri).send(body);
+      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
       break;
 
     case "PUT":
       req = request(config, opts.headers).put(uri).send(body);
+      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
       break;
 
     case "PATCH":
       req = request(config, opts.headers).patch(uri).send(body);
+      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
       break;
 
     case "DELETE":
       req = request(config, opts.headers).delete(uri).send(body);
+      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
       break;
 
     default:
       req = request(config, opts.headers).get(uri);
+      if (opts.signal || config.signal) req = req.signal(opts.signal || config.signal);
   }
 
   if (config.timestamp) req.query({ t: config.timestamp });
@@ -251,7 +272,7 @@ const performAction = async <T>(
 
   if (!opts.raw && !isEmpty(opts.schema)) {
     const schema = parseSchema(opts.schema);
-    objects = await resolve(objects, schema, config);
+    objects = await resolve(objects, schema, config, opts.signal);
   }
 
   const result: IResult<T> = {
