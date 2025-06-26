@@ -111,11 +111,11 @@ export const getSpec = async (
     if ((req = pending(url, config))) {
       res = await req;
     } else {
-      req = request(config).get(url);
+      req = request(config, undefined, config.signal).get(url);
 
       if (config.timestamp) req.query({ t: config.timestamp });
 
-      res = await run(req, config);
+      res = await run(req, config, config.signal);
     }
 
     spec = get(res, `body['@context']`) || get(res, "body");

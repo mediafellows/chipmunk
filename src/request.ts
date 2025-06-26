@@ -35,12 +35,20 @@ export const isNode = (): boolean => {
 
 export const request = (
   config: IConfig,
-  headers?: { [s: string]: any }
+  headers?: { [s: string]: any },
+  signal?: AbortSignal
 ): SuperAgentStatic => {
   const req = superagent.agent();
 
   if (config.verbose) req.use(superdebug(console.info));
   req.use(preventSSRF);
+
+  // Apply abort signal if provided
+  if (signal) {
+    req.abort(signal);
+  } else if (config.signal) {
+    req.abort(config.signal);
+  }
 
   headers = merge({}, config.headers, headers);
 
@@ -59,7 +67,8 @@ export const request = (
 
 export const run = async (
   req: SuperAgentRequest,
-  config: IConfig
+  config: IConfig,
+  signal?: AbortSignal
 ): Promise<Response> => {
   const key =
     Math.random().toString(36).substring(2, 15) +
@@ -76,6 +85,12 @@ export const run = async (
     error.object = get(err, "response.body");
     error.text = get(err, "response.body.description") || err.message;
     error.url = get(req, "url");
+
+    // Check if the error is due to abort
+    if (signal?.aborted || config.signal?.aborted) {
+      error.name = "AbortError";
+      error.message = "Request was aborted";
+    }
 
     throw error;
   } finally {
