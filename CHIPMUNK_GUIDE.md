@@ -109,29 +109,9 @@ req2.catch(() => {});
 - **Chipmunk**: Sophisticated error handling with:
   - Global error interceptors
   - Request-specific error handling
-  - Automatic retry logic for certain scenarios
   - Structured error objects with context
 
-#### **9. Pagination Handling**
-- **Axios**: Manual pagination implementation
-- **Chipmunk**: Automatic pagination with `unfurl()`
-
-```javascript
-// With axios - manual pagination
-let allUsers = [];
-let page = 1;
-do {
-  const response = await axios.get(`/users?page=${page}`);
-  allUsers.push(...response.data.members);
-  page++;
-} while (page <= response.data.total_pages);
-
-// With chipmunk - automatic pagination
-const result = await chipmunk.unfurl('um.user', 'query');
-// All pages fetched automatically
-```
-
-#### **10. Multi-API Coordination**
+#### **9. Multi-API Coordination**
 - **Axios**: Each API requires separate configuration
 - **Chipmunk**: Unified interface for multiple APIs with:
   - Shared configuration
@@ -319,17 +299,65 @@ controller.abort(); // Cancels only this request
 - Adds `_attributes` suffix to nested objects
 - Maintains Rails compatibility
 
-### 8. Unfurl (Pagination)
+### 8. Pagination and Search
 
-**What it does:**
-- Automatically fetches all pages of paginated results
-- Combines results into a single response
-- Sets `total_pages: 1` to indicate completion
+Chipmunk provides two main ways to handle pagination and data retrieval:
 
-```javascript
-const result = await chipmunk.unfurl('um.user', 'query');
-// Fetches all pages automatically
+#### **A. Controlled Pagination and Search (Recommended)**
+
+Use the `search` action for models like `um.user` to perform advanced, paginated, and filtered queries. This action supports a wide range of parameters, including:
+- **Pagination:** `page`, `per`
+- **Sorting:** `sort`, `order`
+- **Flags:** `include_deleted`, `include_internal_accounts`, etc.
+- **Advanced Filtering:** `search: { filters: ... }`
+- **Aggregations/Stats:** `stats: ...`
+
+The `search` action is backed by Elasticsearch, enabling powerful full-text search, filtering, and analytics in a single request.
+
+**Example:**
+```js
+const result = await chipmunk.action('um.user', 'search', {
+  body: {
+    per: 20,
+    page: 1,
+    sort: 'created_at',
+    include_deleted: false,
+    search: {
+      filters: [['role', 'eq', 'admin']],
+    },
+    // stats: { ... } // aggregations if needed
+  },
+  schema: 'id, name, role',
+});
+// result.objects contains the users
+// result.pagination contains pagination info
+// result.aggregations contains stats if requested
 ```
+
+#### **B. Loading All Data with Unfurl**
+
+If you need to load **all pages of data automatically**, you can use the `unfurl` helper. This will make multiple requests behind the scenes to fetch every page and combine the results into a single response.
+
+**Caution:** This is **not recommended for large datasets** as it may result in high memory usage and long load times.
+
+**Example:**
+```js
+const allResults = await chipmunk.unfurl('um.user', 'search', {
+  body: {
+    per: 100,
+    include_deleted: false,
+    search: {
+      filters: [['role', 'eq', 'admin']],
+    },
+  },
+  schema: 'id, name, role',
+});
+// allResults.objects contains all users across all pages
+```
+
+**Summary:**
+- Use the `search` action with `chipmunk.action` for controlled, paginated, and filtered queries—this is the recommended and most flexible approach.
+- Use `unfurl` only if you truly need to load all data at once, and be mindful of the potential performance impact.
 
 ## Error Handling
 
