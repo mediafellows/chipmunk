@@ -71,6 +71,19 @@ const req2 = chipmunk.action('um.user', 'query'); // Reuses pending request
 // Both resolve to the same result
 ```
 
+**Note:**
+If you use request deduplication (i.e., multiple calls to the same action return the same promise), make sure at least one of the returned promises is awaited or has a `.catch()` handler. Otherwise, if the request fails, it may result in an unhandled promise rejection.
+
+**Example:**
+```js
+const req1 = chipmunk.action('um.user', 'query');
+const req2 = chipmunk.action('um.user', 'query');
+await req1; // or req2
+// or
+req1.catch(() => {});
+req2.catch(() => {});
+```
+
 #### **5. Data Formatting and Cleanup**
 - **Axios**: Returns raw API responses
 - **Chipmunk**: Automatically cleans and formats data:
