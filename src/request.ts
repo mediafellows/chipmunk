@@ -21,6 +21,7 @@ export interface IRequestError extends Error {
   object?: any;
   url?: string;
   code?: 'ERR_CANCELED';
+  status?: number;
 }
 
 export const isNode = (): boolean => {
