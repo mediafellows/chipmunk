@@ -17,10 +17,10 @@ const preventSSRF = (config: InternalAxiosRequestConfig) => {
 
 export interface IRequestError extends Error {
   message: string;
-  status?: number;
   text?: string;
   object?: any;
   url?: string;
+  code?: 'ERR_CANCELED';
 }
 
 export const isNode = (): boolean => {
