@@ -1,5 +1,7 @@
 # CHIPMUNK
 
+REST API client library for the Mediastore. Successor of [Chinchilla](https://github.com/mediafellows/chinchilla).
+
 ## main goals
 
 * slim & simple compared to _chinchilla_
