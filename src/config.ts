@@ -35,6 +35,8 @@ export interface IConfig {
   watcher?: IWatcher;
   timestamp?: number;
   defaultAssociationsSearch?: { [s: string]: any };
+  abortController?: AbortController;
+  signal?: AbortSignal;
 }
 
 const DEFAULTS: IConfig = {
@@ -60,7 +62,7 @@ const DEFAULTS: IConfig = {
 };
 
 export const cleanConfig = (config: IConfig): Partial<IConfig> => {
-  return omit(config, "errorInterceptor", "verbose", "cache", "watcher");
+  return omit(config, "errorInterceptor", "verbose", "cache", "watcher", "abortController", "signal");
 };
 
 export default (...configs: Partial<IConfig>[]): IConfig => {

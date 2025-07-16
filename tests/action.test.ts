@@ -221,13 +221,11 @@ describe("action", () => {
     await expect(promise).to.be.fulfilled;
   });
 
-  // 'badheaders' option seems not to work with superagent :(
   it("does not send a session id", async () => {
     chipmunk.updateConfig({ headers: { "Session-Id": "56BA" } });
 
     nock(config.endpoints.um)
-      // nock performs a string check on the value. meaning we have to check for Session-Id to equal to '' to verify it is not sent
-      .matchHeader("Session-Id", "")
+      .matchHeader("Session-Id", null)
       .get(matches("users"))
       .reply(404, {});
 
@@ -764,9 +762,116 @@ describe("action", () => {
       expect(get(body, "config.headers")).to.exist;
       expect(get(body, "config.errorInterceptor")).not.to.exist;
       expect(get(body, "config.watcher")).not.to.exist;
+      expect(get(body, "config.abortController")).not.to.exist;
+      expect(get(body, "config.signal")).not.to.exist;
 
       expect(get(body, "opts.schema")).to.exist;
       expect(get(body, "opts.proxy")).not.to.exist;
     });
+
+    describe("AbortController with actions", () => {
+      it("aborts action with config-level signal", async () => {
+        nock(config.endpoints.um)
+          .get(matches("/users"))
+          .delay(1000)
+          .reply(200, { members: [] });
+
+        chipmunk.createAbortController();
+        const actionPromise = chipmunk.action("um.user", "query");
+        setImmediate(() => chipmunk.abort());
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("aborts action with per-action signal", async () => {
+        nock(config.endpoints.um)
+          .get(matches("/users"))
+          .delay(1000)
+          .reply(200, { members: [] });
+
+        const controller = new AbortController();
+        const actionPromise = chipmunk.action("um.user", "query", {
+          signal: controller.signal
+        });
+        setImmediate(() => controller.abort());
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("aborts POST action", async () => {
+        nock(config.endpoints.um)
+          .post(matches("/users"))
+          .delay(1000)
+          .reply(200, { id: "1" });
+
+        chipmunk.createAbortController();
+        const actionPromise = chipmunk.action("um.user", "create", {
+          body: { first_name: "John" }
+        });
+        setImmediate(() => chipmunk.abort());
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("aborts PUT action", async () => {
+        nock(config.endpoints.um)
+          .put(matches("/users/1"))
+          .delay(1000)
+          .reply(200, { id: "1" });
+
+        chipmunk.createAbortController();
+        const actionPromise = chipmunk.action("um.user", "update", {
+          params: { user_ids: 1 },
+          body: { first_name: "John" }
+        });
+        setImmediate(() => chipmunk.abort());
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("aborts DELETE action", async () => {
+        nock(config.endpoints.um)
+          .delete(matches("/users/1"))
+          .delay(1000)
+          .reply(200, {});
+
+        chipmunk.createAbortController();
+        const actionPromise = chipmunk.action("um.user", "delete", {
+          params: { user_ids: 1 }
+        });
+        setImmediate(() => chipmunk.abort());
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("aborts proxied action", async () => {
+        nock(config.endpoints.tuco)
+          .post(matches("/proxy"))
+          .delay(1000)
+          .reply(200, { objects: [] });
+
+        chipmunk.createAbortController();
+        const actionPromise = chipmunk.action("um.user", "query", {
+          proxy: true,
+          schema: "id"
+        });
+        setImmediate(() => chipmunk.abort());
+        await expect(actionPromise).to.be.rejectedWith("Request was aborted");
+      });
+
+      it("continues normal action when not aborted", async () => {
+        nock(config.endpoints.um)
+          .get(matches("/users"))
+          .reply(200, { members: [{ id: "1" }] });
+
+        chipmunk.createAbortController();
+        const result = await chipmunk.action("um.user", "query");
+        expect(result.objects).to.have.length(1);
+        expect(result.objects[0].id).to.equal("1");
+      });
+    });
+  });
+
+  it("throws an error for unsupported URLs (SSRF prevention)", async () => {
+    chipmunk.updateConfig({
+      endpoints: { um: "https://evil.com/api" }
+    });
+    const promise = chipmunk.action("um.user", "query");
+    await expect(promise).to.be.rejectedWith(/unsupported URL/);
   });
 });

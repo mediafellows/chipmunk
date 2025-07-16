@@ -40,6 +40,7 @@ export interface IActionOpts {
   body?: { [s: string]: any };
   params?: { [s: string]: any };
   schema?: string;
+  signal?: AbortSignal;
 }
 
 export interface IObject {
@@ -104,9 +105,18 @@ const validateParams = (action: IAction, params, config): boolean => {
   return true;
 };
 
-const resolve = async (objects, schema, config) => {
+function checkAborted(signal?: AbortSignal, configSignal?: AbortSignal) {
+  if (signal?.aborted || configSignal?.aborted) {
+    throw new Error("Request was aborted");
+  }
+}
+
+const resolve = async (objects, schema, config, signal?: AbortSignal) => {
   if (isEmpty(objects)) return [];
   if (schema === "*") return objects;
+
+  // Check if aborted before proceeding
+  checkAborted(signal, config.signal);
 
   merge(schema, {
     "@id": true,
@@ -143,13 +153,16 @@ const resolve = async (objects, schema, config) => {
 
   const promises = map(associations, async (assocSchema, assocName) => {
     try {
+      // Check if aborted before each association fetch
+      checkAborted(signal, config.signal);
+
       const result = await fetch(objects, assocName, config);
 
       // first add props needed for the assignments later to the schema
       const neededProps = keys(result.extractedProps.allProps);
       reduce(neededProps, (acc, prop) => write(acc, { [prop]: true }), assocSchema)
 
-      const resolved = await resolve(result.objects, assocSchema, config);
+      const resolved = await resolve(result.objects, assocSchema, config, signal);
 
       // assign results to the target objects that were associating them
       await assign(objects, resolved, assocName, result.many, result.extractedProps);
@@ -173,6 +186,9 @@ const performAction = async <T>(
   opts: IActionOpts,
   config: IConfig
 ): Promise<IResult<T>> => {
+  // Short-circuit if already aborted
+  checkAborted(opts.signal, config.signal);
+
   const spec = await getSpec(appModel, config);
   const action = spec.action(actionName);
   const body = format(opts.body, opts.multi, opts.ROR);
@@ -194,34 +210,35 @@ const performAction = async <T>(
 
   let req;
 
-  switch (action.method) {
-    case "POST":
-      req = request(config, opts.headers).post(uri).send(body);
-      break;
-
-    case "PUT":
-      req = request(config, opts.headers).put(uri).send(body);
-      break;
-
-    case "PATCH":
-      req = request(config, opts.headers).patch(uri).send(body);
-      break;
-
-    case "DELETE":
-      req = request(config, opts.headers).delete(uri).send(body);
-      break;
-
-    default:
-      req = request(config, opts.headers).get(uri);
+  const axiosOptions: any = {
+    signal: opts.signal || config.signal,
+  };
+  if (config.timestamp) {
+    axiosOptions.params = { t: config.timestamp };
   }
 
-  if (config.timestamp) req.query({ t: config.timestamp });
+  switch (action.method) {
+    case "POST":
+      req = request(config, opts.headers).post(uri, body, axiosOptions);
+      break;
+    case "PUT":
+      req = request(config, opts.headers).put(uri, body, axiosOptions);
+      break;
+    case "PATCH":
+      req = request(config, opts.headers).patch(uri, body, axiosOptions);
+      break;
+    case "DELETE":
+      req = request(config, opts.headers).delete(uri, { data: body, ...axiosOptions });
+      break;
+    default:
+      req = request(config, opts.headers).get(uri, axiosOptions);
+  }
 
-  const response = await run(req, config);
+  const response = await run(req, config, action.method, uri);
   let objects = [];
 
-  if (get(response, "body.members")) objects = response.body.members;
-  else if (!isEmpty(response.body)) objects = [response.body];
+  if (get(response, "data.members")) objects = response.data.members;
+  else if (!isEmpty(response.data)) objects = [response.data];
 
   if (!opts.raw) {
     // objects can have different context, e.g. series vs seasons vs episodes
@@ -251,7 +268,7 @@ const performAction = async <T>(
 
   if (!opts.raw && !isEmpty(opts.schema)) {
     const schema = parseSchema(opts.schema);
-    objects = await resolve(objects, schema, config);
+    objects = await resolve(objects, schema, config, opts.signal);
   }
 
   const result: IResult<T> = {
@@ -259,17 +276,17 @@ const performAction = async <T>(
     get object() {
       return first(objects);
     },
-    headers: get(response, "headers", {}),
-    type: get(response, `body['@type']`),
+    headers: get(response, "data.headers", {}) as any,
+    type: get(response, `data['@type']`),
   };
 
-  if (get(response, "body.aggregations")) {
+  if (get(response, "data.aggregations")) {
     if (opts.raw) {
-      result.aggregations = response.body.aggregations;
+      result.aggregations = response.data.aggregations;
     }
     else {
       result.aggregations = reduce(
-        response.body.aggregations,
+        response.data.aggregations,
         (acc, agg, name) => {
           acc[name] = map(get(agg, "buckets"), (tranche) => ({
             value: tranche.key,
@@ -282,15 +299,15 @@ const performAction = async <T>(
     }
   }
 
-  if (get(response, `body['total_count']`) || get(response, `body['@total_count']`)) {
+  if (get(response, `data['total_count']`) || get(response, `data['@total_count']`)) {
     result.pagination = {} as IPagination;
 
     each(PAGINATION_PROPS, (prop) => {
-      if (response.body[prop]) {
-        result.pagination[prop] = response.body[prop];
+      if (response.data[prop]) {
+        result.pagination[prop] = response.data[prop];
       }
-      else if (response.body[`@${prop}`]) {
-        result.pagination[prop] = response.body[`@${prop}`];
+      else if (response.data[`@${prop}`]) {
+        result.pagination[prop] = response.data[`@${prop}`];
       }
     });
   }
@@ -315,22 +332,22 @@ const performProxiedAction = async <T>(
     config: cleanedConfig,
   };
 
-  const debugParams = `?m=${appModel}&a=${actionName}`
+  const debugParams = `?m=${appModel}&a=${actionName}`;
   const url = action.template + debugParams;
-  const req = request(config).post(url).send(body);
+  const req = request(config).post(url, body);
 
-  const response = await run(req, config);
-  const objects = get(response, "body.objects", []) as T[];
+  const response = await run(req, config, "POST", url);
+  const objects = get(response, "data.objects", []) as T[];
 
   const result: IResult<T> = {
     objects: objects,
     get object() {
       return first(objects);
     },
-    headers: get(response, "body.headers", {}),
-    type: get(response, "body.type"),
-    aggregations: get(response, "body.aggregations"),
-    pagination: get(response, "body.pagination"),
+    headers: get(response, "data.headers", {}),
+    type: get(response, "data.type"),
+    aggregations: get(response, "data.aggregations"),
+    pagination: get(response, "data.pagination"),
   };
 
   return result;

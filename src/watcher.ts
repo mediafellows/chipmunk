@@ -23,9 +23,11 @@ export const enqueuePerformLater = (cb: Function, config: IConfig): void => {
 export const enqueueRequest = (
   key: string,
   payload: any,
-  config: IConfig
+  config: IConfig,
+  method?: string,
+  url?: string
 ): void => {
-  config.watcher.pendingRequests[key] = payload;
+  config.watcher.pendingRequests[key] = { payload, method, url };
 };
 
 export const clearRequest = (key: string, config: IConfig): void => {
@@ -37,5 +39,5 @@ export const pending = (url: string, config: IConfig): any => {
   const match = find(config.watcher.pendingRequests, (request) => {
     return request.method === "GET" && request.url === url;
   });
-  return match;
+  return match ? match.payload : undefined;
 };

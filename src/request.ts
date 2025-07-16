@@ -1,9 +1,4 @@
-import superagent, {
-  Response,
-  SuperAgentStatic,
-  SuperAgentRequest,
-} from "superagent";
-import superdebug from "superdebug";
+import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from "axios";
 import get from "lodash/get";
 import each from "lodash/each";
 import merge from "lodash/merge";
@@ -12,21 +7,21 @@ import { stringify } from "querystringify";
 import { IConfig } from "./config";
 import { enqueueRequest, clearRequest } from "./watcher";
 
-const SSRFRegex = /api.nbcupassport|api.mediastore|localhost/i
-const preventSSRF = (request) => {
-  if (!get(request, 'url', '').match(SSRFRegex)) {
-    throw Error(`unsupported URL ${request.url}`);
+const SSRFRegex = /api.nbcupassport|api.mediastore|localhost/i;
+const preventSSRF = (config: InternalAxiosRequestConfig) => {
+  if (!get(config, 'url', '').match(SSRFRegex)) {
+    throw Error(`unsupported URL ${config.url}`);
   }
-
-  return request;
+  return config;
 };
 
 export interface IRequestError extends Error {
   message: string;
-  status?: number;
   text?: string;
   object?: any;
   url?: string;
+  code?: 'ERR_CANCELED';
+  status?: number;
 }
 
 export const isNode = (): boolean => {
@@ -36,47 +31,72 @@ export const isNode = (): boolean => {
 export const request = (
   config: IConfig,
   headers?: { [s: string]: any }
-): SuperAgentStatic => {
-  const req = superagent.agent();
-
-  if (config.verbose) req.use(superdebug(console.info));
-  req.use(preventSSRF);
-
+): AxiosInstance => {
+  // Merge headers
   headers = merge({}, config.headers, headers);
 
+  const instance = axios.create({
+    headers: {}, // We'll set headers below
+  });
+
+  // SSRF prevention as a request interceptor
+  instance.interceptors.request.use(preventSSRF);
+
+  // Optionally add debug logging
+  if (config.verbose) {
+    // Add Axios request and response interceptors for logging
+    instance.interceptors.request.use((cfg) => {
+      console.info('Axios Request:', cfg);
+      return cfg;
+    });
+
+    instance.interceptors.response.use((response) => {
+      console.info('Axios Response:', response);
+      return response;
+    });
+  }
+
+  // Set headers
   each(headers, (value, key) => {
     if (!value) return;
-
-    isPlainObject(value) ? req.set(key, stringify(value)) : req.set(key, value);
+    instance.defaults.headers.common[key] = isPlainObject(value)
+      ? stringify(value)
+      : value;
   });
 
   if (!isNode()) {
-    req.set("X-Window-Location", get(window, "location.href", ""));
+    instance.defaults.headers.common["X-Window-Location"] = get(window, "location.href", "");
   }
 
-  return req;
+  return instance;
 };
 
+function isAxiosError(error: any): error is AxiosError {
+  return error && error.isAxiosError;
+}
+
 export const run = async (
-  req: SuperAgentRequest,
-  config: IConfig
-): Promise<Response> => {
-  const key =
-    Math.random().toString(36).substring(2, 15) +
-    Math.random().toString(36).substring(2, 15);
-
+  req: Promise<AxiosResponse>,
+  config: IConfig,
+  method: string,
+  url: string
+): Promise<AxiosResponse> => {
+  // Use a unique random key for each request
+  const key = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  enqueueRequest(key, req, config, method, url);
   try {
-    const promise = req;
-    enqueueRequest(key, promise, config);
-
-    return await promise;
-  } catch (err) {
-    const error = err as IRequestError;
-    error.name = "RequestError";
-    error.object = get(err, "response.body");
-    error.text = get(err, "response.body.description") || err.message;
-    error.url = get(req, "url");
-
+    const response = await req;
+    return response;
+  } catch (err: any) {
+    const error: IRequestError = err;
+    if (error.name === "AbortError" || (isAxiosError(error) && error.code === "ERR_CANCELED")) {
+      error.message = "Request was aborted";
+    } else {
+      error.name = "RequestError";
+    }
+    error.object = get(err, "response.data");
+    error.text = get(err, "response.data.description") || err.message;
+    error.url = get(err, "config.url");
     throw error;
   } finally {
     clearRequest(key, config);
