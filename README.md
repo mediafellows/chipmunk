@@ -1,4 +1,6 @@
-# CHIPMUNK
+[![Javascript CI](https://github.com/mediafellows/chipmunk/actions/workflows/javascript.yml/badge.svg)](https://github.com/mediafellows/chipmunk/actions/workflows/javascript.yml)
+
+# Chipmunk
 
 REST API client library for the Mediastore. Successor of [Chinchilla](https://github.com/mediafellows/chinchilla).
 
