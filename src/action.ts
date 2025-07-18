@@ -329,11 +329,6 @@ const performProxiedAction = async <T>(
 
   const response = await run(req, config);
 
-  const headers = get(response, "body.headers", {});
-  if (isDownloadFileRequest(headers)) {
-    return handleFileDonwload(headers, response.body) as IResult<T>;
-  }
-
   const objects = get(response, "body.objects", []) as T[];
 
   const result: IResult<T> = {
