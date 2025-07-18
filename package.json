@@ -3,7 +3,7 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "version": "2.5.9-beta.5",
+  "version": "2.5.9-beta.6",
   "description": "helper library to talk to mediastore backends",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
