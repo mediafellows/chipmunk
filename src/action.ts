@@ -24,6 +24,7 @@ import getSpec, { IAction } from "./spec";
 import format from "./format";
 import parseSchema from "./schema";
 import { fetch, assign, assignEmpty } from "./association";
+import { handleFileDonwload, isDownloadFileRequest } from "./file-utils";
 import log from "./log";
 
 export interface IActionOpts {
@@ -175,11 +176,14 @@ const performAction = async <T>(
 ): Promise<IResult<T>> => {
   const spec = await getSpec(appModel, config);
   const action = spec.action(actionName);
-  const body = format(opts.body, opts.multi, opts.ROR);
+  const isBodyFormData = opts.body instanceof FormData;
+  // Don't format the body if it's already FormData
+  const body = isBodyFormData ? opts.body : format(opts.body, opts.multi, opts.ROR);  
   const uriTemplate = UriTemplate(action.template);
   const params = merge(
     {},
-    extractParamsFromBody(action, body),
+    // Skip extracting params from FormData
+    isBodyFormData ? {} : extractParamsFromBody(action, body),
     // additionally also treat params like a body, to convert back 'object'-props (source) into template params
     // helps when template variables don't match, like
     // e.g. collection get: '/assets/{asset_id}/products/{product_ids}' and collection query: '/assets/{asset_ids}/products
@@ -218,6 +222,13 @@ const performAction = async <T>(
   if (config.timestamp) req.query({ t: config.timestamp });
 
   const response = await run(req, config);
+
+  const headers = get(response, "headers", {});
+  // Handle file downloads
+  if (isDownloadFileRequest(headers)) {
+    return handleFileDonwload(headers, response.text) as IResult<T>;
+  }
+
   let objects = [];
 
   if (get(response, "body.members")) objects = response.body.members;
@@ -321,6 +332,11 @@ const performProxiedAction = async <T>(
 
   const response = await run(req, config);
   const objects = get(response, "body.objects", []) as T[];
+  const headers = get(response, "body.headers", {});
+  
+  if (isDownloadFileRequest(headers)) {
+    return handleFileDonwload(headers, response.body) as IResult<T>;
+  }
 
   const result: IResult<T> = {
     objects: objects,
