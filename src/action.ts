@@ -197,8 +197,7 @@ const performAction = async <T>(
   
   switch (action.method) {
     case "POST":
-      req = request(config, opts.headers).post(uri);
-      req.send(body);
+      req = request(config, opts.headers).post(uri).send(body);
       break;
 
     case "PUT":
