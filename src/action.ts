@@ -21,10 +21,11 @@ import isPlainObject from "lodash/isPlainObject";
 import { IConfig, cleanConfig } from "./config";
 import { request, run } from "./request";
 import getSpec, { IAction } from "./spec";
-import format, { extractFilename } from "./format";
+import format from "./format";
 import parseSchema from "./schema";
 import { fetch, assign, assignEmpty } from "./association";
 import log from "./log";
+import { handleDonwload, handleFileUpload, hasFileInBody, isDownloadFileRequest } from "./file-utils";
 
 export interface IActionOpts {
   // returns raw data, without moving association references, does not support schema resolving
@@ -194,9 +195,16 @@ const performAction = async <T>(
 
   let req;
   
+  const isUpload = hasFileInBody(body);
+
   switch (action.method) {
     case "POST":
-      req = request(config, opts.headers).post(uri).send(body);
+      req = request(config, opts.headers).post(uri);
+      if (isUpload) {
+        req = handleFileUpload(req, body);
+      } else {
+        req = req.send(body);
+      }
       break;
 
     case "PUT":
@@ -218,6 +226,13 @@ const performAction = async <T>(
   if (config.timestamp) req.query({ t: config.timestamp });
 
   const response = await run(req, config);
+
+  const headers = get(response, "headers", {});
+  // Handle file downloads
+  if (isDownloadFileRequest(headers)) {
+    return handleDonwload(headers, response.body) as IResult<T>;
+  }
+
   let objects = [];
 
   if (get(response, "body.members")) objects = response.body.members;
@@ -322,31 +337,8 @@ const performProxiedAction = async <T>(
   const response = await run(req, config);
 
   const headers = get(response, "body.headers", {});
-  const isDownloadFileRequest = headers['content-disposition'] || 
-                  headers['content-type']?.includes('application/octet-stream') ||
-                  headers['content-type']?.includes('application/pdf') ||
-                  headers['content-type']?.includes('application/zip');
-
-  // Handle file downloads
-  if (isDownloadFileRequest) {
-    const blob = new Blob([response.body]);
-    const url = window.URL.createObjectURL(blob);
-    const filename = extractFilename(headers) || 'download';
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-
-    return {
-      objects: [],
-      object: null,
-      headers: headers,
-      type: 'download'
-    } as IResult<T>;
+  if (isDownloadFileRequest(headers)) {
+    return handleDonwload(headers, response.body) as IResult<T>;
   }
 
   const objects = get(response, "body.objects", []) as T[];

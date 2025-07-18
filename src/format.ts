@@ -87,12 +87,3 @@ const toROR = (object) => {
 
   return object;
 };
-
-export const extractFilename = (headers) => {
-  const contentDisposition = headers['content-disposition'];
-  if (contentDisposition) {
-    const matches = contentDisposition.match(/filename="?([^"]+)"?/);
-    return matches ? matches[1] : 'download';
-  }
-  return 'download';
-};
