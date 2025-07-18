@@ -25,7 +25,7 @@ import format from "./format";
 import parseSchema from "./schema";
 import { fetch, assign, assignEmpty } from "./association";
 import log from "./log";
-import { handleDonwload, handleFileUpload, hasFileInBody, isDownloadFileRequest } from "./file-utils";
+import { handleFileDonwload, handleFileUpload, hasFileInBody, isDownloadFileRequest } from "./file-utils";
 
 export interface IActionOpts {
   // returns raw data, without moving association references, does not support schema resolving
@@ -230,7 +230,7 @@ const performAction = async <T>(
   const headers = get(response, "headers", {});
   // Handle file downloads
   if (isDownloadFileRequest(headers)) {
-    return handleDonwload(headers, response.body) as IResult<T>;
+    return handleFileDonwload(headers, response.body) as IResult<T>;
   }
 
   let objects = [];
@@ -338,7 +338,7 @@ const performProxiedAction = async <T>(
 
   const headers = get(response, "body.headers", {});
   if (isDownloadFileRequest(headers)) {
-    return handleDonwload(headers, response.body) as IResult<T>;
+    return handleFileDonwload(headers, response.body) as IResult<T>;
   }
 
   const objects = get(response, "body.objects", []) as T[];

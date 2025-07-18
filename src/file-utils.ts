@@ -55,7 +55,7 @@ export const isDownloadFileRequest = (headers) => {
     headers['content-type']?.includes('application/zip');
 } 
 
-export const handleDonwload = (headers, body) => {
+export const handleFileDonwload = (headers, body) => {
   const blob = new Blob([body]);
   const url = window.URL.createObjectURL(blob);
   const filename = extractFilename(headers) || 'download';
