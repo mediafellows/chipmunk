@@ -25,7 +25,7 @@ import format from "./format";
 import parseSchema from "./schema";
 import { fetch, assign, assignEmpty } from "./association";
 import log from "./log";
-import { handleFileDonwload, handleFileUpload, hasFileInBody, isDownloadFileRequest } from "./file-utils";
+import { handleFileDonwload, isDownloadFileRequest } from "./file-utils";
 
 export interface IActionOpts {
   // returns raw data, without moving association references, does not support schema resolving
@@ -176,14 +176,15 @@ const performAction = async <T>(
 ): Promise<IResult<T>> => {
   const spec = await getSpec(appModel, config);
   const action = spec.action(actionName);
+  const isBodyFormData = opts.body instanceof FormData;
   // Don't format the body if it's already FormData
-  const body = opts.body instanceof FormData ? opts.body : format(opts.body, opts.multi, opts.ROR);
+  const body = isBodyFormData ? opts.body : format(opts.body, opts.multi, opts.ROR);
   
   const uriTemplate = UriTemplate(action.template);
   const params = merge(
     {},
     // Skip extracting params from FormData
-    opts.body instanceof FormData ? {} : extractParamsFromBody(action, body),
+    isBodyFormData ? {} : extractParamsFromBody(action, body),
     extractParamsFromBody(action, opts.params),
     opts.params
   );
@@ -194,21 +195,10 @@ const performAction = async <T>(
 
   let req;
   
-  const isUpload = hasFileInBody(opts.body);
-
   switch (action.method) {
     case "POST":
       req = request(config, opts.headers).post(uri);
-      if (isUpload) {
-        if (opts.body instanceof FormData) {
-          // Pass FormData directly - don't process it
-          req = req.send(opts.body);
-        } else {
-          req = handleFileUpload(req, body);
-        }
-      } else {
-        req = req.send(body);
-      }
+      req.send(body);
       break;
 
     case "PUT":
