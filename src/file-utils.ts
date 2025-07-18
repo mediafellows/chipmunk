@@ -20,7 +20,7 @@ export const hasFileInBody = (body) => {
 };
 
 export const handleFileUpload = (req, body) => {
-  // Handle files in body
+  // Handle regular objects (your existing code)
   if (body) {
     Object.keys(body).forEach(key => {
       const value = body[key];

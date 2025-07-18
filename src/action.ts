@@ -176,15 +176,14 @@ const performAction = async <T>(
 ): Promise<IResult<T>> => {
   const spec = await getSpec(appModel, config);
   const action = spec.action(actionName);
-  const body = format(opts.body, opts.multi, opts.ROR);
+  // Don't format the body if it's already FormData
+  const body = opts.body instanceof FormData ? opts.body : format(opts.body, opts.multi, opts.ROR);
+  
   const uriTemplate = UriTemplate(action.template);
   const params = merge(
     {},
-    extractParamsFromBody(action, body),
-    // additionally also treat params like a body, to convert back 'object'-props (source) into template params
-    // helps when template variables don't match, like
-    // e.g. collection get: '/assets/{asset_id}/products/{product_ids}' and collection query: '/assets/{asset_ids}/products
-    //                                                                          ^^ asset_id vs asset_ids
+    // Skip extracting params from FormData
+    opts.body instanceof FormData ? {} : extractParamsFromBody(action, body),
     extractParamsFromBody(action, opts.params),
     opts.params
   );
@@ -195,13 +194,18 @@ const performAction = async <T>(
 
   let req;
   
-  const isUpload = hasFileInBody(body);
+  const isUpload = hasFileInBody(opts.body);
 
   switch (action.method) {
     case "POST":
       req = request(config, opts.headers).post(uri);
       if (isUpload) {
-        req = handleFileUpload(req, body);
+        if (opts.body instanceof FormData) {
+          // Pass FormData directly - don't process it
+          req = req.send(opts.body);
+        } else {
+          req = handleFileUpload(req, body);
+        }
       } else {
         req = req.send(body);
       }
