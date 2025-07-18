@@ -21,7 +21,7 @@ import isPlainObject from "lodash/isPlainObject";
 import { IConfig, cleanConfig } from "./config";
 import { request, run } from "./request";
 import getSpec, { IAction } from "./spec";
-import format from "./format";
+import format, { extractFilename } from "./format";
 import parseSchema from "./schema";
 import { fetch, assign, assignEmpty } from "./association";
 import log from "./log";
@@ -193,7 +193,7 @@ const performAction = async <T>(
   const uri = uriTemplate.fillFromObject(params);
 
   let req;
-
+  
   switch (action.method) {
     case "POST":
       req = request(config, opts.headers).post(uri).send(body);
@@ -320,6 +320,35 @@ const performProxiedAction = async <T>(
   const req = request(config).post(url).send(body);
 
   const response = await run(req, config);
+
+  const headers = get(response, "body.headers", {});
+  const isDownloadFileRequest = headers['content-disposition'] || 
+                  headers['content-type']?.includes('application/octet-stream') ||
+                  headers['content-type']?.includes('application/pdf') ||
+                  headers['content-type']?.includes('application/zip');
+
+  // Handle file downloads
+  if (isDownloadFileRequest) {
+    const blob = new Blob([response.body]);
+    const url = window.URL.createObjectURL(blob);
+    const filename = extractFilename(headers) || 'download';
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    return {
+      objects: [],
+      object: null,
+      headers: headers,
+      type: 'download'
+    } as IResult<T>;
+  }
+
   const objects = get(response, "body.objects", []) as T[];
 
   const result: IResult<T> = {
