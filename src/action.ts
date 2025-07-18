@@ -223,8 +223,15 @@ const performAction = async <T>(
   const headers = get(response, "headers", {});
   // Handle file downloads
   if (isDownloadFileRequest(headers)) {
-    return handleFileDonwload(headers, response.body) as IResult<T>;
+    return handleFileDonwload(headers, response.text) as IResult<T>;
   }
+
+  console.log('Non-proxied response structure:', {
+    headers: response.headers,
+    bodyType: typeof response.body,
+    bodyKeys: Object.keys(response.body || {}),
+    fullResponse: response
+  });
 
   let objects = [];
 
@@ -329,6 +336,10 @@ const performProxiedAction = async <T>(
 
   const response = await run(req, config);
 
+  const headers = get(response, "body.headers", {});
+  if (isDownloadFileRequest(headers)) {
+    return handleFileDonwload(headers, response.body) as IResult<T>;
+  }
   const objects = get(response, "body.objects", []) as T[];
 
   const result: IResult<T> = {
