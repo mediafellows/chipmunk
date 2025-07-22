@@ -24,7 +24,7 @@ import getSpec, { IAction } from "./spec";
 import format from "./format";
 import parseSchema from "./schema";
 import { fetch, assign, assignEmpty } from "./association";
-import { handleFileDonwload, isDownloadFileRequest } from "./file-utils";
+import { handleFileDownload, isDownloadFileRequest } from "./file-utils";
 import log from "./log";
 
 export interface IActionOpts {
@@ -177,17 +177,11 @@ const performAction = async <T>(
   const spec = await getSpec(appModel, config);
   const action = spec.action(actionName);
   const isBodyFormData = opts.body instanceof FormData;
-  // Don't format the body if it's already FormData
-  const body = isBodyFormData ? opts.body : format(opts.body, opts.multi, opts.ROR);  
+  const body = isBodyFormData ? opts.body : format(opts.body, opts.multi, opts.ROR);
   const uriTemplate = UriTemplate(action.template);
   const params = merge(
     {},
-    // Skip extracting params from FormData
     isBodyFormData ? {} : extractParamsFromBody(action, body),
-    // additionally also treat params like a body, to convert back 'object'-props (source) into template params
-    // helps when template variables don't match, like
-    // e.g. collection get: '/assets/{asset_id}/products/{product_ids}' and collection query: '/assets/{asset_ids}/products
-    //                                                                          ^^ asset_id vs asset_ids
     extractParamsFromBody(action, opts.params),
     opts.params
   );
@@ -195,66 +189,77 @@ const performAction = async <T>(
   validateParams(action, params, config);
 
   const uri = uriTemplate.fillFromObject(params);
-
   let req;
 
   switch (action.method) {
     case "POST":
       req = request(config, opts.headers).post(uri).send(body);
       break;
-
     case "PUT":
       req = request(config, opts.headers).put(uri).send(body);
       break;
-
     case "PATCH":
       req = request(config, opts.headers).patch(uri).send(body);
       break;
-
     case "DELETE":
       req = request(config, opts.headers).delete(uri).send(body);
       break;
-
     default:
       req = request(config, opts.headers).get(uri);
   }
 
   if (config.timestamp) req.query({ t: config.timestamp });
 
-  const response = await run(req, config);
+  // Always handle as blob to support both JSON and file responses
+  req.responseType("blob");
 
-  const headers = get(response, "headers", {});
-  // Handle file downloads
+  const rawResponse = await run(req, config);
+  const headers = get(rawResponse, "headers", {});
+  const contentType = headers["content-type"] || "";
+  
+  let responseBody: any;
+
   if (isDownloadFileRequest(headers)) {
-    return handleFileDonwload(headers, response.text) as IResult<T>;
+    responseBody = rawResponse.body; 
+    return handleFileDownload(headers, responseBody) as IResult<T>;
+  }
+
+  if (contentType.includes("application/json")) {
+    const text = await rawResponse.body.text();
+    responseBody = JSON.parse(text);
+  } else {
+    const text = await rawResponse.body.text();
+    try {
+      responseBody = JSON.parse(text);
+    } catch {
+      responseBody = text;
+    }
   }
 
   let objects = [];
-
-  if (get(response, "body.members")) objects = response.body.members;
-  else if (!isEmpty(response.body)) objects = [response.body];
+  if (get(responseBody, "members")) objects = responseBody.members;
+  else if (!isEmpty(responseBody)) objects = [responseBody];
 
   if (!opts.raw) {
-    // objects can have different context, e.g. series vs seasons vs episodes
-    // for this reason we have to check all possible contexts for association definitions
-
     const promises = map(objects, async (object) => {
-      if (!object["@context"]) return; // skip non JSONLD objects
+      if (!object["@context"]) return;
+      
+      try {
+        const objectSpec = await getSpec(object["@context"], config);
+        object["@associations"] = {};
 
-      const objectSpec = await getSpec(object["@context"], config);
-      object["@associations"] = {};
-
-      each(objectSpec.associations, (_def, name) => {
-        const data = object[name];
-
-        if (data) {
-          object["@associations"][name] = isArray(data)
-            ? map(data, "@id")
-            : get(data, "@id");
-        }
-
-        object[name] = null; // initialize association data with null
-      });
+        each(objectSpec.associations, (_def, name) => {
+          const data = object[name];
+          if (data) {
+            object["@associations"][name] = isArray(data)
+              ? map(data, "@id")
+              : get(data, "@id");
+          }
+          object[name] = null;
+        });
+      } catch (err) {
+        if (config.verbose) console.warn(`Failed to load spec for context: ${object["@context"]}`);
+      }
     });
 
     await Promise.all(promises);
@@ -270,38 +275,33 @@ const performAction = async <T>(
     get object() {
       return first(objects);
     },
-    headers: get(response, "headers", {}),
-    type: get(response, `body['@type']`),
+    headers,
+    type: get(responseBody, "@type"),
   };
 
-  if (get(response, "body.aggregations")) {
-    if (opts.raw) {
-      result.aggregations = response.body.aggregations;
-    }
-    else {
-      result.aggregations = reduce(
-        response.body.aggregations,
-        (acc, agg, name) => {
-          acc[name] = map(get(agg, "buckets"), (tranche) => ({
-            value: tranche.key,
-            count: tranche.doc_count,
-          }));
-          return acc;
-        },
-        {}
-      );
-    }
+  if (get(responseBody, "aggregations")) {
+    result.aggregations = opts.raw
+      ? responseBody.aggregations
+      : reduce(
+          responseBody.aggregations,
+          (acc, agg, name) => {
+            acc[name] = map(get(agg, "buckets"), (tranche) => ({
+              value: tranche.key,
+              count: tranche.doc_count,
+            }));
+            return acc;
+          },
+          {}
+        );
   }
 
-  if (get(response, `body['total_count']`) || get(response, `body['@total_count']`)) {
+  if (get(responseBody, "total_count") || get(responseBody, "@total_count")) {
     result.pagination = {} as IPagination;
-
     each(PAGINATION_PROPS, (prop) => {
-      if (response.body[prop]) {
-        result.pagination[prop] = response.body[prop];
-      }
-      else if (response.body[`@${prop}`]) {
-        result.pagination[prop] = response.body[`@${prop}`];
+      if (responseBody[prop]) {
+        result.pagination[prop] = responseBody[prop];
+      } else if (responseBody[`@${prop}`]) {
+        result.pagination[prop] = responseBody[`@${prop}`];
       }
     });
   }
@@ -332,11 +332,6 @@ const performProxiedAction = async <T>(
 
   const response = await run(req, config);
   const objects = get(response, "body.objects", []) as T[];
-  const headers = get(response, "body.headers", {});
-  
-  if (isDownloadFileRequest(headers)) {
-    return handleFileDonwload(headers, response.body) as IResult<T>;
-  }
 
   const result: IResult<T> = {
     objects: objects,

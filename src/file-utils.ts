@@ -8,13 +8,15 @@ const extractFilename = (headers) => {
 };
 
 export const isDownloadFileRequest = (headers) => {
-  return headers['content-disposition'] || 
-    headers['content-type']?.includes('application/octet-stream') ||
-    headers['content-type']?.includes('application/pdf') ||
-    headers['content-type']?.includes('application/zip');
-} 
+ const contentType = headers['content-type'] || '';
+ return headers['content-disposition'] || 
+   contentType.includes('application/octet-stream') ||
+   contentType.includes('application/pdf') ||
+   contentType.includes('application/zip') ||
+   (contentType.startsWith('application/') && !contentType.includes('json'));
+};
 
-export const handleFileDonwload = (headers, body) => {
+export const handleFileDownload = (headers, body) => {
   const blob = new Blob([body]);
   const url = window.URL.createObjectURL(blob);
   const filename = extractFilename(headers) || 'download';
