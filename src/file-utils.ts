@@ -1,11 +1,23 @@
 const extractFilename = (headers) => {
   const contentDisposition = headers['content-disposition'];
   if (contentDisposition) {
-    const matches = contentDisposition.match(/filename="?([^"]+)"?/);
-    return matches ? matches[1] : 'download';
+    const matches = contentDisposition.match(/filename[*]?=['"]?([^'";\r\n]+)['"]?/);
+    return matches ? decodeURIComponent(matches[1]) : 'download';
   }
+  
+  // Fallback based on content-type if no content-disposition
+  const contentType = headers['content-type'] || '';
+  if (contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+    return 'download.xlsx';
+  } else if (contentType.includes('application/pdf')) {
+    return 'download.pdf';
+  } else if (contentType.includes('application/zip')) {
+    return 'download.zip';
+  }
+  
   return 'download';
 };
+
 
 export const isDownloadFileRequest = (headers) => {
  const contentType = headers['content-type'] || '';
