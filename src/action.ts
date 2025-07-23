@@ -176,8 +176,8 @@ const performAction = async <T>(
 ): Promise<IResult<T>> => {
   const spec = await getSpec(appModel, config);
   const action = spec.action(actionName);
-  // Don't format the body if it's already FormData
   const isBodyFormData = opts.body instanceof FormData;
+  // Don't format the body if it's already FormData
   const body = isBodyFormData ? opts.body : format(opts.body, opts.multi, opts.ROR);
   const uriTemplate = UriTemplate(action.template);
   const params = merge(
@@ -201,19 +201,15 @@ const performAction = async <T>(
     case "POST":
       req = request(config, opts.headers).post(uri).send(body);
       break;
-    
     case "PUT":
       req = request(config, opts.headers).put(uri).send(body);
       break;
-    
     case "PATCH":
       req = request(config, opts.headers).patch(uri).send(body);
       break;
-    
     case "DELETE":
       req = request(config, opts.headers).delete(uri).send(body);
       break;
-    
     default:
       req = request(config, opts.headers).get(uri);
   }
@@ -268,7 +264,7 @@ const performAction = async <T>(
               ? map(data, "@id")
               : get(data, "@id");
           }
-          
+
           object[name] = null; // initialize association data with null
         });
       } catch (err) {
