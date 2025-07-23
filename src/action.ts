@@ -176,12 +176,18 @@ const performAction = async <T>(
 ): Promise<IResult<T>> => {
   const spec = await getSpec(appModel, config);
   const action = spec.action(actionName);
+  // Don't format the body if it's already FormData
   const isBodyFormData = opts.body instanceof FormData;
   const body = isBodyFormData ? opts.body : format(opts.body, opts.multi, opts.ROR);
   const uriTemplate = UriTemplate(action.template);
   const params = merge(
     {},
+    // Skip extracting params from FormData
     isBodyFormData ? {} : extractParamsFromBody(action, body),
+    // additionally also treat params like a body, to convert back 'object'-props (source) into template params
+    // helps when template variables don't match, like
+    // e.g. collection get: '/assets/{asset_id}/products/{product_ids}' and collection query: '/assets/{asset_ids}/products
+    //                                                                          ^^ asset_id vs asset_ids
     extractParamsFromBody(action, opts.params),
     opts.params
   );
@@ -195,15 +201,19 @@ const performAction = async <T>(
     case "POST":
       req = request(config, opts.headers).post(uri).send(body);
       break;
+    
     case "PUT":
       req = request(config, opts.headers).put(uri).send(body);
       break;
+    
     case "PATCH":
       req = request(config, opts.headers).patch(uri).send(body);
       break;
+    
     case "DELETE":
       req = request(config, opts.headers).delete(uri).send(body);
       break;
+    
     default:
       req = request(config, opts.headers).get(uri);
   }
@@ -241,9 +251,12 @@ const performAction = async <T>(
   else if (!isEmpty(responseBody)) objects = [responseBody];
 
   if (!opts.raw) {
+    // objects can have different context, e.g. series vs seasons vs episodes
+    // for this reason we have to check all possible contexts for association definitions
+    
     const promises = map(objects, async (object) => {
-      if (!object["@context"]) return;
-      
+      if (!object["@context"]) return; // skip non JSONLD objects
+            
       try {
         const objectSpec = await getSpec(object["@context"], config);
         object["@associations"] = {};
@@ -255,7 +268,8 @@ const performAction = async <T>(
               ? map(data, "@id")
               : get(data, "@id");
           }
-          object[name] = null;
+          
+          object[name] = null; // initialize association data with null
         });
       } catch (err) {
         if (config.verbose) console.warn(`Failed to load spec for context: ${object["@context"]}`);
