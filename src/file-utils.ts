@@ -1,20 +1,22 @@
 const extractFilename = (headers) => {
   const contentDisposition = headers['content-disposition'];
   if (contentDisposition) {
-    const matches = contentDisposition.match(/filename="?([^"]+)"?/);
-    return matches ? matches[1] : 'download';
+    const matches = contentDisposition.match(/filename[*]?=['"]?([^'";\r\n]+)['"]?/);
+    return matches ? decodeURIComponent(matches[1]) : 'download';
   }
+
   return 'download';
 };
+
 
 export const isDownloadFileRequest = (headers) => {
   return headers['content-disposition'] || 
     headers['content-type']?.includes('application/octet-stream') ||
     headers['content-type']?.includes('application/pdf') ||
     headers['content-type']?.includes('application/zip');
-} 
+}
 
-export const handleFileDonwload = (headers, body) => {
+export const handleFileDownload = (headers, body) => {
   const blob = new Blob([body]);
   const url = window.URL.createObjectURL(blob);
   const filename = extractFilename(headers) || 'download';
