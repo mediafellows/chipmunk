@@ -24,7 +24,7 @@ import getSpec, { IAction } from "./spec";
 import format from "./format";
 import parseSchema from "./schema";
 import { fetch, assign, assignEmpty } from "./association";
-import { handleFileDonwload, isDownloadFileRequest } from "./file-utils";
+import { handleFileDownload, isDownloadFileRequest } from "./file-utils";
 import log from "./log";
 
 export interface IActionOpts {
@@ -41,6 +41,7 @@ export interface IActionOpts {
   body?: { [s: string]: any };
   params?: { [s: string]: any };
   schema?: string;
+  isFileDownload?: boolean;
 }
 
 export interface IObject {
@@ -70,6 +71,7 @@ const DEFAULT_OPTS: IActionOpts = {
   proxy: false,
   multi: false,
   params: {},
+  isFileDownload: false
 };
 
 const PAGINATION_PROPS = ["total_pages", "total_count", "current_page"];
@@ -168,6 +170,70 @@ const resolve = async (objects, schema, config) => {
   return result;
 };
 
+const performFileDownloadAction = async <T>(
+  appModel: string,
+  actionName: string,
+  opts: IActionOpts,
+  config: IConfig
+): Promise<IResult<T>> => {
+  const spec = await getSpec(appModel, config);
+  const action = spec.action(actionName);
+  const isBodyFormData = opts.body instanceof FormData;
+  // Don't format the body if it's already FormData
+  const body = isBodyFormData ? opts.body : format(opts.body, opts.multi, opts.ROR);  
+  const uriTemplate = UriTemplate(action.template);
+  const params = merge(
+    {},
+    // Skip extracting params from FormData
+    isBodyFormData ? {} : extractParamsFromBody(action, body),
+    extractParamsFromBody(action, opts.params),
+    opts.params
+  );
+
+  validateParams(action, params, config);
+
+  const uri = uriTemplate.fillFromObject(params);
+
+  let req;
+
+  switch (action.method) {
+    case "POST":
+      req = request(config, opts.headers).post(uri).send(body);
+      break;
+
+    case "PUT":
+      req = request(config, opts.headers).put(uri).send(body);
+      break;
+
+    case "PATCH":
+      req = request(config, opts.headers).patch(uri).send(body);
+      break;
+
+    case "DELETE":
+      req = request(config, opts.headers).delete(uri).send(body);
+      break;
+
+    default:
+      req = request(config, opts.headers).get(uri);
+  }
+
+  if (config.timestamp) req.query({ t: config.timestamp });
+
+  req.responseType("blob");
+
+  const rawResponse = await run(req, config);
+  const headers = get(rawResponse, "headers", {});
+
+  let responseBody: any;
+
+  if (isDownloadFileRequest(headers)) {
+    responseBody = rawResponse.body; 
+    return handleFileDownload(headers, responseBody) as IResult<T>;
+  }
+
+  return null;
+};
+
 const performAction = async <T>(
   appModel: string,
   actionName: string,
@@ -222,12 +288,6 @@ const performAction = async <T>(
   if (config.timestamp) req.query({ t: config.timestamp });
 
   const response = await run(req, config);
-
-  const headers = get(response, "headers", {});
-  // Handle file downloads
-  if (isDownloadFileRequest(headers)) {
-    return handleFileDonwload(headers, response.text) as IResult<T>;
-  }
 
   let objects = [];
 
@@ -332,11 +392,6 @@ const performProxiedAction = async <T>(
 
   const response = await run(req, config);
   const objects = get(response, "body.objects", []) as T[];
-  const headers = get(response, "body.headers", {});
-  
-  if (isDownloadFileRequest(headers)) {
-    return handleFileDonwload(headers, response.body) as IResult<T>;
-  }
 
   const result: IResult<T> = {
     objects: objects,
@@ -362,6 +417,9 @@ export default async <T>(
 
   if (opts.proxy && isEmpty(opts.schema)) {
     throw new Error("Proxying is supported only if a schema is given, too.");
+  }
+  if (opts.isFileDownload) {
+    return performFileDownloadAction(appModel, actionName, opts, config);
   }
 
   return opts.proxy
