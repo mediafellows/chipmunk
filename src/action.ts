@@ -230,6 +230,8 @@ const performFileDownloadAction = async <T>(
     responseBody = rawResponse.body; 
     return handleFileDownload(headers, responseBody) as IResult<T>;
   }
+
+  return null;
 };
 
 const performAction = async <T>(
