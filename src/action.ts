@@ -416,7 +416,6 @@ export default async <T>(
   if (opts.proxy && isEmpty(opts.schema)) {
     throw new Error("Proxying is supported only if a schema is given, too.");
   }
-
   if (opts.isFileDownload) {
     return performFileDownloadAction(appModel, actionName, opts, config);
   }
