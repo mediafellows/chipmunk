@@ -24,7 +24,7 @@ import getSpec, { IAction } from "./spec";
 import format from "./format";
 import parseSchema from "./schema";
 import { fetch, assign, assignEmpty } from "./association";
-import { handleFileDonwload, isDownloadFileRequest } from "./file-utils";
+import { handleFileDownload, isDownloadFileRequest } from "./file-utils";
 import log from "./log";
 
 export interface IActionOpts {
@@ -42,6 +42,7 @@ export interface IActionOpts {
   params?: { [s: string]: any };
   schema?: string;
   signal?: AbortSignal;
+  isFileDownload?: boolean;
 }
 
 export interface IObject {
@@ -71,6 +72,7 @@ const DEFAULT_OPTS: IActionOpts = {
   proxy: false,
   multi: false,
   params: {},
+  isFileDownload: false,
 };
 
 const PAGINATION_PROPS = ["total_pages", "total_count", "current_page"];
@@ -221,6 +223,10 @@ const performAction = async <T>(
     axiosOptions.params = { t: config.timestamp };
   }
 
+  if (opts.isFileDownload) {
+    axiosOptions.responseType = 'blob';
+  }
+  
   switch (action.method) {
     case "POST":
       req = request(config, opts.headers).post(uri, body, axiosOptions);
@@ -239,12 +245,12 @@ const performAction = async <T>(
   }
   
   const response = await run(req, config, action.method, uri);
-
   const headers = get(response, "headers", {});
   
   // Handle file downloads
   if (isDownloadFileRequest(headers)) {
-    return handleFileDonwload(headers, response.text) as IResult<T>;
+    const body = get(response, "data", {});
+    return handleFileDownload(headers, body) as IResult<T>;
   }
 
   let objects = [];
@@ -350,11 +356,6 @@ const performProxiedAction = async <T>(
 
   const response = await run(req, config, "POST", url);
   const objects = get(response, "data.objects", []) as T[];
-  const headers = get(response, "body.headers", {});
-  
-  if (isDownloadFileRequest(headers)) {
-    return handleFileDonwload(headers, response.body) as IResult<T>;
-  }
 
   const result: IResult<T> = {
     objects: objects,
