@@ -183,70 +183,6 @@ const resolve = async (objects, schema, config, signal?: AbortSignal) => {
   return result;
 };
 
-const performFileDownloadAction = async <T>(
-  appModel: string,
-  actionName: string,
-  opts: IActionOpts,
-  config: IConfig
-): Promise<IResult<T>> => {
-  const spec = await getSpec(appModel, config);
-  const action = spec.action(actionName);
-  const isBodyFormData = opts.body instanceof FormData;
-  // Don't format the body if it's already FormData
-  const body = isBodyFormData ? opts.body : format(opts.body, opts.multi, opts.ROR);  
-  const uriTemplate = UriTemplate(action.template);
-  const params = merge(
-    {},
-    // Skip extracting params from FormData
-    isBodyFormData ? {} : extractParamsFromBody(action, body),
-    extractParamsFromBody(action, opts.params),
-    opts.params
-  );
-
-  validateParams(action, params, config);
-
-  const uri = uriTemplate.fillFromObject(params);
-
-  let req;
-
-  switch (action.method) {
-    case "POST":
-      req = request(config, opts.headers).post(uri).send(body);
-      break;
-
-    case "PUT":
-      req = request(config, opts.headers).put(uri).send(body);
-      break;
-
-    case "PATCH":
-      req = request(config, opts.headers).patch(uri).send(body);
-      break;
-
-    case "DELETE":
-      req = request(config, opts.headers).delete(uri).send(body);
-      break;
-
-    default:
-      req = request(config, opts.headers).get(uri);
-  }
-
-  if (config.timestamp) req.query({ t: config.timestamp });
-
-  req.responseType("blob");
-
-  const rawResponse = await run(req, config);
-  const headers = get(rawResponse, "headers", {});
-
-  let responseBody: any;
-
-  if (isDownloadFileRequest(headers)) {
-    responseBody = rawResponse.body; 
-    return handleFileDownload(headers, responseBody) as IResult<T>;
-  }
-
-  return null;
-};
-
 const performAction = async <T>(
   appModel: string,
   actionName: string,
@@ -445,9 +381,6 @@ export default async <T>(
 
   if (opts.proxy && isEmpty(opts.schema)) {
     throw new Error("Proxying is supported only if a schema is given, too.");
-  }
-  if (opts.isFileDownload) {
-    return performFileDownloadAction(appModel, actionName, opts, config);
   }
 
   return opts.proxy
