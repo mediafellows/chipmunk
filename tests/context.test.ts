@@ -32,7 +32,7 @@ describe("context", () => {
   it("fails to find a random context", async () => {
     await chipmunk.run(async (ch) => {
       const promise = ch.context("um.foo");
-      await expect(promise).to.be.rejectedWith("Not Found");
+      await expect(promise).to.be.rejected;
     });
   });
 

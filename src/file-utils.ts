@@ -21,19 +21,17 @@ const extractFilename = (headers) => {
   return 'download';
 };
 
-
 export const isDownloadFileRequest = (headers) => {
   return headers['content-disposition'] || 
     headers['content-type']?.includes('application/octet-stream') ||
     headers['content-type']?.includes('application/pdf') ||
     headers['content-type']?.includes('application/zip');
-}
+} 
 
 export const handleFileDownload = (headers, body) => {
   const blob = new Blob([body]);
   const url = window.URL.createObjectURL(blob);
   const filename = extractFilename(headers) || 'download';
-
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
@@ -41,7 +39,6 @@ export const handleFileDownload = (headers, body) => {
   a.click();
   document.body.removeChild(a);
   window.URL.revokeObjectURL(url);
-
   return {
     objects: [],
     object: null,

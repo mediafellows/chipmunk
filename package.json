@@ -3,7 +3,7 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
-  "version": "2.5.9-beta.11",
+  "version": "2.6.0",
   "description": "helper library to talk to mediastore backends",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -28,7 +28,7 @@
     "@types/chai-as-promised": "^7.1.0",
     "@types/js-yaml": "^3.12.1",
     "@types/lodash": "^4.17.14",
-    "@types/mocha": "^5.2.6",
+    "@types/mocha": "^10.0.10",
     "@types/nock": "^11",
     "@types/node": "^11.13.7",
     "@types/querystringify": "^2.0.0",
@@ -37,7 +37,7 @@
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
     "js-yaml": "^3.13.1",
-    "mocha": "^6.1.4",
+    "mocha": "^11.7.1",
     "nock": "^13.5.6",
     "nyc": "^14.0.0",
     "prettier": "^2.4.1",
@@ -49,11 +49,9 @@
     "webpack-cli": "^4.2.0"
   },
   "dependencies": {
-    "@types/superagent": "^4.1.1",
+    "axios": "^1.10.0",
     "lodash": "^4.17.21",
     "querystringify": "^2.1.1",
-    "superagent": "^5.0.5",
-    "superdebug": "https://github.com/mediafellows/superdebug.git#7c29e60b4c60f6f23d37a5882a6687483597f178",
     "uri-templates": "^0.2.0"
   }
 }

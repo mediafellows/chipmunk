@@ -111,14 +111,14 @@ export const getSpec = async (
     if ((req = pending(url, config))) {
       res = await req;
     } else {
-      req = request(config).get(url);
-
-      if (config.timestamp) req.query({ t: config.timestamp });
-
-      res = await run(req, config);
+      req = request(config).get(url, {
+        params: config.timestamp ? { t: config.timestamp } : undefined,
+        signal: config.signal,
+      });
+      res = await run(req, config, "GET", url);
     }
 
-    spec = get(res, `body['@context']`) || get(res, "body");
+    spec = get(res, `data['@context']`) || get(res, "data");
     spec.url = url;
 
     if (config.cache.enabled && config.cache.default) {
