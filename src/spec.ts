@@ -7,7 +7,7 @@ import cloneDeep from "lodash/cloneDeep";
 import startsWith from "lodash/startsWith";
 
 import { IConfig } from "./config";
-import { request, run } from "./request";
+import { request, run, formatHeaders } from "./request";
 import { set as cacheSet, get as cacheGet } from "./cache";
 import { pending } from "./watcher";
 import { getSpecUrl } from "./association";
@@ -112,6 +112,7 @@ export const getSpec = async (
       res = await req;
     } else {
       req = request(config).get(url, {
+        headers: formatHeaders(config.headers),
         params: config.timestamp ? { t: config.timestamp } : undefined,
         signal: config.signal,
       });
