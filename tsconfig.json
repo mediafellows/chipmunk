@@ -17,6 +17,7 @@
     "outDir": "dist",
     "lib": ["es6", "es7", "dom"],
     "esModuleInterop": true,
+    "types": ["node"],
   },
   "compilerOptsRef": {
     "baseUrl": "src",
