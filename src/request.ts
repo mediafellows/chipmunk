@@ -51,7 +51,7 @@ let axiosInstance: AxiosInstance = null;
 export const request = (
   config: IConfig,
 ): AxiosInstance => {
-  if (isNode && axiosInstance) return axiosInstance;
+  if (axiosInstance) return axiosInstance;
 
   let instance: AxiosInstance;
   if (isNode) {
@@ -84,7 +84,7 @@ export const request = (
     });
   }
 
-  if (isNode) axiosInstance = instance;
+  axiosInstance = instance;
   return instance;
 };
 
