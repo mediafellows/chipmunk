@@ -19,7 +19,7 @@ import isEmpty from "lodash/isEmpty";
 import isPlainObject from "lodash/isPlainObject";
 
 import { IConfig, cleanConfig } from "./config";
-import { request, run } from "./request";
+import { request, run, isNode } from "./request";
 import getSpec, { IAction } from "./spec";
 import format from "./format";
 import parseSchema from "./schema";
@@ -377,7 +377,7 @@ export default async <T>(
   opts: IActionOpts,
   config: IConfig
 ): Promise<IResult<T>> => {
-  opts = merge({}, DEFAULT_OPTS, { proxy: !isEmpty(opts.schema) }, opts);
+  opts = merge({}, DEFAULT_OPTS, { proxy: !isEmpty(opts.schema) && !isNode() }, opts);
 
   if (opts.proxy && isEmpty(opts.schema)) {
     throw new Error("Proxying is supported only if a schema is given, too.");
