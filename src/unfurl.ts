@@ -14,7 +14,11 @@ export default async <T> (
 ): Promise<IResult<T>> => {
   const per = get(opts, "params.per") || get(opts, "body.per") || 100;
 
-  const result= await action<T>(appModel, actionName, opts, config);
+  // Ensure params.per is always set for the initial request
+  const initialOpts = merge({}, opts);
+  initialOpts.params = { ...initialOpts.params, per };
+
+  const result = await action<T>(appModel, actionName, initialOpts, config);
   let objects = result.objects.slice();
 
   if (result.pagination) {
@@ -23,10 +27,8 @@ export default async <T> (
     if (startPage < result.pagination.total_pages) {
       const pages = range(startPage + 1, result.pagination.total_pages + 1);
       const promises = map(pages, (page) => {
-        const pageOpts = merge({}, opts, {
-          params: { page, per },
-          body: { page, per },
-        });
+        const pageOpts = merge({}, opts);
+        pageOpts.params = { ...pageOpts.params, page, per };
 
         return action<T>(appModel, actionName, pageOpts, config);
       });
