@@ -14,9 +14,10 @@ export default async <T> (
 ): Promise<IResult<T>> => {
   const per = get(opts, "params.per") || get(opts, "body.per") || 100;
   
-  // Ensure params.per is always set for the initial request
+  // Ensure both params.per and body.per are always set for the initial request
   const initialOpts = merge({}, opts);
   initialOpts.params = { ...initialOpts.params, per };
+  initialOpts.body = { ...initialOpts.body, per };
 
   const result= await action<T>(appModel, actionName, initialOpts, config);
   let objects = result.objects.slice();
