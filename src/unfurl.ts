@@ -18,7 +18,7 @@ export default async <T> (
   const initialOpts = merge({}, opts);
   initialOpts.params = { ...initialOpts.params, per };
 
-  const result= await action<T>(appModel, actionName, opts, config);
+  const result= await action<T>(appModel, actionName, initialOpts, config);
   let objects = result.objects.slice();
 
   if (result.pagination) {
