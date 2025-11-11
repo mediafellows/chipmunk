@@ -13,8 +13,18 @@ export default async <T> (
   config: IConfig
 ): Promise<IResult<T>> => {
   const per = get(opts, "params.per") || get(opts, "body.per") || 100;
+  
+  // modify opts for the action call if per was explicitly set in body or params
+  const explicitPer = get(opts, "params.per") || get(opts, "body.per");
+  const finalOpts = explicitPer !== undefined 
+    ? { 
+        ...opts, 
+        params: { ...opts.params, per: explicitPer },
+        body: { ...opts.body, per: explicitPer }
+      }
+    : opts;
 
-  const result= await action<T>(appModel, actionName, opts, config);
+  const result = await action<T>(appModel, actionName, finalOpts, config);
   let objects = result.objects.slice();
 
   if (result.pagination) {
