@@ -14,12 +14,17 @@ export default async <T> (
 ): Promise<IResult<T>> => {
   const per = get(opts, "params.per") || get(opts, "body.per") || 100;
   
-  // Ensure both params.per and body.per are always set for the initial request
-  const initialOpts = merge({}, opts);
-  initialOpts.params = { ...initialOpts.params, per };
-  initialOpts.body = { ...initialOpts.body, per };
+  // modify opts for the action call if per was explicitly set in body or params
+  const explicitPer = get(opts, "params.per") || get(opts, "body.per");
+  const finalOpts = explicitPer !== undefined 
+    ? { 
+        ...opts, 
+        params: { ...opts.params, per: explicitPer },
+        body: { ...opts.body, per: explicitPer }
+      }
+    : opts;
 
-  const result= await action<T>(appModel, actionName, initialOpts, config);
+  const result = await action<T>(appModel, actionName, finalOpts, config);
   let objects = result.objects.slice();
 
   if (result.pagination) {
