@@ -1,11 +1,18 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig, AxiosError } from "axios";
 import get from "lodash/get";
-import each from "lodash/each";
-import merge from "lodash/merge";
+import reduce from "lodash/reduce";
 import isPlainObject from "lodash/isPlainObject";
 import { stringify } from "querystringify";
 import { IConfig } from "./config";
 import { enqueueRequest, clearRequest } from "./watcher";
+
+export const isNode = typeof window === 'undefined';
+
+let http, https;
+if (isNode) {
+  http = require('http');
+  https = require('https');
+}
 
 const SSRFRegex = /api.nbcupassport|api.mediastore|localhost/i;
 const preventSSRF = (config: InternalAxiosRequestConfig) => {
@@ -24,22 +31,43 @@ export interface IRequestError extends Error {
   status?: number;
 }
 
-export const isNode = (): boolean => {
-  return typeof window === "undefined";
-};
+export const formatHeaders = (headers) => {
+  return reduce(
+    headers,
+    (acc, value, key) => {
+      if (!value) return acc;
 
+      acc[key] = isPlainObject(value)
+        ? stringify(value)
+        : value;
+
+      return acc;
+    }, 
+    {}
+  );
+}
+
+let axiosInstance: AxiosInstance = null;
 export const request = (
   config: IConfig,
-  headers?: { [s: string]: any }
 ): AxiosInstance => {
-  // Merge headers
-  headers = merge({}, config.headers, headers);
+  if (axiosInstance) return axiosInstance;
 
-  const instance = axios.create({
-    headers: {}, // We'll set headers below
-  });
+  let instance: AxiosInstance;
+  if (isNode) {
+    const httpAgent = new http.Agent({ keepAlive: true });
+    const httpsAgent = new https.Agent({ keepAlive: true });
+    instance = axios.create({
+      headers: {},
+      httpAgent: httpAgent,
+      httpsAgent: httpsAgent,
+    });
+  } else {
+    instance = axios.create({
+      headers: {},
+    });
+  }
 
-  // SSRF prevention as a request interceptor
   instance.interceptors.request.use(preventSSRF);
 
   // Optionally add debug logging
@@ -56,18 +84,7 @@ export const request = (
     });
   }
 
-  // Set headers
-  each(headers, (value, key) => {
-    if (!value) return;
-    instance.defaults.headers.common[key] = isPlainObject(value)
-      ? stringify(value)
-      : value;
-  });
-
-  if (!isNode()) {
-    instance.defaults.headers.common["X-Window-Location"] = get(window, "location.href", "");
-  }
-
+  axiosInstance = instance;
   return instance;
 };
 

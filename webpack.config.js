@@ -8,6 +8,10 @@ module.exports = {
   },
   resolve: {
     extensions: [".js", ".ts"],
+    fallback: {
+      "http": false,
+      "https": false,
+    },
   },
   module: {
     rules: [
