@@ -7,6 +7,7 @@ import uniq from "lodash/uniq";
 import flatten from "lodash/flatten";
 import omit from "lodash/omit";
 import pick from "lodash/pick";
+import pickBy from "lodash/pickBy";
 import keys from "lodash/keys";
 import reduce from "lodash/reduce";
 import filter from "lodash/filter";
@@ -43,6 +44,8 @@ export interface IActionOpts {
   schema?: string;
   signal?: AbortSignal;
   isFileDownload?: boolean;
+  // Internal: params to forward to association requests
+  _associationParams?: { [s: string]: any };
 }
 
 export interface IObject {
@@ -219,7 +222,34 @@ const performAction = async <T>(
   const axiosOptions: any = {
     signal: opts.signal || config.signal,
   };
-  if (config.timestamp) {
+  
+  // For GET requests, include non-template params as query parameters
+  if (action.method === "GET") {
+    // Extract all variable names from the URI template (e.g., {?ids,sort} or {id})
+    // This regex matches {var}, {?var}, {var1,var2}, {?var1,var2}, etc.
+    const templateVarMatches = action.template.match(/\{[^}]+\}/g) || [];
+    const templateVars = new Set<string>();
+    
+    templateVarMatches.forEach(match => {
+      // Remove braces and optional '?' prefix: "{?ids,sort}" -> "ids,sort"
+      const varString = match.replace(/[{}?]/g, '');
+      // Split by comma and add each variable: ["ids", "sort"]
+      varString.split(',').forEach(v => {
+        const cleanVar = v.split(':')[0].trim(); // Handle expressions like {var:3}
+        if (cleanVar) templateVars.add(cleanVar);
+      });
+    });
+    
+    // Only include params that are NOT template variables (those go in the URL)
+    const queryParams = pickBy(opts.params || {}, (_, key) => !templateVars.has(key));
+    if (Object.keys(queryParams).length > 0) {
+      axiosOptions.params = queryParams;
+    }
+    
+    if (config.timestamp) {
+      axiosOptions.params = { ...axiosOptions.params, t: config.timestamp };
+    }
+  } else if (config.timestamp) {
     axiosOptions.params = { t: config.timestamp };
   }
 
@@ -286,7 +316,7 @@ const performAction = async <T>(
 
   if (!opts.raw && !isEmpty(opts.schema)) {
     const schema = parseSchema(opts.schema);
-    const extraParams = 'include_folders' in (opts.params ?? {}) ? { include_folders: opts.params.include_folders } : {};
+    const extraParams = opts._associationParams || {};
     objects = await resolve(objects, schema, config, opts.signal, extraParams);
   }
 
@@ -382,6 +412,11 @@ export default async <T>(
 
   if (opts.proxy && isEmpty(opts.schema)) {
     throw new Error("Proxying is supported only if a schema is given, too.");
+  }
+
+  // Extract params that should be forwarded to associations
+  if ('include_folders' in (opts.params ?? {})) {
+    opts._associationParams = { include_folders: opts.params.include_folders };
   }
 
   return opts.proxy

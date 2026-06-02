@@ -874,4 +874,129 @@ describe("action", () => {
     const promise = chipmunk.action("um.user", "query");
     await expect(promise).to.be.rejectedWith(/unsupported URL/);
   });
+
+  it("passes include_folders param to association requests", async () => {
+    // Mock pm.product/asset context
+    nock(config.endpoints.pm)
+      .persist()
+      .get(matches("/context/product/asset"))
+      .reply(200, {
+        "@context": {
+          "@id": "https://pm.api.mediastore.dev/v20140601/context/product/asset",
+          properties: {
+            id: { readable: true, writable: false, exportable: true, type: "number" },
+            asset: { readable: true, writable: false, exportable: true, type: "https://am.api.mediastore.dev/v20140601/context/asset", collection: false }
+          },
+          collection_actions: {
+            query: {
+              method: "GET",
+              template: "https://pm.api.mediastore.dev/v20140601/products/assets{?include_folders}",
+              mappings: []
+            }
+          },
+          member_actions: {}
+        }
+      });
+
+    // Mock am.asset context
+    nock(config.endpoints.am)
+      .persist()
+      .get(matches("/context/asset"))
+      .reply(200, {
+        "@context": {
+          "@id": "https://am.api.mediastore.dev/v20140601/context/asset",
+          properties: {
+            id: { readable: true, writable: false, exportable: true, type: "number" },
+            name: { readable: true, writable: false, exportable: true, type: "string" }
+          },
+          collection_actions: {
+            get: {
+              method: "GET",
+              template: "https://am.api.mediastore.dev/v20140601/assets/{asset_ids}{?include_folders}",
+              mappings: [{ variable: "asset_ids", source: "id" }]
+            }
+          },
+          member_actions: {}
+        }
+      });
+
+    // Mock pm.product/asset query WITHOUT include_folders - return regular assets
+    nock(config.endpoints.pm)
+      .persist()
+      .get(matches("/products/assets"))
+      .query((q) => !q.include_folders)
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://pm.api.mediastore.dev/v20140601/context/product/asset",
+            "@id": "https://pm.api.mediastore.dev/v20140601/product/asset/1",
+            id: 1
+          }
+        ]
+      });
+
+    // Mock pm.product/asset query WITH include_folders - return assets including folders
+    nock(config.endpoints.pm)
+      .persist()
+      .get(matches("/products/assets"))
+      .query((q) => q.include_folders === "true")
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://pm.api.mediastore.dev/v20140601/context/product/asset",
+            "@id": "https://pm.api.mediastore.dev/v20140601/product/asset/1",
+            id: 1,
+            asset: {
+              "@id": "https://am.api.mediastore.dev/v20140601/asset/5"
+            }
+          }
+        ]
+      });
+
+    // Mock am.asset get WITHOUT include_folders - return non-folder assets
+    nock(config.endpoints.am)
+      .persist()
+      .get(matches("/assets"))
+      .query((q) => !q.include_folders)
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://am.api.mediastore.dev/v20140601/context/asset",
+            "@id": "https://am.api.mediastore.dev/v20140601/asset/5",
+            id: 5
+          }
+        ]
+      });
+
+    // Mock am.asset get WITH include_folders - return folder assets with data
+    nock(config.endpoints.am)
+      .persist()
+      .get(matches("/assets"))
+      .query((q) => q.include_folders === "true")
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://am.api.mediastore.dev/v20140601/context/asset",
+            "@id": "https://am.api.mediastore.dev/v20140601/asset/5",
+            id: 5,
+            name: "My Folder"
+          }
+        ]
+      });
+
+    await chipmunk.run(async (ch) => {
+      const result = await ch.action("pm.product/asset", "query", {
+        proxy: false,
+        params: { include_folders: true },
+        schema: "id, asset { name }"
+      });
+
+      expect(result.objects[0].asset).not.to.be.null;
+      expect(result.objects[0].asset.name).to.equal("My Folder");
+    });
+  });
 });
