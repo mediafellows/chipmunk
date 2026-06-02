@@ -286,7 +286,8 @@ const performAction = async <T>(
 
   if (!opts.raw && !isEmpty(opts.schema)) {
     const schema = parseSchema(opts.schema);
-    objects = await resolve(objects, schema, config, opts.signal, opts.params);
+    const extraParams = opts.params?.include_folders != null ? { include_folders: opts.params.include_folders } : {};
+    objects = await resolve(objects, schema, config, opts.signal, extraParams);
   }
 
   const result: IResult<T> = {
