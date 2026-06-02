@@ -114,7 +114,7 @@ function checkAborted(signal?: AbortSignal, configSignal?: AbortSignal) {
   }
 }
 
-const resolve = async (objects, schema, config, signal?: AbortSignal) => {
+const resolve = async (objects, schema, config, signal?: AbortSignal, extraParams: { [s: string]: any } = {}) => {
   if (isEmpty(objects)) return [];
   if (schema === "*") return objects;
 
@@ -159,13 +159,13 @@ const resolve = async (objects, schema, config, signal?: AbortSignal) => {
       // Check if aborted before each association fetch
       checkAborted(signal, config.signal);
 
-      const result = await fetch(objects, assocName, config);
+      const result = await fetch(objects, assocName, config, extraParams);
 
       // first add props needed for the assignments later to the schema
       const neededProps = keys(result.extractedProps.allProps);
       reduce(neededProps, (acc, prop) => write(acc, { [prop]: true }), assocSchema)
 
-      const resolved = await resolve(result.objects, assocSchema, config, signal);
+      const resolved = await resolve(result.objects, assocSchema, config, signal, extraParams);
 
       // assign results to the target objects that were associating them
       await assign(objects, resolved, assocName, result.many, result.extractedProps);
@@ -286,10 +286,7 @@ const performAction = async <T>(
 
   if (!opts.raw && !isEmpty(opts.schema)) {
     const schema = parseSchema(opts.schema);
-    const resolveConfig = opts.params?.include_folders != null || opts.params?.include_folders != false
-      ? { ...config, defaultAssociationsParams: { ...config.defaultAssociationsParams, include_folders: opts.params.include_folders } }
-      : config;
-    objects = await resolve(objects, schema, resolveConfig, opts.signal);
+    objects = await resolve(objects, schema, config, opts.signal, opts.params);
   }
 
   const result: IResult<T> = {

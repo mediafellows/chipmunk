@@ -146,7 +146,8 @@ const buildParams = (action: IAction, props) => {
 export const fetch = async (
   objects: any[],
   assocName: string,
-  { defaultAssociationsSearch , ...config }: IConfig = {}
+  { defaultAssociationsSearch , ...config }: IConfig = {},
+  extraParams: { [s: string]: any } = {}
 ): Promise<IFetchedResults> => {
   // since it might be possible the association we're looking for is only available for a subset of our objects
   // we first need to find the spec that contains a definition for the desired association..
@@ -212,7 +213,6 @@ export const fetch = async (
   }
 
   let result;
-  const extraParams = config.defaultAssociationsParams || {};
 
   if (performSearch) {
     const ids = [...extractedProps.allProps['id']];

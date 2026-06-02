@@ -35,7 +35,6 @@ export interface IConfig {
   watcher?: IWatcher;
   timestamp?: number;
   defaultAssociationsSearch?: { [s: string]: any };
-  defaultAssociationsParams?: { [s: string]: any };
   abortController?: AbortController;
   signal?: AbortSignal;
 }
