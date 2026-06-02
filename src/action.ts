@@ -286,7 +286,10 @@ const performAction = async <T>(
 
   if (!opts.raw && !isEmpty(opts.schema)) {
     const schema = parseSchema(opts.schema);
-    objects = await resolve(objects, schema, config, opts.signal);
+    const resolveConfig = opts.params?.include_folders != null || opts.params?.include_folders != false
+      ? { ...config, defaultAssociationsParams: { ...config.defaultAssociationsParams, include_folders: opts.params.include_folders } }
+      : config;
+    objects = await resolve(objects, schema, resolveConfig, opts.signal);
   }
 
   const result: IResult<T> = {

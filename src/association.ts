@@ -212,6 +212,8 @@ export const fetch = async (
   }
 
   let result;
+  const extraParams = config.defaultAssociationsParams || {};
+
   if (performSearch) {
     const ids = [...extractedProps.allProps['id']];
     let associationSearch = {};
@@ -226,10 +228,10 @@ export const fetch = async (
       }
     }
 
-    result = await unfurl(specUrl, actionName, { params, body: mergeWith({ search: { filters: [['id', 'in', ids]] } }, associationSearch, customizer) }, config)
+    result = await unfurl(specUrl, actionName, { params: { ...params, ...extraParams }, body: mergeWith({ search: { filters: [['id', 'in', ids]] } }, associationSearch, customizer) }, config)
   }
   else {
-    result = await unfurl(specUrl, actionName, { params }, config);
+    result = await unfurl(specUrl, actionName, { params: { ...params, ...extraParams } }, config);
   }
 
   return {
