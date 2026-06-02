@@ -228,7 +228,19 @@ export const fetch = async (
       }
     }
 
-    result = await unfurl(specUrl, actionName, { params: { ...params, ...extraParams }, body: mergeWith({ search: { filters: [['id', 'in', ids]] } }, associationSearch, customizer) }, config)
+    result = await unfurl(
+      specUrl,
+      actionName,
+      {
+        params: { ...params, ...extraParams },
+        body: mergeWith(
+          { ...extraParams, search: { filters: [["id", "in", ids]] } },
+          associationSearch,
+          customizer
+        ),
+      },
+      config
+    )
   }
   else {
     result = await unfurl(specUrl, actionName, { params: { ...params, ...extraParams } }, config);

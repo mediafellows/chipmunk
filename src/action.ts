@@ -415,7 +415,7 @@ export default async <T>(
   }
 
   // Extract params that should be forwarded to associations
-  if ('include_folders' in (opts.params ?? {})) {
+  if ("include_folders" in (opts.params ?? {})) {
     opts._associationParams = { include_folders: opts.params.include_folders };
   }
 
