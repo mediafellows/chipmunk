@@ -275,6 +275,18 @@ export const assignToJsonLd = (
     },
     {}
   );
+
+  // Fallback index by numeric id for cases where the JSON LD reference URL path
+  // differs from the object's canonical $id (e.g. /assets/1106981 vs /assets/folders/1106981)
+  const objectsByNumericId = reduce(
+    objects,
+    (acc, object) => {
+      if (object.id != null) return write(acc, { [toString(object.id)]: object });
+      return acc;
+    },
+    {}
+  );
+
   const targetsById = reduce(
     targets,
     (acc, target) => {
@@ -298,7 +310,7 @@ export const assignToJsonLd = (
       if (!isEmpty(matches))
         Object.defineProperty(target, assocName, { value: values(matches) });
     } else {
-      const match = objectsById[ref];
+      const match = objectsById[ref] || objectsByNumericId[(ref as string)?.split('/').pop()];
       if (!isEmpty(match))
         Object.defineProperty(target, assocName, { value: match });
     }
