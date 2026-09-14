@@ -2,6 +2,7 @@ const path = require("path");
 
 module.exports = {
   entry: ["./src/bundle.ts"],
+  target: ["web", "es2020"],
   output: {
     filename: "chipmunk.bundle.js",
     path: path.resolve(__dirname, "dist"),
@@ -17,7 +18,7 @@ module.exports = {
           {
             loader: "ts-loader",
             options: {
-              configFile: 'tsconfig.es5.json',
+              configFile: 'tsconfig.browser.json',
             },
           },
         ],

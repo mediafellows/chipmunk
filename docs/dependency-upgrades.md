@@ -1,0 +1,75 @@
+# Dependency upgrade record
+
+Reviewed 2026-09-14. The strategy is to verify Chipmunk's use of each dependency through observable behavior, then upgrade in small groups. Coverage includes every source file in the Node report, rather than just files loaded by tests. Browser behavior is checked separately against the production bundle.
+
+## Evidence and ordering
+
+1. The original locked dependencies passed 103 active unit tests and the build on Node 22. Baseline coverage was 90.07% lines, 89.52% statements, 91.84% functions, and 81.46% branches.
+2. Forty compatibility cases passed before the runtime upgrades (143 total), as did 12 real HTTP cases and 18 browser cases. Baseline artifacts are retained locally under `.artifacts/`.
+3. Additional security, cancellation, and download tests exposed existing failures. Fixes were verified against the old runtime dependencies before upgrading Axios. The expanded suite then passed 175 unit tests, first with old runtime dependencies, then with Axios 1.20.0, then Lodash 4.18.1.
+4. Development tools and transitive dependencies were refreshed. A further regression verifies independent cancellation during metadata loading. The resulting suite has 176 unit tests, 3 audit-parser tests, 18 real HTTP tests, and 27 browser tests (9 scenarios on each of Chromium, Firefox, and WebKit).
+5. The local release gate checks types, coverage, the production build, integration tests, the dependency audit, and an extracted npm archive. The archive check exercises CommonJS imports and cache use and compiles a strict TypeScript consumer against the shipped declarations.
+
+Current coverage gates are 95.63% lines, 94.54% statements, 95.03% functions, and 88.72% branches. Compiler target and instrumentation changes affect coverage denominators, so the percentages alone are not a measure of added test value. No source file is excluded to meet these gates. The browser entry point is validated by browser tests, not counted as covered in the Node report.
+
+Final local verification on 2026-09-14:
+
+| Runtime      | `make release`                              | Unit / audit-parser | Real HTTP | Browser               | Audit                         |
+| ------------ | ------------------------------------------- | ------------------- | --------- | --------------------- | ----------------------------- |
+| Node 22.23.1 | Passed, including build and packed consumer | 176 / 3 passed      | 18 passed | 27 passed, no retries | Zero reported vulnerabilities |
+| Node 24.20.0 | Passed, including build and packed consumer | 176 / 3 passed      | 18 passed | 27 passed, no retries | Zero reported vulnerabilities |
+
+The frozen-lockfile install and `git diff --check` also passed. Runlens release records are `01M2FXGP9HAEXKBGNN5N5B602K` (Node 22) and `01M2FXJPP4FJM4SXF349BV1X7G` (Node 24), under correlation `codex-20260914-chipmunk-deps-b69ae412`. Local machine-readable results are preserved under `.artifacts/node22/` and `.artifacts/node24/`; these generated files are ignored by Git. CI is configured with equivalent gates; it has not been run remotely as part of this local change.
+
+## Dependency contracts
+
+Versions below are resolved versions from the original and updated lockfiles. Unchanged dependencies are explicitly pinned too. A shared behavioral suite is used where dependencies work together; tests do not duplicate upstream library internals.
+
+| Dependency              | Before → after     | Verification of Chipmunk's use                                                                                                                                                                                                                               |
+| ----------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| axios                   | 1.13.2 → 1.20.0    | Request headers, query/body serialization, all supported verbs, normalized errors, cancellation and cleanup; real HTTP redirects, multipart boundaries, disconnected sockets, metadata/proxy/association cancellation; browser requests and binary downloads |
+| lodash                  | 4.17.21 → 4.18.1   | Configuration merge and isolation, header suppression, nested Rails payloads, array/false/zero/null handling, schema selection, cache operations, deterministic watcher timing                                                                               |
+| querystringify          | 2.2.0 → 2.2.0      | Object-valued headers and reserved/Unicode query values through request contracts                                                                                                                                                                            |
+| uri-templates           | 0.2.0 → 0.2.0      | Path and query expansion, missing/empty/zero/false/reserved/Unicode values, published browser global                                                                                                                                                         |
+| mocha                   | 11.7.1 → 12.0.1    | Complete unit suite; fail on zero tests, focused tests, pending tests, or unconsumed mocks                                                                                                                                                                   |
+| chai                    | 4.5.0 → 6.2.2      | Equality and error assertions throughout the unit suite; ESM loaded via Node 22+ require support                                                                                                                                                             |
+| chai-as-promised        | 7.1.2 → 8.0.2      | Rejection and fulfillment contracts, especially cancellation and network errors                                                                                                                                                                              |
+| nock                    | 13.5.6 → 14.0.17   | Realistic request expectations, network disabled, unmatched expectations fail teardown; network errors use Error instances; cancellation waits for the expected request event                                                                                |
+| sinon                   | 7.5.0 → 22.1.0     | Fake timers for watcher order and stubs for cache expiry; all stubs restored after each test                                                                                                                                                                 |
+| nyc                     | 14.1.1 → 18.0.0    | All-source coverage report and enforced thresholds through `make test`                                                                                                                                                                                       |
+| typescript              | 5.7.2 → 6.0.3      | Source/test type checks, declaration emit, strict packaged consumer with a negative signal-type assertion                                                                                                                                                    |
+| ts-node                 | 8.10.2 → 10.9.2    | Every TypeScript unit test runs through the explicit test configuration                                                                                                                                                                                      |
+| ts-loader               | 8.4.0 → 9.6.2      | Production Webpack compilation and browser behavior against its output                                                                                                                                                                                       |
+| loader-utils            | added 3.3.1        | Explicit ts-loader peer; production build and browser suite                                                                                                                                                                                                  |
+| webpack                 | 5.97.1 → 5.111.0   | Production bundle loads and exports the documented globals in all three engines                                                                                                                                                                              |
+| webpack-cli             | 4.10.0 → 7.2.3     | Clean production build invoked by local and CI Make targets                                                                                                                                                                                                  |
+| prettier                | 2.8.8 → 3.9.6      | Format/check the new test, automation, configuration, and documentation files                                                                                                                                                                                |
+| @playwright/test        | added 1.59.1       | 27 browser checks, remote loopback forwarding, real downloaded bytes and filenames                                                                                                                                                                           |
+| @types/chai             | 4.3.20 → 5.2.3     | Compile all equality assertions with `tsconfig.test.json`                                                                                                                                                                                                    |
+| @types/chai-as-promised | 7.1.8 → 8.0.2      | Compile promise assertions                                                                                                                                                                                                                                   |
+| @types/lodash           | 4.17.14 → 4.17.25  | Source and test type checks and packaged declarations                                                                                                                                                                                                        |
+| @types/mocha            | 10.0.10 → 10.0.10  | Compile test hooks and test cases                                                                                                                                                                                                                            |
+| @types/node             | 11.15.54 → 22.20.2 | Compile Node globals and cancellation types; execute under Node 22 and 24                                                                                                                                                                                    |
+| @types/querystringify   | 2.0.2 → 2.0.2      | Compile request serialization                                                                                                                                                                                                                                |
+| @types/sinon            | 7.5.2 → 22.0.0     | Compile fake timers and stub usage                                                                                                                                                                                                                           |
+| @types/uri-templates    | 0.1.34 → 0.1.34    | Compile URL-template usage                                                                                                                                                                                                                                   |
+
+Removed `@types/nock` 11.1.0 because Nock supplies its own declarations. Removed direct `js-yaml` 3.14.1 and `@types/js-yaml` 3.12.10 with the unused credential-decryption helper and its inactive tests. No runtime API depended on them; the full suite checks that removal. Tooling may still use current YAML packages transitively.
+
+## Security and version choices
+
+The GitHub Dependabot API was readable. It returned 92 open alert records, representing 56 distinct package/advisory pairs across 14 packages, including 29 for Axios; manifest and lockfile alerts overlap. The refreshed lockfile passes `make audit` with zero reported vulnerabilities across all severity levels. This does not mean GitHub alerts have already closed: GitHub must scan the updated default branch after merge. Audit results describe the advisory database at execution time, not a guarantee against undiscovered defects.
+
+No blanket dependency overrides or advisory suppressions were added. Axios and Lodash were upgraded separately before the tooling update. Transitive fixes, including HTTP redirect and multipart dependencies, are covered through the relevant real HTTP contracts and the full lockfile audit.
+
+TypeScript remains on 6.0.3 because the native TypeScript 7 compiler does not provide the classic compiler API required by this ts-node/ts-loader pipeline. See [Microsoft's TypeScript 7 announcement](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/). The compiler configuration explicitly retains the project's existing non-strict checking while the package-consumer check is strict; changing the project's entire type discipline is a separate migration.
+
+Playwright is pinned to 1.59.1 to match the existing remote servers and CI image. Upgrade the client, server image, and CI image together. Dependabot defers TypeScript majors and Playwright minor/major updates for these compatibility reasons; other npm and GitHub Actions updates are checked weekly. All direct dependencies and CI action revisions are pinned.
+
+## Scope and remaining limits
+
+The tests protect application contracts, not every possible behavior of every dependency. They use local HTTP fixtures and real browsers; they do not contact a production MediaStore deployment. The URL guard is a hostname/origin policy, not a DNS-rebinding defense. Its redirect hook applies to Axios's Node HTTP adapter; browser redirects follow browser/CORS behavior.
+
+The runtime floor and stricter Node redirect policy are breaking changes and are documented for the next major release. Before publishing, downstream applications should verify their Node/browser baselines and any reliance on cross-origin redirects. `make release` is a local verification and packaging command and never publishes.
+
+For future upgrades, add a regression for changed Chipmunk behavior or a demonstrated defect, update one runtime dependency (or one coherent toolchain group), and run the release gate. Keep the lockfile and evidence matrix current. Do not defer a security patch until exhaustive coverage exists, or add superficial tests that merely assert a dependency's version.

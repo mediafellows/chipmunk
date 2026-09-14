@@ -224,8 +224,7 @@ describe("action", () => {
   it("does not send a session id", async () => {
     chipmunk.updateConfig({ headers: { "Session-Id": "56BA" } });
 
-    nock(config.endpoints.um)
-      .matchHeader("Session-Id", null)
+    nock(config.endpoints.um, { badheaders: ["session-id"] })
       .get(matches("users"))
       .reply(404, {});
 
@@ -771,19 +770,19 @@ describe("action", () => {
 
     describe("AbortController with actions", () => {
       it("aborts action with config-level signal", async () => {
-        nock(config.endpoints.um)
+        const scope = nock(config.endpoints.um)
           .get(matches("/users"))
           .delay(1000)
           .reply(200, { members: [] });
 
         chipmunk.createAbortController();
         const actionPromise = chipmunk.action("um.user", "query");
-        setImmediate(() => chipmunk.abort());
+        scope.once("request", () => chipmunk.abort());
         await expect(actionPromise).to.be.rejectedWith("Request was aborted");
       });
 
       it("aborts action with per-action signal", async () => {
-        nock(config.endpoints.um)
+        const scope = nock(config.endpoints.um)
           .get(matches("/users"))
           .delay(1000)
           .reply(200, { members: [] });
@@ -792,12 +791,12 @@ describe("action", () => {
         const actionPromise = chipmunk.action("um.user", "query", {
           signal: controller.signal
         });
-        setImmediate(() => controller.abort());
+        scope.once("request", () => controller.abort());
         await expect(actionPromise).to.be.rejectedWith("Request was aborted");
       });
 
       it("aborts POST action", async () => {
-        nock(config.endpoints.um)
+        const scope = nock(config.endpoints.um)
           .post(matches("/users"))
           .delay(1000)
           .reply(200, { id: "1" });
@@ -806,27 +805,27 @@ describe("action", () => {
         const actionPromise = chipmunk.action("um.user", "create", {
           body: { first_name: "John" }
         });
-        setImmediate(() => chipmunk.abort());
+        scope.once("request", () => chipmunk.abort());
         await expect(actionPromise).to.be.rejectedWith("Request was aborted");
       });
 
       it("aborts PUT action", async () => {
-        nock(config.endpoints.um)
+        const scope = nock(config.endpoints.um)
           .put(matches("/users/1"))
           .delay(1000)
           .reply(200, { id: "1" });
 
         chipmunk.createAbortController();
-        const actionPromise = chipmunk.action("um.user", "update", {
+        const actionPromise = chipmunk.action("um.user", "invite", {
           params: { user_ids: 1 },
           body: { first_name: "John" }
         });
-        setImmediate(() => chipmunk.abort());
+        scope.once("request", () => chipmunk.abort());
         await expect(actionPromise).to.be.rejectedWith("Request was aborted");
       });
 
       it("aborts DELETE action", async () => {
-        nock(config.endpoints.um)
+        const scope = nock(config.endpoints.um)
           .delete(matches("/users/1"))
           .delay(1000)
           .reply(200, {});
@@ -835,12 +834,12 @@ describe("action", () => {
         const actionPromise = chipmunk.action("um.user", "delete", {
           params: { user_ids: 1 }
         });
-        setImmediate(() => chipmunk.abort());
+        scope.once("request", () => chipmunk.abort());
         await expect(actionPromise).to.be.rejectedWith("Request was aborted");
       });
 
       it("aborts proxied action", async () => {
-        nock(config.endpoints.tuco)
+        const scope = nock(config.endpoints.tuco)
           .post(matches("/proxy"))
           .delay(1000)
           .reply(200, { objects: [] });
@@ -850,7 +849,7 @@ describe("action", () => {
           proxy: true,
           schema: "id"
         });
-        setImmediate(() => chipmunk.abort());
+        scope.once("request", () => chipmunk.abort());
         await expect(actionPromise).to.be.rejectedWith("Request was aborted");
       });
 

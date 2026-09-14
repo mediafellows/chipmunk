@@ -1,0 +1,12 @@
+{
+  "all": true,
+  "include": ["src/**/*.ts"],
+  "extension": [".ts"],
+  "require": ["./tests/register.cjs"],
+  "reporter": ["text-summary", "json-summary", "lcov"],
+  "check-coverage": true,
+  "lines": 95.63,
+  "statements": 94.54,
+  "functions": 95.03,
+  "branches": 88.72
+}
