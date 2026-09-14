@@ -19,7 +19,7 @@ Final local verification on 2026-09-14:
 | Node 22.23.1 | Passed, including build and packed consumer | 176 / 3 passed      | 18 passed | 27 passed, no retries | Zero reported vulnerabilities |
 | Node 24.20.0 | Passed, including build and packed consumer | 176 / 3 passed      | 18 passed | 27 passed, no retries | Zero reported vulnerabilities |
 
-The frozen-lockfile install and `git diff --check` also passed. Runlens release records are `01M2FXGP9HAEXKBGNN5N5B602K` (Node 22) and `01M2FXJPP4FJM4SXF349BV1X7G` (Node 24), under correlation `codex-20260914-chipmunk-deps-b69ae412`. Local machine-readable results are preserved under `.artifacts/node22/` and `.artifacts/node24/`; these generated files are ignored by Git. CI is configured with equivalent gates; it has not been run remotely as part of this local change.
+The frozen-lockfile install and `git diff --check` also passed. Runlens release records are `01M2FXGP9HAEXKBGNN5N5B602K` (Node 22) and `01M2FXJPP4FJM4SXF349BV1X7G` (Node 24), under correlation `codex-20260914-chipmunk-deps-b69ae412`. Local machine-readable results are preserved under `.artifacts/node22/` and `.artifacts/node24/`; these generated files are ignored by Git. [PR #53](https://github.com/mediafellows/chipmunk/pull/53) tracks subsequent CI results with equivalent gates. The browser container invokes `yarn test:integration` directly because it does not include Make.
 
 ## Dependency contracts
 
