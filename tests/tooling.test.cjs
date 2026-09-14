@@ -18,6 +18,7 @@ it("rejects empty, malformed, incomplete or failed audit reports", () => {
     { status: 0, stdout: "" },
     { status: 0, stdout: "not JSON" },
     { ...clean(), stdout: clean().stdout + "\nnull" },
+    { ...clean(), stdout: clean().stdout + "\n" + clean().stdout },
     {
       ...clean(),
       stdout: clean().stdout + '\n{"type":"auditAdvisory","data":{}}',
@@ -39,4 +40,16 @@ it("rejects a vulnerability even if the audit process unexpectedly exits success
     parseAudit({ status: 0, stdout: JSON.stringify(report) }).passed,
     false,
   );
+  for (const reports of [
+    [summary, report],
+    [report, summary],
+  ]) {
+    assert.equal(
+      parseAudit({
+        status: 0,
+        stdout: reports.map((value) => JSON.stringify(value)).join("\n"),
+      }).passed,
+      false,
+    );
+  }
 });

@@ -14,9 +14,9 @@ function parseAudit(result) {
       parseError = true;
     }
   }
-  const summary = records.find(
-    (record) => record.type === "auditSummary",
-  )?.data;
+  const summaries = records.filter((record) => record.type === "auditSummary");
+  if (summaries.length !== 1) parseError = true;
+  const summary = summaries[0]?.data;
   const levels = ["info", "low", "moderate", "high", "critical"];
   const valid =
     summary &&

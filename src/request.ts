@@ -12,11 +12,11 @@ const localHosts = ["localhost", "127.0.0.1", "[::1]"];
 
 const validateUrl = (value: string): URL => {
   let url: URL;
-  try { url = new URL(value); } catch { throw new Error(`unsupported URL ${value}`); }
+  try { url = new URL(value); } catch { throw new Error("unsupported URL"); }
   const hostname = url.hostname.toLowerCase();
   const trusted = localHosts.includes(hostname) || trustedDomains.some(domain => hostname === domain || hostname.endsWith(`.${domain}`));
   if (!trusted || !["http:", "https:"].includes(url.protocol) || url.username || url.password) {
-    throw new Error(`unsupported URL ${value}`);
+    throw new Error("unsupported URL");
   }
   return url;
 };

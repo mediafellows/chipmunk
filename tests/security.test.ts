@@ -34,7 +34,7 @@ describe("request URL security", () => {
         });
       await expect(
         request(createConfig()).get(url, { adapter }),
-      ).to.be.rejectedWith("unsupported URL");
+      ).to.be.rejectedWith(/^unsupported URL$/);
       expect(adapter.notCalled).to.equal(true);
     });
   }
