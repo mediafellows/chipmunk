@@ -27,7 +27,7 @@ export const enqueueRequest = (
   method?: string,
   url?: string
 ): void => {
-  config.watcher.pendingRequests[key] = { payload, method, url };
+  config.watcher.pendingRequests[key] = { payload, method, url, signal: config.signal };
 };
 
 export const clearRequest = (key: string, config: IConfig): void => {
@@ -37,7 +37,7 @@ export const clearRequest = (key: string, config: IConfig): void => {
 
 export const pending = (url: string, config: IConfig): any => {
   const match = find(config.watcher.pendingRequests, (request) => {
-    return request.method === "GET" && request.url === url;
+    return request.method === "GET" && request.url === url && request.signal === config.signal;
   });
   return match ? match.payload : undefined;
 };

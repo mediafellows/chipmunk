@@ -26,6 +26,7 @@ import parseSchema from "./schema";
 import { fetch, assign, assignEmpty } from "./association";
 import { handleFileDownload, isDownloadFileRequest } from "./file-utils";
 import log from "./log";
+import { combineSignals, throwIfAborted } from "./cancellation";
 
 export interface IActionOpts {
   // returns raw data, without moving association references, does not support schema resolving
@@ -109,9 +110,8 @@ const validateParams = (action: IAction, params, config): boolean => {
 };
 
 function checkAborted(signal?: AbortSignal, configSignal?: AbortSignal) {
-  if (signal?.aborted || configSignal?.aborted) {
-    throw new Error("Request was aborted");
-  }
+  throwIfAborted(signal);
+  throwIfAborted(configSignal);
 }
 
 const resolve = async (objects, schema, config, signal?: AbortSignal) => {
@@ -170,6 +170,8 @@ const resolve = async (objects, schema, config, signal?: AbortSignal) => {
       // assign results to the target objects that were associating them
       await assign(objects, resolved, assocName, result.many, result.extractedProps);
     } catch (err) {
+      checkAborted(signal, config.signal);
+      if (err.code === "ERR_CANCELED") throw err;
       // if we fail to resolve an association, continue anyways
       assignEmpty(objects, assocName);
       log(`failed to resolve association ${assocName}`);
@@ -217,7 +219,7 @@ const performAction = async <T>(
   let req;
 
   const axiosOptions: any = {
-    signal: opts.signal || config.signal,
+    signal: config.signal,
   };
   if (config.timestamp) {
     axiosOptions.params = { t: config.timestamp };
@@ -346,13 +348,13 @@ const performProxiedAction = async <T>(
   const body = {
     appModel,
     actionName,
-    opts: omit(opts, "proxy"),
+    opts: omit(opts, "proxy", "signal"),
     config: cleanedConfig,
   };
 
   const debugParams = `?m=${appModel}&a=${actionName}`;
   const url = action.template + debugParams;
-  const req = request(config).post(url, body);
+  const req = request(config).post(url, body, { signal: config.signal });
 
   const response = await run(req, config, "POST", url);
   const objects = get(response, "data.objects", []) as T[];
@@ -377,6 +379,9 @@ export default async <T>(
   opts: IActionOpts,
   config: IConfig
 ): Promise<IResult<T>> => {
+  // Share one effective signal with metadata, proxy and nested association requests.
+  config = { ...config, signal: combineSignals(opts.signal, config.signal) };
+  throwIfAborted(config.signal);
   opts = merge({}, DEFAULT_OPTS, { proxy: !isEmpty(opts.schema) }, opts);
 
   if (opts.proxy && isEmpty(opts.schema)) {

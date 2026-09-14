@@ -114,7 +114,7 @@ describe("storage cache", () => {
   beforeEach(() => {
     global["window"] = {
       localStorage: storageMock,
-    };
+    } as unknown as Window & typeof globalThis;
     chipmunk = createChipmunk(config, { cache: { default: "storage" } });
   });
   afterEach(() => {

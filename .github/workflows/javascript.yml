@@ -1,40 +1,60 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
-
 name: Javascript CI
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
-  test:
-    name: CI tests
+  node:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        node-version: [18.x]
-
+        node: [22.23.1, 24.20.0]
     steps:
-      - name: Git checkout
-        uses: actions/checkout@v3
-
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: ${{ matrix.node }}
+      - run: npm install --global yarn@1.22.22
+      - run: yarn install --frozen-lockfile --ignore-scripts --non-interactive
+      - run: make test build
+      - run: yarn test:http
+      - run: yarn test:package
+      - run: make audit
+        if: matrix.node == '22.23.1'
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: node-${{ matrix.node }}-results
+          include-hidden-files: true
+          path: |
+            coverage/
+            .artifacts/*.json
+            .artifacts/*.xml
+            .artifacts/*.tgz
 
-      - name: Install yarn package manger (which we use instead of npm)
-        run: npm install -g yarn
-
-      # We use the access token of the mfx-v2-deployment GH user which has read acess to all
-      # mediafellows org library repos and thus the associated GH packages
-      - name: Setup GH credentials for pulling NPM packages from Github NPM registry
-        run: |
-          touch ~/.npmrc
-          echo '//npm.pkg.github.com/:_authToken=${{ secrets.MF_GH_PKG_TOKEN }}' > ~/.npmrc
-          chmod 600 ~/.npmrc
-
-      - name: Install npm dependencies
-        run: yarn install
-
-      - name: Run tests
-        run: yarn test
+  browsers:
+    runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.59.1-noble
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22.23.1
+      - run: npm install --global yarn@1.22.22
+      - run: yarn install --frozen-lockfile --ignore-scripts --non-interactive
+      # Firefox requires its home directory to belong to the launching user.
+      # GitHub mounts /github/home with host ownership inside this root container.
+      - name: Match browser home ownership to the container user
+        run: chown "$(id -u):$(id -g)" "$HOME"
+      - run: yarn test:integration
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: always()
+        with:
+          name: browser-results
+          include-hidden-files: true
+          path: |
+            test-results/
+            .artifacts/browser-results.json
