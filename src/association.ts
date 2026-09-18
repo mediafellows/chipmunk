@@ -8,7 +8,6 @@ import filter from "lodash/filter";
 import find from "lodash/find";
 import compact from "lodash/compact";
 import values from "lodash/values";
-import pick from "lodash/pick";
 import write from "lodash/assign";
 import reduce from "lodash/reduce";
 import uniq from "lodash/uniq";
@@ -321,9 +320,12 @@ export const assignToJsonLd = (
       get(target, `$links[${assocName}]`);
 
     if (isArray(ref)) {
-      const matches = pick(objectsById, ref);
+      const matches = compact(map(ref, (r) => {
+        const refId = (r as string)?.split('/').pop();
+        return objectsById[r] || objectsByNumericId[refId];
+      }));
       if (!isEmpty(matches))
-        Object.defineProperty(target, assocName, { value: values(matches) });
+        Object.defineProperty(target, assocName, { value: matches });
     } else {
       const refId = (ref as string)?.split('/').pop();
       const match = objectsById[ref] || objectsByNumericId[refId];
