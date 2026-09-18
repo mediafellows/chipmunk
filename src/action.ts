@@ -23,7 +23,7 @@ import { request, run } from "./request";
 import getSpec, { IAction } from "./spec";
 import format from "./format";
 import parseSchema from "./schema";
-import { fetch, assign, assignEmpty } from "./association";
+import { fetch, assign, assignEmpty, IResolveOpts } from "./association";
 import { handleFileDownload, isDownloadFileRequest } from "./file-utils";
 import log from "./log";
 
@@ -41,10 +41,9 @@ export interface IActionOpts {
   body?: { [s: string]: any };
   params?: { [s: string]: any };
   schema?: string;
+  resolveOpts?: IResolveOpts;
   signal?: AbortSignal;
   isFileDownload?: boolean;
-  // Internal: params to forward to association requests
-  _associationParams?: { [s: string]: any };
 }
 
 export interface IObject {
@@ -116,7 +115,13 @@ function checkAborted(signal?: AbortSignal, configSignal?: AbortSignal) {
   }
 }
 
-const resolve = async (objects, schema, config, signal?: AbortSignal, extraParams: { [s: string]: any } = {}) => {
+const resolve = async (
+  objects,
+  schema,
+  config,
+  signal?: AbortSignal,
+  resolveOpts: IResolveOpts = {}
+) => {
   if (isEmpty(objects)) return [];
   if (schema === "*") return objects;
 
@@ -161,13 +166,14 @@ const resolve = async (objects, schema, config, signal?: AbortSignal, extraParam
       // Check if aborted before each association fetch
       checkAborted(signal, config.signal);
 
-      const result = await fetch(objects, assocName, config, extraParams);
+      const assocResolveOpts = resolveOpts[assocName] || {};
+      const result = await fetch(objects, assocName, config, assocResolveOpts);
 
       // first add props needed for the assignments later to the schema
       const neededProps = keys(result.extractedProps.allProps);
       reduce(neededProps, (acc, prop) => write(acc, { [prop]: true }), assocSchema)
 
-      const resolved = await resolve(result.objects, assocSchema, config, signal, extraParams);
+      const resolved = await resolve(result.objects, assocSchema, config, signal, resolveOpts);
 
       // assign results to the target objects that were associating them
       await assign(objects, resolved, assocName, result.many, result.extractedProps);
@@ -289,8 +295,7 @@ const performAction = async <T>(
 
   if (!opts.raw && !isEmpty(opts.schema)) {
     const schema = parseSchema(opts.schema);
-    const extraParams = opts._associationParams || {};
-    objects = await resolve(objects, schema, config, opts.signal, extraParams);
+    objects = await resolve(objects, schema, config, opts.signal, opts.resolveOpts);
   }
 
   const result: IResult<T> = {
@@ -385,11 +390,6 @@ export default async <T>(
 
   if (opts.proxy && isEmpty(opts.schema)) {
     throw new Error("Proxying is supported only if a schema is given, too.");
-  }
-
-  // Extract params that should be forwarded to associations
-  if ("include_folders" in (opts.params ?? {})) {
-    opts._associationParams = { include_folders: opts.params.include_folders };
   }
 
   return opts.proxy

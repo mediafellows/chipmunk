@@ -47,6 +47,15 @@ export interface IFetchedResults {
   objects: IObject[];
 }
 
+export interface IResolveAssociationOpts {
+  params?: { [s: string]: any };
+  body?: { [s: string]: any };
+}
+
+export interface IResolveOpts {
+  [assocName: string]: IResolveAssociationOpts;
+}
+
 export const getProps = (spec: ISpec, references) => {
   const collectionQuery = spec.action("query");
   const collectionGet = spec.action("get");
@@ -147,7 +156,7 @@ export const fetch = async (
   objects: any[],
   assocName: string,
   { defaultAssociationsSearch , ...config }: IConfig = {},
-  extraParams: { [s: string]: any } = {}
+  resolveOpts: IResolveAssociationOpts = {}
 ): Promise<IFetchedResults> => {
   // since it might be possible the association we're looking for is only available for a subset of our objects
   // we first need to find the spec that contains a definition for the desired association..
@@ -169,6 +178,8 @@ export const fetch = async (
 
   const extractedProps = extractProps(assocName, associationSpec, objects);
   const referencedById = isEqual(keys(extractedProps.allProps), ['id']); // only extracted prop is 'id'
+  const resolveParams = resolveOpts.params || {};
+  const resolveBody = resolveOpts.body || {};
 
   const many =
     associationProperty["collection"] || associationProperty.type === "array";
@@ -228,22 +239,26 @@ export const fetch = async (
       }
     }
 
+    const body = mergeWith(
+      {},
+      associationSearch,
+      resolveBody,
+      { search: { filters: [["id", "in", ids]] } },
+      customizer
+    );
+
     result = await unfurl(
       specUrl,
       actionName,
       {
-        params: { ...params, ...extraParams },
-        body: mergeWith(
-          { ...extraParams, search: { filters: [["id", "in", ids]] } },
-          associationSearch,
-          customizer
-        ),
+        params: { ...params, ...resolveParams },
+        body,
       },
       config
     )
   }
   else {
-    result = await unfurl(specUrl, actionName, { params: { ...params, ...extraParams } }, config);
+    result = await unfurl(specUrl, actionName, { params: { ...params, ...resolveParams } }, config);
   }
 
   return {
