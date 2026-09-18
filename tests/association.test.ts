@@ -461,6 +461,42 @@ describe("association", () => {
       );
     });
 
+    it("assigns HABTM associations by numeric id when reference paths differ", () => {
+      const targets = [
+        {
+          "@type": "product/asset",
+          "@associations": {
+            assets: [
+              "https://am.api.mediastore.dev/v20140601/assets/1106981",
+              "https://am.api.mediastore.dev/v20140601/assets/1106982",
+            ],
+          },
+          assets: null,
+        },
+      ];
+
+      const objects = [
+        {
+          "@type": "asset",
+          "@id": "https://am.api.mediastore.dev/v20140601/assets/folders/1106981",
+          id: 1106981,
+        },
+        {
+          "@type": "asset",
+          "@id": "https://am.api.mediastore.dev/v20140601/assets/folders/1106982",
+          id: 1106982,
+        },
+      ];
+
+      assignToJsonLd(targets, objects, "assets");
+      expect(get(targets, `[0].assets[0]['@id']`)).to.equal(
+        "https://am.api.mediastore.dev/v20140601/assets/folders/1106981"
+      );
+      expect(get(targets, `[0].assets[1]['@id']`)).to.equal(
+        "https://am.api.mediastore.dev/v20140601/assets/folders/1106982"
+      );
+    });
+
     it("assigns has many associations", () => {
       const targets = [
         {
