@@ -166,7 +166,30 @@ await ch.action('um.user', 'update', {
 await ch.action('um.user', 'query', {
   raw: true,
 })
+
+// pass params/body to association requests while resolving a schema
+// keys in resolveOpts must match association names in the schema
+await ch.action('pm.product/asset', 'query', {
+  params: {
+    product_ids: '753919',
+    include_folders: true,
+  },
+  schema: `
+    id,
+    asset { id, name },
+  `,
+  resolveOpts: {
+    asset: {
+      // used for association GET/query requests
+      params: { include_folders: true },
+      // used for association search POST requests
+      body: { include_folders: true },
+    }
+  }
+})
 ```
+
+`resolveOpts` is optional and scoped per association. Associations that are not listed keep the default behavior. If the association is resolved through a search action, custom `body.search.filters` are merged with the generated `['id', 'in', ids]` filter.
 
 ### cache
 

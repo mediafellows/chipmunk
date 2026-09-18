@@ -949,7 +949,7 @@ describe("action", () => {
             "@id": "https://pm.api.mediastore.dev/v20140601/product/asset/1",
             id: 1,
             asset: {
-              "@id": "https://am.api.mediastore.dev/v20140601/asset/5"
+              "@id": "https://am.api.mediastore.dev/v20140601/assets/5"
             }
           }
         ]
@@ -975,7 +975,7 @@ describe("action", () => {
     // Mock am.asset get WITH association params - return folder assets
     nock(config.endpoints.am)
       .persist()
-      .get(matches("/assets"))
+      .get(matches("/assets/5"))
       .query((q) => q.include_archived === "true")
       .reply(200, {
         members: [
@@ -994,7 +994,7 @@ describe("action", () => {
         proxy: false,
         params: { include_folders: true },
         resolveOpts: {
-          asset: { params: { include_archived: true } }
+          asset: { params: { asset_ids: "999", include_archived: true } }
         },
         schema: "id, asset { name }"
       });

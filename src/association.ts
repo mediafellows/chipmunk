@@ -249,14 +249,14 @@ export const fetch = async (
       specUrl,
       actionName,
       {
-        params: { ...params, ...resolveParams },
+        params: { ...resolveParams, ...params },
         body,
       },
       config
     )
   }
   else {
-    result = await unfurl(specUrl, actionName, { params: { ...params, ...resolveParams } }, config);
+    result = await unfurl(specUrl, actionName, { params: { ...resolveParams, ...params } }, config);
   }
 
   return {
