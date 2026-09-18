@@ -8,7 +8,6 @@ import filter from "lodash/filter";
 import find from "lodash/find";
 import compact from "lodash/compact";
 import values from "lodash/values";
-import pick from "lodash/pick";
 import write from "lodash/assign";
 import reduce from "lodash/reduce";
 import uniq from "lodash/uniq";
@@ -45,6 +44,15 @@ export interface IFetchedResults {
   many: boolean;
   extractedProps: IExtractedProps;
   objects: IObject[];
+}
+
+export interface IResolveAssociationOpts {
+  params?: { [s: string]: any };
+  body?: { [s: string]: any };
+}
+
+export interface IResolveOpts {
+  [assocName: string]: IResolveAssociationOpts;
 }
 
 export const getProps = (spec: ISpec, references) => {
@@ -146,7 +154,8 @@ const buildParams = (action: IAction, props) => {
 export const fetch = async (
   objects: any[],
   assocName: string,
-  { defaultAssociationsSearch , ...config }: IConfig = {}
+  { defaultAssociationsSearch , ...config }: IConfig = {},
+  resolveOpts: IResolveAssociationOpts = {}
 ): Promise<IFetchedResults> => {
   // since it might be possible the association we're looking for is only available for a subset of our objects
   // we first need to find the spec that contains a definition for the desired association..
@@ -168,6 +177,8 @@ export const fetch = async (
 
   const extractedProps = extractProps(assocName, associationSpec, objects);
   const referencedById = isEqual(keys(extractedProps.allProps), ['id']); // only extracted prop is 'id'
+  const resolveParams = resolveOpts.params || {};
+  const resolveBody = resolveOpts.body || {};
 
   const many =
     associationProperty["collection"] || associationProperty.type === "array";
@@ -226,10 +237,26 @@ export const fetch = async (
       }
     }
 
-    result = await unfurl(specUrl, actionName, { params, body: mergeWith({ search: { filters: [['id', 'in', ids]] } }, associationSearch, customizer) }, config)
+    const body = mergeWith(
+      {},
+      associationSearch,
+      resolveBody,
+      { search: { filters: [["id", "in", ids]] } },
+      customizer
+    );
+
+    result = await unfurl(
+      specUrl,
+      actionName,
+      {
+        params: { ...resolveParams, ...params },
+        body,
+      },
+      config
+    )
   }
   else {
-    result = await unfurl(specUrl, actionName, { params }, config);
+    result = await unfurl(specUrl, actionName, { params: { ...resolveParams, ...params } }, config);
   }
 
   return {
@@ -261,6 +288,18 @@ export const assignToJsonLd = (
     },
     {}
   );
+
+  // Fallback index by numeric id for cases where the JSON LD reference URL path
+  // differs from the object's canonical $id (e.g. /assets/1106981 vs /assets/folders/1106981)
+  const objectsByNumericId = reduce(
+    objects,
+    (acc, object) => {
+      if (object.id != null) return write(acc, { [toString(object.id)]: object });
+      return acc;
+    },
+    {}
+  );
+
   const targetsById = reduce(
     targets,
     (acc, target) => {
@@ -280,11 +319,15 @@ export const assignToJsonLd = (
       get(target, `$links[${assocName}]`);
 
     if (isArray(ref)) {
-      const matches = pick(objectsById, ref);
+      const matches = compact(map(ref, (r) => {
+        const refId = (r as string)?.split('/').pop();
+        return objectsById[r] || objectsByNumericId[refId];
+      }));
       if (!isEmpty(matches))
-        Object.defineProperty(target, assocName, { value: values(matches) });
+        Object.defineProperty(target, assocName, { value: matches });
     } else {
-      const match = objectsById[ref];
+      const refId = (ref as string)?.split('/').pop();
+      const match = objectsById[ref] || objectsByNumericId[refId];
       if (!isEmpty(match))
         Object.defineProperty(target, assocName, { value: match });
     }

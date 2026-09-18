@@ -13,6 +13,7 @@ import getSpec, {
 import action, { IResult, IActionOpts, IObject } from "./action";
 import unfurl from "./unfurl";
 import createConfig, { IConfig, cleanConfig } from "./config";
+import { IResolveAssociationOpts, IResolveOpts } from "./association";
 import {
   ICallOpts,
   ISetOpts,
@@ -70,6 +71,7 @@ export {
 };
 
 export { IResult, IConfig, IActionOpts, cleanConfig };
+export { IResolveAssociationOpts, IResolveOpts };
 
 export interface IChipmunk extends IInterface {
   run: (
