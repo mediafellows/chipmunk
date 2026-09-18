@@ -325,7 +325,8 @@ export const assignToJsonLd = (
       if (!isEmpty(matches))
         Object.defineProperty(target, assocName, { value: values(matches) });
     } else {
-      const match = objectsById[ref] || objectsByNumericId[(ref as string)?.split('/').pop()];
+      const refId = (ref as string)?.split('/').pop();
+      const match = objectsById[ref] || objectsByNumericId[refId];
       if (!isEmpty(match))
         Object.defineProperty(target, assocName, { value: match });
     }
