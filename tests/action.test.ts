@@ -756,6 +756,7 @@ describe("action", () => {
         });
 
       await chipmunk.action("um.user", "query", {
+        proxy: true,
         schema: "id, first_name",
       });
 
