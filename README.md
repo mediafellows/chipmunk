@@ -4,6 +4,33 @@
 
 REST API client library for the Mediastore. Successor of [Chinchilla](https://github.com/mediafellows/chinchilla).
 
+## Development and verification
+
+Use Node.js 22.12+ and Yarn 1.22.22. `.nvmrc` pins the development version; CI also checks Node 24. The browser bundle requires ES2020 and native `AbortSignal.any` (or application-provided polyfills).
+
+```sh
+nvm use
+yarn install --frozen-lockfile --ignore-scripts --non-interactive
+make test              # Type checking, unit tests, coverage gate, audit-parser tests
+make build             # CommonJS, declarations, production browser bundle
+make integration-test  # Build, real local HTTP, Chromium, Firefox, WebKit
+make audit             # Audit runtime and development dependencies; fail on any advisory
+make release           # All checks above plus a local package-consumer smoke test
+```
+
+`make release` creates a tarball in `.artifacts/`; it does not publish. Tests use local fixtures and need no MediaStore credentials. Run Make targets without `-j`, because build and integration checks share generated outputs.
+
+Browser tests use Playwright 1.59.1. In the MFX development environment, use the existing remote browser server:
+
+```sh
+PLAYWRIGHT_WS_ENDPOINT=ws://127.0.0.1:8115/ make integration-test
+PLAYWRIGHT_WS_ENDPOINT=ws://127.0.0.1:8115/ make release
+```
+
+The client and browser server versions must match. Loopback network forwarding lets the remote browsers reach the local test server. CI runs in `mcr.microsoft.com/playwright:v1.59.1-noble`, with matching browsers already present. On other machines, provide matching Playwright browsers or a matching server.
+
+Coverage reports are in `coverage/`; machine-readable unit, HTTP, browser, and audit results are in `.artifacts/`. Browser failure traces are in `test-results/`. `yarn test` runs the faster unit suite; `make test` also enforces coverage and types. See [the upgrade record](docs/dependency-upgrades.md) and [unreleased compatibility changes](CHANGELOG.md).
+
 ## main goals
 
 * slim & simple compared to _chinchilla_

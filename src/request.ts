@@ -7,11 +7,28 @@ import { stringify } from "querystringify";
 import { IConfig } from "./config";
 import { enqueueRequest, clearRequest } from "./watcher";
 
-const SSRFRegex = /api.nbcupassport|api.mediastore|localhost/i;
-const preventSSRF = (config: InternalAxiosRequestConfig) => {
-  if (!get(config, 'url', '').match(SSRFRegex)) {
-    throw Error(`unsupported URL ${config.url}`);
+const trustedDomains = ["api.mediastore.com", "api.mediastore.dev", "api.nbcupassport.com", "api.nbcupassport.dev"];
+const localHosts = ["localhost", "127.0.0.1", "[::1]"];
+
+const validateUrl = (value: string): URL => {
+  let url: URL;
+  try { url = new URL(value); } catch { throw new Error("unsupported URL"); }
+  const hostname = url.hostname.toLowerCase();
+  const trusted = localHosts.includes(hostname) || trustedDomains.some(domain => hostname === domain || hostname.endsWith(`.${domain}`));
+  if (!trusted || !["http:", "https:"].includes(url.protocol) || url.username || url.password) {
+    throw new Error("unsupported URL");
   }
+  return url;
+};
+
+const preventSSRF = (config: InternalAxiosRequestConfig) => {
+  const url = validateUrl(config.url);
+  // Axios's Node HTTP adapter invokes this before transmitting a redirected request.
+  // An origin change must never forward MediaStore's custom identity headers.
+  config.beforeRedirect = (options) => {
+    const redirected = validateUrl(options.href);
+    if (redirected.origin !== url.origin) throw new Error("unsupported redirect origin");
+  };
   return config;
 };
 

@@ -44,13 +44,13 @@ describe("AbortController", () => {
 
   describe("Request abortion", () => {
     it("aborts a pending request", async () => {
-      nock(config.endpoints.um)
+      const scope = nock(config.endpoints.um)
         .get(matches("/users"))
         .delay(3000)
         .reply(200, { members: [] });
       chipmunk.createAbortController();
       const requestPromise = chipmunk.run(async (ch) => ch.action("um.user", "query"));
-      setImmediate(() => chipmunk.abort());
+      scope.once("request", () => chipmunk.abort());
       try {
         await requestPromise;
         throw new Error("Expected promise to be rejected");
@@ -60,13 +60,13 @@ describe("AbortController", () => {
     });
 
     it("aborts request with per-action signal", async () => {
-      nock(config.endpoints.um)
+      const scope = nock(config.endpoints.um)
         .get(matches("/users"))
         .delay(1000)
         .reply(200, { members: [] });
       const controller = new AbortController();
       const requestPromise = chipmunk.run(async (ch) => ch.action("um.user", "query", { signal: controller.signal }));
-      setImmediate(() => controller.abort());
+      scope.once("request", () => controller.abort());
       try {
         await requestPromise;
         throw new Error("Expected promise to be rejected");
@@ -106,19 +106,19 @@ describe("AbortController", () => {
           members: [{
             "@context": "https://um.api.mediastore.dev/v20140601/context/user",
             id: "1",
-            organization: { "@id": "http://um.app/organization/1" }
+            organization: { "@id": "https://um.api.mediastore.dev/v20140601/organization/1" }
           }]
         });
-      nock(config.endpoints.um)
+      const scope = nock(config.endpoints.um)
         .get(matches("/organizations/1"))
         .delay(1000)
         .reply(200, { id: "1", name: "Test Org" });
       const controller = chipmunk.createAbortController();
       const requestPromise = chipmunk.run(async (ch) => ch.action("um.user", "get", {
         params: { user_ids: 1 },
-        schema: "id, organization { name }"
+        schema: "id, organization { name }", proxy: false
       }));
-      setImmediate(() => controller.abort());
+      scope.once("request", () => controller.abort());
       try {
         await requestPromise;
         throw new Error("Expected promise to be rejected");
@@ -129,43 +129,35 @@ describe("AbortController", () => {
   });
 
   describe("Multiple concurrent requests", () => {
-    it("aborts all concurrent requests", async () => {
-      nock(config.endpoints.um)
-        .get(matches("/users"))
-        .delay(1000)
-        .reply(200, { members: [] });
-      nock(config.endpoints.um)
-        .get(matches("/organizations"))
-        .delay(1000)
-        .reply(200, { members: [] });
+    it("aborts all concurrent requests after both reach the transport", async () => {
+      const first = nock(config.endpoints.um).get("/v20140601/users").query({ q: "first" }).delay(1000).reply(200, { members: [] });
+      const second = nock(config.endpoints.um).get("/v20140601/users").query({ q: "second" }).delay(1000).reply(200, { members: [] });
       chipmunk.createAbortController();
-      const request1 = chipmunk.run(async (ch) => ch.action("um.user", "query"));
-      const request2 = chipmunk.run(async (ch) => ch.action("um.organization", "query"));
-      setImmediate(() => chipmunk.abort());
-      try {
-        await request1;
-        throw new Error("Expected promise to be rejected");
-      } catch (err) {
-        expect(err.message).to.equal("Request was aborted");
-      }
-      try {
-        await request2;
-        throw new Error("Expected promise to be rejected");
-      } catch (err) {
-        expect(err.message).to.equal("Request was aborted");
-      }
+      let received = 0;
+      const abortWhenBothArrive = () => { if (++received === 2) chipmunk.abort(); };
+      first.once("request", abortWhenBothArrive);
+      second.once("request", abortWhenBothArrive);
+      const results = await Promise.all([
+        chipmunk.action("um.user", "query", { params: { q: "first" } }),
+        chipmunk.action("um.user", "query", { params: { q: "second" } })
+      ].map(promise => promise.then(
+        () => ({ status: "fulfilled", reason: undefined }),
+        reason => ({ status: "rejected", reason })
+      )));
+      expect(results.map(result => result.reason?.message || result.status)).to.eql(["Request was aborted", "Request was aborted"]);
+      expect(received).to.equal(2);
     });
   });
 
   describe("Error handling", () => {
     it("throws AbortError when request is aborted", async () => {
-      nock(config.endpoints.um)
+      const scope = nock(config.endpoints.um)
         .get(matches("/users"))
         .delay(1000)
         .reply(200, { members: [] });
       const controller = chipmunk.createAbortController();
       const requestPromise = chipmunk.run(async (ch) => ch.action("um.user", "query"));
-      setImmediate(() => controller.abort());
+      scope.once("request", () => controller.abort());
       try {
         await requestPromise;
         expect.fail("Should have thrown an error");
@@ -175,7 +167,7 @@ describe("AbortController", () => {
     });
 
     it("handles abort in error interceptor", async () => {
-      nock(config.endpoints.um)
+      const scope = nock(config.endpoints.um)
         .get(matches("/users"))
         .delay(1000)
         .reply(200, { members: [] });
@@ -183,7 +175,7 @@ describe("AbortController", () => {
       chipmunk.updateConfig({ errorInterceptor });
       const controller = chipmunk.createAbortController();
       const requestPromise = chipmunk.run(async (ch) => ch.action("um.user", "query"));
-      setImmediate(() => controller.abort());
+      scope.once("request", () => controller.abort());
       try {
         await requestPromise;
         throw new Error("Expected promise to be rejected");

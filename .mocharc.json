@@ -1,0 +1,9 @@
+{
+  "require": ["./tests/register.cjs"],
+  "spec": ["tests/**/*.test.ts"],
+  "extension": ["ts"],
+  "timeout": 5000,
+  "forbid-only": true,
+  "forbid-pending": true,
+  "fail-zero": true
+}
