@@ -874,4 +874,352 @@ describe("action", () => {
     const promise = chipmunk.action("um.user", "query");
     await expect(promise).to.be.rejectedWith(/unsupported URL/);
   });
+
+  it("passes resolveOpts params to association requests", async () => {
+    // Mock pm.product/asset context
+    nock(config.endpoints.pm)
+      .persist()
+      .get(matches("/context/product/asset"))
+      .reply(200, {
+        "@context": {
+          "@id": "https://pm.api.mediastore.dev/v20140601/context/product/asset",
+          properties: {
+            id: { readable: true, writable: false, exportable: true, type: "number" },
+            asset: { readable: true, writable: false, exportable: true, type: "https://am.api.mediastore.dev/v20140601/context/asset", collection: false }
+          },
+          collection_actions: {
+            query: {
+              method: "GET",
+              template: "https://pm.api.mediastore.dev/v20140601/products/assets{?include_folders}",
+              mappings: []
+            }
+          },
+          member_actions: {}
+        }
+      });
+
+    // Mock am.asset context
+    nock(config.endpoints.am)
+      .persist()
+      .get(matches("/context/asset"))
+      .reply(200, {
+        "@context": {
+          "@id": "https://am.api.mediastore.dev/v20140601/context/asset",
+          properties: {
+            id: { readable: true, writable: false, exportable: true, type: "number" },
+            name: { readable: true, writable: false, exportable: true, type: "string" }
+          },
+          collection_actions: {
+            get: {
+              method: "GET",
+              template: "https://am.api.mediastore.dev/v20140601/assets/{asset_ids}{?include_archived}",
+              mappings: [{ variable: "asset_ids", source: "id" }]
+            }
+          },
+          member_actions: {}
+        }
+      });
+
+    // Mock pm.product/asset query WITHOUT include_folders - return regular assets
+    nock(config.endpoints.pm)
+      .persist()
+      .get(matches("/products/assets"))
+      .query((q) => !q.include_folders)
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://pm.api.mediastore.dev/v20140601/context/product/asset",
+            "@id": "https://pm.api.mediastore.dev/v20140601/product/asset/1",
+            id: 1
+          }
+        ]
+      });
+
+    // Mock pm.product/asset query WITH include_folders - return assets including folders
+    nock(config.endpoints.pm)
+      .persist()
+      .get(matches("/products/assets"))
+      .query((q) => q.include_folders === "true")
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://pm.api.mediastore.dev/v20140601/context/product/asset",
+            "@id": "https://pm.api.mediastore.dev/v20140601/product/asset/1",
+            id: 1,
+            asset: {
+              "@id": "https://am.api.mediastore.dev/v20140601/assets/5"
+            }
+          }
+        ]
+      });
+
+    // Mock am.asset get WITHOUT association params - return regular assets
+    nock(config.endpoints.am)
+      .persist()
+      .get(matches("/assets"))
+      .query((q) => !q.include_archived)
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://am.api.mediastore.dev/v20140601/context/asset",
+            "@id": "https://am.api.mediastore.dev/v20140601/asset/5",
+            id: 5,
+            name: "Regular Asset"
+          }
+        ]
+      });
+
+    // Mock am.asset get WITH association params - return folder assets
+    nock(config.endpoints.am)
+      .persist()
+      .get(matches("/assets/5"))
+      .query((q) => q.include_archived === "true")
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://am.api.mediastore.dev/v20140601/context/asset",
+            "@id": "https://am.api.mediastore.dev/v20140601/asset/5",
+            id: 5,
+            name: "My Folder"
+          }
+        ]
+      });
+
+    await chipmunk.run(async (ch) => {
+      const result = await ch.action("pm.product/asset", "query", {
+        proxy: false,
+        params: { include_folders: true },
+        resolveOpts: {
+          asset: { params: { asset_ids: "999", include_archived: true } }
+        },
+        schema: "id, asset { name }"
+      });
+
+      expect(result.objects[0].asset).not.to.be.null;
+      expect(result.objects[0].asset.name).to.equal("My Folder");
+    });
+  });
+
+  it("passes resolveOpts body to association search requests", async () => {
+    // Mock pm.product/asset context
+    nock(config.endpoints.pm)
+      .persist()
+      .get(matches("/context/product/asset"))
+      .reply(200, {
+        "@context": {
+          "@id": "https://pm.api.mediastore.dev/v20140601/context/product/asset",
+          properties: {
+            id: { readable: true, writable: false, exportable: true, type: "number" },
+            asset: { readable: true, writable: false, exportable: true, type: "https://am.api.mediastore.dev/v20140601/context/asset", collection: false }
+          },
+          collection_actions: {
+            query: {
+              method: "GET",
+              template: "https://pm.api.mediastore.dev/v20140601/products/assets{?product_ids,include_folders}",
+              mappings: [{ variable: "product_ids", source: "product_ids" }]
+            }
+          },
+          member_actions: {}
+        }
+      });
+
+    // Mock am.asset context with search action
+    nock(config.endpoints.am)
+      .persist()
+      .get(matches("/context/asset"))
+      .reply(200, {
+        "@context": {
+          "@id": "https://am.api.mediastore.dev/v20140601/context/asset",
+          properties: {
+            id: { readable: true, writable: false, exportable: true, type: "number" },
+            name: { readable: true, writable: false, exportable: true, type: "string" }
+          },
+          collection_actions: {
+            get: {
+              method: "GET",
+              template: "https://am.api.mediastore.dev/v20140601/asset/{id}",
+              mappings: [{ variable: "id", source: "id" }]
+            },
+            search: {
+              method: "POST",
+              template: "https://am.api.mediastore.dev/v20140601/assets/search",
+              mappings: []
+            }
+          },
+          member_actions: {}
+        }
+      });
+
+    // First request returns product assets with association references
+    nock(config.endpoints.pm)
+      .persist()
+      .get(matches("/products/assets"))
+      .query((q) => q.include_folders === "true")
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://pm.api.mediastore.dev/v20140601/context/product/asset",
+            "@id": "https://pm.api.mediastore.dev/v20140601/product/asset/1",
+            id: 1,
+            asset: {
+              "@id": "https://am.api.mediastore.dev/v20140601/asset/5"
+            }
+          }
+        ]
+      });
+
+    // Association search must receive custom body data and the generated id filter
+    nock(config.endpoints.am)
+      .post(matches("/assets/search"), (body) => {
+        return (
+          body.include_archived === true &&
+          body.search?.filters?.[0]?.[0] === "type" &&
+          body.search?.filters?.[0]?.[1] === "eq" &&
+          body.search?.filters?.[1]?.[0] === "id" &&
+          body.search?.filters?.[1]?.[1] === "in"
+        );
+      })
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://am.api.mediastore.dev/v20140601/context/asset",
+            "@id": "https://am.api.mediastore.dev/v20140601/asset/5",
+            id: 5,
+            name: "Search Asset"
+          }
+        ]
+      });
+
+    await chipmunk.run(async (ch) => {
+      const result = await ch.action("pm.product/asset", "query", {
+        proxy: false,
+        params: { product_ids: "753919", include_folders: true },
+        resolveOpts: {
+          asset: {
+            body: {
+              include_archived: true,
+              search: { filters: [["type", "eq", "folder"]] }
+            }
+          }
+        },
+        schema: "id, asset { id, name }"
+      });
+
+      expect(result.objects[0].asset).not.to.be.null;
+      expect(result.objects[0].asset.name).to.equal("Search Asset");
+    });
+  });
+
+  it("scopes resolveOpts to the requested association", async () => {
+    nock(config.endpoints.pm)
+      .persist()
+      .get(matches("/context/product/asset"))
+      .reply(200, {
+        "@context": {
+          "@id": "https://pm.api.mediastore.dev/v20140601/context/product/asset",
+          properties: {
+            id: { readable: true, writable: false, exportable: true, type: "number" },
+            preview_image: { readable: true, writable: false, exportable: true, type: "https://am.api.mediastore.dev/v20140601/context/asset", collection: false },
+            default_layer: { readable: true, writable: false, exportable: true, type: "https://am.api.mediastore.dev/v20140601/context/asset", collection: false }
+          },
+          collection_actions: {
+            query: {
+              method: "GET",
+              template: "https://pm.api.mediastore.dev/v20140601/products/assets",
+              mappings: []
+            }
+          },
+          member_actions: {}
+        }
+      });
+
+    nock(config.endpoints.am)
+      .persist()
+      .get(matches("/context/asset"))
+      .reply(200, {
+        "@context": {
+          "@id": "https://am.api.mediastore.dev/v20140601/context/asset",
+          properties: {
+            id: { readable: true, writable: false, exportable: true, type: "number" },
+            name: { readable: true, writable: false, exportable: true, type: "string" }
+          },
+          collection_actions: {
+            get: {
+              method: "GET",
+              template: "https://am.api.mediastore.dev/v20140601/assets/{asset_ids}{?include_folders}",
+              mappings: [{ variable: "asset_ids", source: "id" }]
+            }
+          },
+          member_actions: {}
+        }
+      });
+
+    nock(config.endpoints.pm)
+      .get(matches("/products/assets"))
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://pm.api.mediastore.dev/v20140601/context/product/asset",
+            "@id": "https://pm.api.mediastore.dev/v20140601/product/asset/1",
+            id: 1,
+            preview_image: {
+              "@id": "https://am.api.mediastore.dev/v20140601/asset/5"
+            },
+            default_layer: {
+              "@id": "https://am.api.mediastore.dev/v20140601/asset/6"
+            }
+          }
+        ]
+      });
+
+    nock(config.endpoints.am)
+      .get(matches("/assets"))
+      .query((q) => q.include_folders === "true")
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://am.api.mediastore.dev/v20140601/context/asset",
+            "@id": "https://am.api.mediastore.dev/v20140601/asset/5",
+            id: 5,
+            name: "Preview Image"
+          }
+        ]
+      });
+
+    nock(config.endpoints.am)
+      .get(matches("/assets"))
+      .query((q) => !q.include_folders)
+      .reply(200, {
+        members: [
+          {
+            "@type": "asset",
+            "@context": "https://am.api.mediastore.dev/v20140601/context/asset",
+            "@id": "https://am.api.mediastore.dev/v20140601/asset/6",
+            id: 6,
+            name: "Default Layer"
+          }
+        ]
+      });
+
+    await chipmunk.run(async (ch) => {
+      const result = await ch.action("pm.product/asset", "query", {
+        proxy: false,
+        resolveOpts: {
+          preview_image: { params: { include_folders: true } }
+        },
+        schema: "id, preview_image { name }, default_layer { name }"
+      });
+
+      expect(result.objects[0].preview_image.name).to.equal("Preview Image");
+      expect(result.objects[0].default_layer.name).to.equal("Default Layer");
+    });
+  });
 });
