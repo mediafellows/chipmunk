@@ -358,7 +358,11 @@ const performProxiedAction = async <T>(
 
   const debugParams = `?m=${appModel}&a=${actionName}`;
   const url = action.template + debugParams;
-  const req = request(config).post(url, body);
+  const requestHeaders = formatHeaders(config.headers);
+  if (!isNode) {
+    requestHeaders['X-Window-Location'] = get(window, "location.href", "");
+  }
+  const req = request(config).post(url, body, { headers: requestHeaders });
 
   const response = await run(req, config, "POST", url);
   const objects = get(response, "data.objects", []) as T[];
