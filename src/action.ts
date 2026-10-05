@@ -19,7 +19,7 @@ import isEmpty from "lodash/isEmpty";
 import isPlainObject from "lodash/isPlainObject";
 
 import { IConfig, cleanConfig } from "./config";
-import { request, run } from "./request";
+import { request, run, isNode, formatHeaders } from "./request";
 import getSpec, { IAction } from "./spec";
 import format from "./format";
 import parseSchema from "./schema";
@@ -192,6 +192,11 @@ const performAction = async <T>(
   // Short-circuit if already aborted
   checkAborted(opts.signal, config.signal);
 
+  const requestHeaders = formatHeaders(merge({}, config.headers, opts.headers));
+  if (!isNode) {
+    requestHeaders['X-Window-Location'] = get(window, "location.href", "")
+  }
+  
   const spec = await getSpec(appModel, config);
   const action = spec.action(actionName);
   const isBodyFormData = opts.body instanceof FormData;
@@ -218,6 +223,7 @@ const performAction = async <T>(
 
   const axiosOptions: any = {
     signal: opts.signal || config.signal,
+    headers: requestHeaders,
   };
   if (config.timestamp) {
     axiosOptions.params = { t: config.timestamp };
@@ -229,24 +235,24 @@ const performAction = async <T>(
   
   switch (action.method) {
     case "POST":
-      req = request(config, opts.headers).post(uri, body, axiosOptions);
+      req = request(config).post(uri, body, axiosOptions);
       break;
     case "PUT":
-      req = request(config, opts.headers).put(uri, body, axiosOptions);
+      req = request(config).put(uri, body, axiosOptions);
       break;
     case "PATCH":
-      req = request(config, opts.headers).patch(uri, body, axiosOptions);
+      req = request(config).patch(uri, body, axiosOptions);
       break;
     case "DELETE":
-      req = request(config, opts.headers).delete(uri, { data: body, ...axiosOptions });
+      req = request(config).delete(uri, { data: body, ...axiosOptions });
       break;
     default:
-      req = request(config, opts.headers).get(uri, axiosOptions);
+      req = request(config).get(uri, axiosOptions);
   }
   
   const response = await run(req, config, action.method, uri);
   const headers = get(response, "headers", {});
-  
+
   // Handle file downloads
   if (isDownloadFileRequest(headers)) {
     const body = get(response, "data", {});
@@ -352,7 +358,11 @@ const performProxiedAction = async <T>(
 
   const debugParams = `?m=${appModel}&a=${actionName}`;
   const url = action.template + debugParams;
-  const req = request(config).post(url, body);
+  const requestHeaders = formatHeaders(config.headers);
+  if (!isNode) {
+    requestHeaders['X-Window-Location'] = get(window, "location.href", "");
+  }
+  const req = request(config).post(url, body, { headers: requestHeaders });
 
   const response = await run(req, config, "POST", url);
   const objects = get(response, "data.objects", []) as T[];
@@ -377,7 +387,7 @@ export default async <T>(
   opts: IActionOpts,
   config: IConfig
 ): Promise<IResult<T>> => {
-  opts = merge({}, DEFAULT_OPTS, { proxy: !isEmpty(opts.schema) }, opts);
+  opts = merge({}, DEFAULT_OPTS, { proxy: !isEmpty(opts.schema) && !isNode }, opts);
 
   if (opts.proxy && isEmpty(opts.schema)) {
     throw new Error("Proxying is supported only if a schema is given, too.");

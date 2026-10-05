@@ -112,7 +112,7 @@ describe("runtime cache", () => {
 
 describe("storage cache", () => {
   beforeEach(() => {
-    global["window"] = {
+    (global as any)["window"] = {
       localStorage: storageMock,
     };
     chipmunk = createChipmunk(config, { cache: { default: "storage" } });

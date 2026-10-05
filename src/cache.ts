@@ -8,7 +8,7 @@ const PREFIX = "chipmunk";
 const DEFAULT_EXPIRY = 60;
 
 
-if (!isNode()) {
+if (!isNode) {
 	// remove all expired entries
 	const nowDate = Date.now();
 	for (const key of Object.keys(localStorage).filter(k => k.startsWith(`${PREFIX}-`))) {

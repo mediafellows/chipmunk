@@ -30,7 +30,7 @@
     "@types/lodash": "^4.17.14",
     "@types/mocha": "^10.0.10",
     "@types/nock": "^11",
-    "@types/node": "^11.13.7",
+    "@types/node": "^24.7.1",
     "@types/querystringify": "^2.0.0",
     "@types/sinon": "^7.0.11",
     "@types/uri-templates": "^0.1.30",
